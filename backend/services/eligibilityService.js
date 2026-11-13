@@ -35,12 +35,14 @@ export const checkEligibility = (profile, drive) => {
   }
 
   // 4. Backlogs check
+  const studentBacklogs =
+    profile.activeBacklogs !== undefined ? profile.activeBacklogs : profile.backlogs || 0;
   if (
     eligibilityCriteria?.maxBacklogs !== undefined &&
-    profile.backlogs > eligibilityCriteria.maxBacklogs
+    studentBacklogs > eligibilityCriteria.maxBacklogs
   ) {
     reasons.push(
-      `Maximum allowed active backlogs is ${eligibilityCriteria.maxBacklogs}, but you have ${profile.backlogs}.`
+      `Maximum allowed active backlogs is ${eligibilityCriteria.maxBacklogs}, but you have ${studentBacklogs}.`
     );
   }
 

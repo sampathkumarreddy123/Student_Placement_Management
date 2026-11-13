@@ -29,7 +29,19 @@ const studentProfileSchema = new mongoose.Schema(
       required: [true, 'CGPA is required'],
       min: [0, 'CGPA cannot be negative'],
       max: [10, 'CGPA cannot exceed 10'],
+      default: 0,
     },
+    activeBacklogs: {
+      type: Number,
+      default: 0,
+      min: [0, 'Active backlogs cannot be negative'],
+    },
+    totalBacklogs: {
+      type: Number,
+      default: 0,
+      min: [0, 'Total backlogs cannot be negative'],
+    },
+    // Keep backlogs for backward compatibility
     backlogs: {
       type: Number,
       default: 0,
@@ -50,8 +62,36 @@ const studentProfileSchema = new mongoose.Schema(
     phone: {
       type: String,
       trim: true,
+      default: '',
+    },
+    profilePhoto: {
+      type: String,
+      trim: true,
+      default: '',
     },
     resumeUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    resumeOriginalName: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    resumeSize: {
+      type: Number,
+      default: 0,
+    },
+    resumeUpdatedAt: {
+      type: Date,
+    },
+    githubUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    linkedinUrl: {
       type: String,
       trim: true,
       default: '',
@@ -76,6 +116,13 @@ const studentProfileSchema = new mongoose.Schema(
   }
 );
 
+// Sync backlogs with activeBacklogs
+studentProfileSchema.pre('save', function (next) {
+  if (this.activeBacklogs !== undefined) {
+    this.backlogs = this.activeBacklogs;
+  }
+  next();
+});
+
 const StudentProfile = mongoose.model('StudentProfile', studentProfileSchema);
 export default StudentProfile;
-

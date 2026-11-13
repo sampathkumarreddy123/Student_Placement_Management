@@ -67,24 +67,12 @@ const Login = () => {
     }
   };
 
-  const fillDemo = (role) => {
-    if (role === 'officer') {
-      setEmail('officer@college.edu');
-      setPassword('password123');
-    } else {
-      setEmail('student@college.edu');
-      setPassword('password123');
-    }
-    setError('');
-    setFieldErrors({});
-  };
-
   return (
     <div>
       <div className="mb-6">
         <h2 className="text-xl font-bold text-slate-900">Sign in to your account</h2>
         <p className="text-xs text-slate-500 mt-1">
-          Common portal login for both Students and Placement Officers
+          Access your placement portal with your registered email
         </p>
       </div>
 
@@ -104,34 +92,6 @@ const Login = () => {
           className="mb-4"
         />
       )}
-
-      {/* Demo Quick-Fill Buttons */}
-      <div className="mb-5 p-3 bg-blue-50/70 border border-blue-100 rounded-lg">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-semibold text-blue-900">
-            One-Click Test Accounts:
-          </p>
-          <span className="text-[10px] text-blue-600 bg-blue-100/60 px-1.5 py-0.5 rounded">
-            Pre-Seeded
-          </span>
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => fillDemo('officer')}
-            className="py-1.5 px-2 bg-white text-blue-700 hover:bg-blue-100 border border-blue-200 rounded text-xs font-medium transition-colors text-center"
-          >
-            Placement Officer
-          </button>
-          <button
-            type="button"
-            onClick={() => fillDemo('student')}
-            className="py-1.5 px-2 bg-white text-blue-700 hover:bg-blue-100 border border-blue-200 rounded text-xs font-medium transition-colors text-center"
-          >
-            Eligible Student
-          </button>
-        </div>
-      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input

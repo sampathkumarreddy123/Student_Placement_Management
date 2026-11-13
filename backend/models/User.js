@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema(
       enum: ['student', 'officer'],
       default: 'student',
     },
+    profilePhoto: {
+      type: String,
+      default: '',
+    },
     isActive: {
       type: Boolean,
       default: true,

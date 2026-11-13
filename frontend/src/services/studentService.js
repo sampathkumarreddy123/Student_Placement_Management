@@ -11,6 +11,31 @@ export const studentService = {
     return response.data;
   },
 
+  uploadResume: async (formData) => {
+    const response = await api.post('/users/profile/resume', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  uploadAvatar: async (formData) => {
+    const response = await api.post('/users/profile/avatar', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  downloadResume: async () => {
+    const response = await api.get('/users/profile/resume/download', {
+      responseType: 'blob',
+    });
+    return response;
+  },
+
   getAllStudents: async (params = {}) => {
     const response = await api.get('/users/students', { params });
     return response.data;
@@ -21,4 +46,3 @@ export const studentService = {
     return response.data;
   },
 };
-

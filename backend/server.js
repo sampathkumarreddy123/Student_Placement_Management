@@ -2,8 +2,12 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
-import { ensureOfficerAccount } from './utils/initOfficer.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Route imports
 import authRoutes from './routes/authRoutes.js';
@@ -18,10 +22,8 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB and ensure default officer account exists
-connectDB().then(() => {
-  ensureOfficerAccount();
-});
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 
@@ -29,6 +31,9 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Static files for uploaded resumes and profile photos
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // CORS configuration - support cookies and credentials
 const allowedOrigins = [
