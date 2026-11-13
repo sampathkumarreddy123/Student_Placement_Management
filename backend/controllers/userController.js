@@ -462,6 +462,55 @@ export const getAllStudents = async (req, res, next) => {
   }
 };
 
+// @desc    Get complete student profile by ID (Officer only)
+// @route   GET /api/users/students/:id
+// @access  Private (Officer only)
+export const getStudentById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Search by student profile ID or User ID
+    let profile = await StudentProfile.findById(id)
+      .populate('user', 'name email isActive createdAt profilePhoto')
+      .populate('placedCompany', 'name industry website logoUrl');
+
+    if (!profile) {
+      profile = await StudentProfile.findOne({ user: id })
+        .populate('user', 'name email isActive createdAt profilePhoto')
+        .populate('placedCompany', 'name industry website logoUrl');
+    }
+
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student record not found.',
+      });
+    }
+
+    // Get applicant's applications
+    const applications = await Application.find({ student: profile.user?._id })
+      .populate('drive', 'title jobRole packageLPA status')
+      .populate('company', 'name')
+      .sort({ appliedAt: -1 });
+
+    const completion = calculateProfileCompletion(profile.user, profile);
+
+    res.status(200).json({
+      success: true,
+      student: {
+        ...profile.toObject(),
+        name: profile.user?.name,
+        email: profile.user?.email,
+        profilePhoto: profile.profilePhoto || profile.user?.profilePhoto || '',
+      },
+      applications,
+      completion,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get student stats (Officer only)
 // @route   GET /api/users/stats
 // @access  Private (Officer)

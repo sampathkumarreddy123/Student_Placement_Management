@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Award,
   ShieldCheck,
+  History,
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Badge from '../common/Badge';
@@ -113,6 +114,37 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
           )}
         </div>
 
+        {/* Status History Timeline for Students */}
+        {application.statusHistory && application.statusHistory.length > 0 && (
+          <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
+            <h5 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 pb-2 border-b border-slate-100">
+              <History className="w-4 h-4 text-blue-600" /> Selection Progression History
+            </h5>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {application.statusHistory.slice().reverse().map((hist, i) => (
+                <div
+                  key={i}
+                  className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px]"
+                >
+                  <div>
+                    <div className="flex items-center gap-1.5 font-medium">
+                      <Badge status={hist.previousStatus} size="sm" />
+                      <span className="text-slate-400">→</span>
+                      <Badge status={hist.newStatus} size="sm" />
+                    </div>
+                    {hist.remarks && (
+                      <p className="text-slate-600 mt-1 italic">"{hist.remarks}"</p>
+                    )}
+                  </div>
+                  <span className="text-slate-400 whitespace-nowrap text-[10px]">
+                    {formatDate(hist.updatedDate)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Submitted Profile Snapshot */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
           <h5 className="text-xs font-bold text-slate-800 flex items-center gap-1.5 pb-2 border-b border-slate-100">
@@ -193,3 +225,4 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
 };
 
 export default ApplicationDetailsModal;
+

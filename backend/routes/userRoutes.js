@@ -6,6 +6,7 @@ import {
   downloadResumeFile,
   uploadAvatarFile,
   getAllStudents,
+  getStudentById,
   getPlacementStats,
 } from '../controllers/userController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
@@ -34,6 +35,7 @@ router.post(
 
 // Officer routes
 router.get('/students', protect, authorize('officer'), getAllStudents);
+router.get('/students/:id', protect, authorize('officer'), getStudentById);
 router.get('/stats', protect, authorize('officer'), getPlacementStats);
 
 export default router;

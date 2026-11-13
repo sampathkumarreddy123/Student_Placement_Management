@@ -74,6 +74,31 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    statusHistory: [
+      {
+        previousStatus: {
+          type: String,
+          required: true,
+        },
+        newStatus: {
+          type: String,
+          required: true,
+        },
+        updatedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        updatedDate: {
+          type: Date,
+          default: Date.now,
+        },
+        remarks: {
+          type: String,
+          default: '',
+        },
+      },
+    ],
   },
   {
     timestamps: true,

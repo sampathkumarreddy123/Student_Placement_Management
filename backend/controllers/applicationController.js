@@ -1,7 +1,13 @@
+import path from 'path';
+import fs from 'fs';
+import { fileURLToPath } from 'url';
 import Application from '../models/Application.js';
 import PlacementDrive from '../models/PlacementDrive.js';
 import StudentProfile from '../models/StudentProfile.js';
 import { checkEligibility } from '../services/eligibilityService.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // @desc    Apply for a placement drive
 // @route   POST /api/applications/apply/:driveId
@@ -133,6 +139,15 @@ export const applyForDrive = async (req, res, next) => {
       },
       selectionRemarks: '',
       officerNotes: '',
+      statusHistory: [
+        {
+          previousStatus: 'None',
+          newStatus: 'Applied',
+          updatedBy: req.user._id,
+          updatedDate: new Date(),
+          remarks: 'Application submitted by student.',
+        },
+      ],
     });
 
     res.status(201).json({
@@ -159,6 +174,7 @@ export const getMyApplications = async (req, res, next) => {
 
     const applications = await Application.find(filter)
       .populate('company', 'name industry location website logoUrl')
+      .populate('statusHistory.updatedBy', 'name email')
       .populate({
         path: 'drive',
         populate: { path: 'company', select: 'name industry location website logoUrl' },
@@ -181,9 +197,10 @@ export const getMyApplications = async (req, res, next) => {
 export const getApplicationById = async (req, res, next) => {
   try {
     const application = await Application.findById(req.params.id)
-      .populate('student', 'name email')
+      .populate('student', 'name email profilePhoto phone')
       .populate('studentProfile')
       .populate('company', 'name industry location website logoUrl contactEmail')
+      .populate('statusHistory.updatedBy', 'name email')
       .populate({
         path: 'drive',
         populate: { path: 'company', select: 'name industry location website logoUrl' },
@@ -204,6 +221,18 @@ export const getApplicationById = async (req, res, next) => {
       });
     }
 
+    // Security rule: Officers can only view applications belonging to their drives
+    if (
+      req.user.role === 'officer' &&
+      application.drive?.createdBy &&
+      application.drive.createdBy.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You can only view applicants for drives you manage.',
+      });
+    }
+
     res.status(200).json({
       success: true,
       application,
@@ -213,68 +242,312 @@ export const getApplicationById = async (req, res, next) => {
   }
 };
 
-// @desc    Get all applications for a drive (Officer only)
+// @desc    Download applicant's resume
+// @route   GET /api/applications/:id/resume
+// @access  Private (Officer for their drive, or Student for own app)
+export const downloadApplicantResume = async (req, res, next) => {
+  try {
+    const application = await Application.findById(req.params.id)
+      .populate('student', 'name email')
+      .populate('studentProfile')
+      .populate('drive');
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: 'Application record not found.',
+      });
+    }
+
+    // Access check
+    if (req.user.role === 'student' && application.student._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You can only download your own application resume.',
+      });
+    }
+
+    if (
+      req.user.role === 'officer' &&
+      application.drive?.createdBy &&
+      application.drive.createdBy.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You can only download resumes for applicants belonging to your drives.',
+      });
+    }
+
+    const resumeUrl =
+      application.resumeSnapshot?.resumeUrl ||
+      application.studentProfile?.resumeUrl;
+
+    if (!resumeUrl) {
+      return res.status(404).json({
+        success: false,
+        message: 'No resume document attached to this application.',
+      });
+    }
+
+    // If local file path
+    if (resumeUrl.startsWith('/uploads/resumes/')) {
+      const filename = resumeUrl.replace('/uploads/resumes/', '');
+      const filePath = path.join(__dirname, '../uploads/resumes', filename);
+
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({
+          success: false,
+          message: 'Resume file not found on disk storage.',
+        });
+      }
+
+      const originalName =
+        application.resumeSnapshot?.resumeOriginalName ||
+        application.studentProfile?.resumeOriginalName ||
+        `${(application.student?.name || 'Applicant').replace(/\s+/g, '_')}_Resume.pdf`;
+
+      return res.download(filePath, originalName);
+    }
+
+    // If external URL or static path
+    return res.redirect(resumeUrl);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Helper: Filter, Sort & Paginate applications array in memory
+const filterSortPaginate = (applications, options) => {
+  const {
+    search = '',
+    department = '',
+    minCgpa = '',
+    maxCgpa = '',
+    status = '',
+    sortBy = 'appliedAt',
+    sortOrder = 'desc',
+    page = 1,
+    limit = 10,
+  } = options;
+
+  let filtered = [...applications];
+
+  // 1. Status Filter
+  if (status && status !== 'All') {
+    filtered = filtered.filter((app) => app.status === status);
+  }
+
+  // 2. Department Filter
+  if (department && department !== 'All') {
+    const deptNorm = department.trim().toLowerCase();
+    filtered = filtered.filter((app) => {
+      const d1 = app.studentProfile?.department?.toLowerCase() || '';
+      const d2 = app.resumeSnapshot?.studentDepartment?.toLowerCase() || '';
+      return d1.includes(deptNorm) || d2.includes(deptNorm);
+    });
+  }
+
+  // 3. CGPA Range Filter
+  if (minCgpa !== '') {
+    const min = Number(minCgpa);
+    filtered = filtered.filter((app) => {
+      const cgpa =
+        app.studentProfile?.cgpa !== undefined
+          ? app.studentProfile.cgpa
+          : app.resumeSnapshot?.studentCgpa !== undefined
+          ? app.resumeSnapshot.studentCgpa
+          : 0;
+      return cgpa >= min;
+    });
+  }
+
+  if (maxCgpa !== '') {
+    const max = Number(maxCgpa);
+    filtered = filtered.filter((app) => {
+      const cgpa =
+        app.studentProfile?.cgpa !== undefined
+          ? app.studentProfile.cgpa
+          : app.resumeSnapshot?.studentCgpa !== undefined
+          ? app.resumeSnapshot.studentCgpa
+          : 0;
+      return cgpa <= max;
+    });
+  }
+
+  // 4. Keyword Search (Student Name, Roll Number, or Email)
+  if (search && search.trim()) {
+    const q = search.trim().toLowerCase();
+    filtered = filtered.filter((app) => {
+      const name = app.student?.name?.toLowerCase() || '';
+      const email = app.student?.email?.toLowerCase() || '';
+      const roll1 = app.studentProfile?.rollNumber?.toLowerCase() || '';
+      const roll2 = app.resumeSnapshot?.studentRollNumber?.toLowerCase() || '';
+      return name.includes(q) || email.includes(q) || roll1.includes(q) || roll2.includes(q);
+    });
+  }
+
+  // 5. Sorting
+  const isAsc = sortOrder === 'asc';
+  filtered.sort((a, b) => {
+    let valA, valB;
+
+    switch (sortBy) {
+      case 'cgpa':
+        valA = a.studentProfile?.cgpa ?? a.resumeSnapshot?.studentCgpa ?? 0;
+        valB = b.studentProfile?.cgpa ?? b.resumeSnapshot?.studentCgpa ?? 0;
+        return isAsc ? valA - valB : valB - valA;
+
+      case 'name':
+        valA = (a.student?.name || '').toLowerCase();
+        valB = (b.student?.name || '').toLowerCase();
+        return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+
+      case 'rollNumber':
+        valA = (a.studentProfile?.rollNumber || a.resumeSnapshot?.studentRollNumber || '').toLowerCase();
+        valB = (b.studentProfile?.rollNumber || b.resumeSnapshot?.studentRollNumber || '').toLowerCase();
+        return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+
+      case 'status':
+        valA = (a.status || '').toLowerCase();
+        valB = (b.status || '').toLowerCase();
+        return isAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+
+      case 'appliedAt':
+      default:
+        valA = new Date(a.appliedAt || 0).getTime();
+        valB = new Date(b.appliedAt || 0).getTime();
+        return isAsc ? valA - valB : valB - valA;
+    }
+  });
+
+  // 6. Pagination
+  const pageNum = Math.max(1, Number(page));
+  const pageLimit = Math.max(1, Number(limit));
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / pageLimit) || 1;
+  const startIndex = (pageNum - 1) * pageLimit;
+  const paginated = filtered.slice(startIndex, startIndex + pageLimit);
+
+  return {
+    total,
+    totalPages,
+    currentPage: pageNum,
+    paginated,
+  };
+};
+
+// @desc    Get all applicants for a specific placement drive with search, filter, sort & pagination
 // @route   GET /api/applications/drive/:driveId
 // @access  Private (Officer only)
 export const getDriveApplicants = async (req, res, next) => {
   try {
     const { driveId } = req.params;
-    const { status } = req.query;
 
-    const filter = { drive: driveId };
-    if (status) {
-      filter.status = status;
+    // Verify drive existence
+    const drive = await PlacementDrive.findById(driveId).populate('company');
+    if (!drive) {
+      return res.status(404).json({
+        success: false,
+        message: 'Placement drive not found.',
+      });
     }
 
-    const applications = await Application.find(filter)
-      .populate('student', 'name email')
+    // Security rule: Officer can only manage applicants belonging to drives they manage/created
+    if (drive.createdBy && drive.createdBy.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You can only view applicants for drives you created or manage.',
+      });
+    }
+
+    const applications = await Application.find({ drive: driveId })
+      .populate('student', 'name email profilePhoto phone')
       .populate('studentProfile')
       .populate('company', 'name logoUrl industry')
-      .sort({ appliedAt: -1 });
+      .populate('statusHistory.updatedBy', 'name email');
+
+    const result = filterSortPaginate(applications, req.query);
 
     res.status(200).json({
       success: true,
-      count: applications.length,
-      applications,
+      drive: {
+        _id: drive._id,
+        title: drive.title,
+        jobRole: drive.jobRole,
+        packageLPA: drive.packageLPA,
+        status: drive.status,
+        company: drive.company,
+        applicationClosingDate: drive.applicationClosingDate,
+        eligibilityCriteria: drive.eligibilityCriteria,
+      },
+      count: result.paginated.length,
+      total: result.total,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+      applications: result.paginated,
     });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Get all applications across system with filters (Officer only)
+// @desc    Get all applications across drives managed by officer with filters, search, sort & pagination
 // @route   GET /api/applications
 // @access  Private (Officer only)
 export const getAllApplications = async (req, res, next) => {
   try {
-    const { status, driveId, companyId } = req.query;
-    const filter = {};
+    const { driveId, companyId } = req.query;
 
-    if (status) filter.status = status;
-    if (driveId) filter.drive = driveId;
+    // Scope to officer's own drives if assigned
+    const officerDrives = await PlacementDrive.find({ createdBy: req.user._id }).select('_id');
+    const officerDriveIds = officerDrives.map((d) => d._id);
+
+    const filter = {};
+    if (driveId) {
+      // Validate drive ownership if specified
+      const targetDrive = await PlacementDrive.findById(driveId);
+      if (
+        targetDrive?.createdBy &&
+        targetDrive.createdBy.toString() !== req.user._id.toString()
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access denied: You can only view applications for drives you created.',
+        });
+      }
+      filter.drive = driveId;
+    } else if (officerDriveIds.length > 0) {
+      filter.drive = { $in: officerDriveIds };
+    }
+
     if (companyId) filter.company = companyId;
 
     const applications = await Application.find(filter)
-      .populate('student', 'name email')
+      .populate('student', 'name email profilePhoto phone')
       .populate('studentProfile')
       .populate('company', 'name logoUrl industry')
+      .populate('statusHistory.updatedBy', 'name email')
       .populate({
         path: 'drive',
         populate: { path: 'company', select: 'name industry logoUrl' },
-      })
-      .sort({ appliedAt: -1 });
+      });
+
+    const result = filterSortPaginate(applications, req.query);
 
     res.status(200).json({
       success: true,
-      count: applications.length,
-      applications,
+      count: result.paginated.length,
+      total: result.total,
+      totalPages: result.totalPages,
+      currentPage: result.currentPage,
+      applications: result.paginated,
     });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Update applicant status and selection remarks (Officer only)
+// @desc    Update applicant selection status with history tracking (Officer only)
 // @route   PATCH /api/applications/:id/status
 // @access  Private (Officer only)
 export const updateApplicationStatus = async (req, res, next) => {
@@ -288,12 +561,45 @@ export const updateApplicationStatus = async (req, res, next) => {
     if (!application) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found.',
+        message: 'Application record not found.',
       });
     }
 
-    if (status) application.status = status;
-    if (currentRound !== undefined) application.currentRound = Number(currentRound);
+    // Security rule: Officers can only manage applicants belonging to their drives
+    if (
+      application.drive?.createdBy &&
+      application.drive.createdBy.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You can only update applicant statuses for drives you created or manage.',
+      });
+    }
+
+    const validStatuses = ['Applied', 'Under Review', 'Shortlisted', 'Interviewing', 'Selected', 'Rejected'];
+    if (status && !validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Invalid status "${status}". Allowed statuses are: ${validStatuses.join(', ')}`,
+      });
+    }
+
+    const previousStatus = application.status;
+    const newStatus = status || previousStatus;
+
+    // Record in status history
+    application.statusHistory.push({
+      previousStatus,
+      newStatus,
+      updatedBy: req.user._id,
+      updatedDate: new Date(),
+      remarks: selectionRemarks || officerNotes || `Status changed from ${previousStatus} to ${newStatus}.`,
+    });
+
+    if (status) application.status = newStatus;
+    if (currentRound !== undefined && currentRound !== null) {
+      application.currentRound = Number(currentRound);
+    }
     if (officerNotes !== undefined) application.officerNotes = officerNotes;
     if (selectionRemarks !== undefined) application.selectionRemarks = selectionRemarks;
     if (feedback !== undefined) application.feedback = feedback;
@@ -301,7 +607,7 @@ export const updateApplicationStatus = async (req, res, next) => {
     await application.save();
 
     // If marked Selected, update student's profile status and placedCompany
-    if (status === 'Selected') {
+    if (newStatus === 'Selected') {
       await StudentProfile.findOneAndUpdate(
         { user: application.student._id },
         {
@@ -311,14 +617,17 @@ export const updateApplicationStatus = async (req, res, next) => {
       );
     }
 
+    await application.populate('statusHistory.updatedBy', 'name email');
+
     res.status(200).json({
       success: true,
-      message: `Applicant status updated to "${status || 'Updated'}" successfully.`,
+      message: `Applicant status successfully updated to "${newStatus}".`,
       application,
     });
   } catch (error) {
     next(error);
   }
 };
+
 
 
