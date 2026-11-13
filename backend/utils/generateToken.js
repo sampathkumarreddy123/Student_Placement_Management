@@ -1,9 +1,12 @@
 import jwt from 'jsonwebtoken';
 
-export const generateTokenAndSetCookie = (res, userId, role) => {
+export const generateTokenAndSetCookie = (res, userId, role, rememberMe = false) => {
   const secret = process.env.JWT_SECRET || 'placement_portal_fallback_secret_key_2026';
+  const expiresIn = rememberMe ? '30d' : '7d';
+  const maxAge = (rememberMe ? 30 : 7) * 24 * 60 * 60 * 1000;
+
   const token = jwt.sign({ id: userId, role }, secret, {
-    expiresIn: '7d',
+    expiresIn,
   });
 
   const isProduction = process.env.NODE_ENV === 'production';
@@ -12,7 +15,7 @@ export const generateTokenAndSetCookie = (res, userId, role) => {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'strict' : 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    maxAge,
   });
 
   return token;

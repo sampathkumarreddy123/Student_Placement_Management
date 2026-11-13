@@ -37,6 +37,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const officerLogin = async (credentials) => {
+    setAuthError(null);
+    try {
+      const data = await authService.officerLogin(credentials);
+      setUser(data.user);
+      return data;
+    } catch (err) {
+      setAuthError(err.message || 'Officer login failed');
+      throw err;
+    }
+  };
+
+  const studentLogin = async (credentials) => {
+    setAuthError(null);
+    try {
+      const data = await authService.studentLogin(credentials);
+      setUser(data.user);
+      return data;
+    } catch (err) {
+      setAuthError(err.message || 'Student login failed');
+      throw err;
+    }
+  };
+
   const register = async (userData) => {
     setAuthError(null);
     try {
@@ -69,6 +93,8 @@ export const AuthProvider = ({ children }) => {
     isStudent: user?.role === 'student',
     isOfficer: user?.role === 'officer',
     login,
+    officerLogin,
+    studentLogin,
     register,
     logout,
     checkAuth,

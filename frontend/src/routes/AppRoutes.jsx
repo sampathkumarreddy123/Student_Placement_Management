@@ -12,6 +12,8 @@ import ProtectedRoute from './ProtectedRoute';
 // Pages
 import LandingPage from '../pages/LandingPage';
 import Login from '../pages/auth/Login';
+import StudentLogin from '../pages/auth/StudentLogin';
+import OfficerLogin from '../pages/auth/OfficerLogin';
 import Register from '../pages/auth/Register';
 import NotFound from '../pages/NotFound';
 
@@ -44,6 +46,8 @@ const AppRoutes = () => {
       {/* Auth Pages */}
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
+        <Route path="/student/login" element={<StudentLogin />} />
+        <Route path="/officer/login" element={<OfficerLogin />} />
         <Route path="/register" element={<Register />} />
       </Route>
 

@@ -44,9 +44,12 @@ const LandingPage = () => {
               </Link>
             ) : (
               <>
-                <Link to="/login">
+                <Link to="/officer/login" className="text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors px-2 py-1">
+                  Officer Portal
+                </Link>
+                <Link to="/student/login">
                   <Button variant="outline" size="sm">
-                    Sign In
+                    Student Sign In
                   </Button>
                 </Link>
                 <Link to="/register">
@@ -92,7 +95,7 @@ const LandingPage = () => {
                   Create Student Account
                 </Button>
               </Link>
-              <Link to="/login">
+              <Link to="/officer/login">
                 <Button variant="outline" size="lg">
                   Placement Officer Sign In
                 </Button>

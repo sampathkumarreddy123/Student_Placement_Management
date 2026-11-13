@@ -9,6 +9,22 @@ export const authService = {
     return response.data;
   },
 
+  officerLogin: async (credentials) => {
+    const response = await api.post('/auth/officer/login', credentials);
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response.data;
+  },
+
+  studentLogin: async (credentials) => {
+    const response = await api.post('/auth/student/login', credentials);
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+    }
+    return response.data;
+  },
+
   register: async (userData) => {
     const response = await api.post('/auth/register', userData);
     if (response.data.token) {
