@@ -223,7 +223,6 @@ const ManageDrives = () => {
   const handleRemoveRound = (idx) => {
     setForm((prev) => {
       const updated = prev.rounds.filter((_, i) => i !== idx);
-      // Re-index round numbers
       return {
         ...prev,
         rounds: updated.map((r, i) => ({ ...r, roundNumber: i + 1 })),
@@ -536,13 +535,13 @@ const ManageDrives = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
                 <tr>
-                  <th className="py-3 px-4">Drive & Company</th>
-                  <th className="py-3 px-4">Role & Package</th>
-                  <th className="py-3 px-4">Eligibility</th>
-                  <th className="py-3 px-4">Timeline</th>
-                  <th className="py-3 px-4 text-center">Applicants</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 min-w-[220px]">Drive & Company</th>
+                  <th className="py-3 px-4 min-w-[150px]">Role & Package</th>
+                  <th className="py-3 px-4 min-w-[160px]">Eligibility</th>
+                  <th className="py-3 px-4 min-w-[140px]">Timeline</th>
+                  <th className="py-3 px-4 text-center min-w-[90px]">Applicants</th>
+                  <th className="py-3 px-4 min-w-[100px]">Status</th>
+                  <th className="py-3 px-4 text-right whitespace-nowrap min-w-[190px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -551,7 +550,7 @@ const ManageDrives = () => {
                   return (
                     <tr key={drive._id} className="hover:bg-slate-50/70 transition-colors">
                       {/* Drive & Company */}
-                      <td className="py-3.5 px-4 max-w-[220px]">
+                      <td className="py-3.5 px-4 min-w-[220px]">
                         <div className="flex items-center gap-2.5">
                           {drive.company?.logoUrl ? (
                             <img
@@ -568,7 +567,7 @@ const ManageDrives = () => {
                               {drive.company?.name ? drive.company.name.charAt(0) : 'C'}
                             </div>
                           )}
-                          <div className="truncate">
+                          <div className="truncate max-w-[170px]">
                             <Link
                               to={`/drives/${drive._id}`}
                               className="font-semibold text-slate-900 hover:text-blue-600 leading-tight block truncate"
@@ -583,10 +582,10 @@ const ManageDrives = () => {
                       </td>
 
                       {/* Role & Package */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 min-w-[150px]">
                         <div className="font-semibold text-blue-700">{formatLPA(drive.packageLPA)}</div>
                         <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                          <span className="font-medium text-slate-700">{drive.jobRole}</span>
+                          <span className="font-medium text-slate-700 truncate max-w-[90px]">{drive.jobRole}</span>
                           <span>•</span>
                           <span className="text-slate-400">{drive.employmentType || 'Full-Time'}</span>
                         </div>
@@ -598,12 +597,12 @@ const ManageDrives = () => {
                       </td>
 
                       {/* Criteria */}
-                      <td className="py-3.5 px-4 text-slate-600">
+                      <td className="py-3.5 px-4 min-w-[160px] text-slate-600">
                         <div>
                           Min CGPA: <span className="font-medium text-slate-800">{drive.eligibilityCriteria?.minCgpa ?? 'N/A'}</span>
                         </div>
                         <div className="text-[11px] text-slate-400 mt-0.5">
-                          Max Active Backlogs: {drive.eligibilityCriteria?.maxActiveBacklogs ?? drive.eligibilityCriteria?.maxBacklogs ?? 0}
+                          Max Backlogs: {drive.eligibilityCriteria?.maxActiveBacklogs ?? drive.eligibilityCriteria?.maxBacklogs ?? 0}
                         </div>
                         <div className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[160px]">
                           {drive.eligibilityCriteria?.allowedDepartments?.length || 0} depts allowed
@@ -611,7 +610,7 @@ const ManageDrives = () => {
                       </td>
 
                       {/* Timeline */}
-                      <td className="py-3.5 px-4 text-slate-600">
+                      <td className="py-3.5 px-4 min-w-[140px] text-slate-600">
                         <div className="text-[11px]">
                           Close: <span className="font-medium text-slate-800">{formatDate(drive.applicationClosingDate || drive.registrationDeadline)}</span>
                         </div>
@@ -631,7 +630,7 @@ const ManageDrives = () => {
                       </td>
 
                       {/* Applicants */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-4 text-center min-w-[90px]">
                         <Link
                           to={`/officer/applications?driveId=${drive._id}`}
                           className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100 transition-colors"
@@ -643,18 +642,19 @@ const ManageDrives = () => {
                       </td>
 
                       {/* Status */}
-                      <td className="py-3.5 px-4">
+                      <td className="py-3.5 px-4 min-w-[100px]">
                         <Badge status={drive.status} size="sm" />
                       </td>
 
                       {/* Actions */}
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1">
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[190px]">
+                        <div className="flex items-center justify-end gap-1.5">
                           {/* Publish button if Draft */}
                           {drive.status === 'Draft' && (
                             <button
+                              type="button"
                               onClick={() => handlePublish(drive)}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[11px] font-medium transition-colors"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[11px] font-medium transition-colors border border-emerald-200"
                               title="Publish drive and open for applications"
                             >
                               <Send className="w-3 h-3" />
@@ -665,8 +665,9 @@ const ManageDrives = () => {
                           {/* Close button if Published */}
                           {drive.status === 'Published' && (
                             <button
+                              type="button"
                               onClick={() => handleClose(drive)}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 text-[11px] font-medium transition-colors"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 text-[11px] font-medium transition-colors border border-amber-200"
                               title="Close applications"
                             >
                               <XCircle className="w-3 h-3" />
@@ -677,8 +678,9 @@ const ManageDrives = () => {
                           {/* Archive button if Closed */}
                           {drive.status === 'Closed' && (
                             <button
+                              type="button"
                               onClick={() => handleArchive(drive)}
-                              className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 text-[11px] font-medium transition-colors"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 text-[11px] font-medium transition-colors border border-purple-200"
                               title="Archive drive as Completed"
                             >
                               <Archive className="w-3 h-3" />
@@ -689,28 +691,30 @@ const ManageDrives = () => {
                           {/* View details */}
                           <Link
                             to={`/drives/${drive._id}`}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                             title="View Full Specifications"
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Eye className="w-4 h-4" />
                           </Link>
 
                           {/* Edit */}
                           <button
+                            type="button"
                             onClick={() => openEditModal(drive)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                             title="Edit Drive"
                           >
-                            <Edit2 className="w-3.5 h-3.5" />
+                            <Edit2 className="w-4 h-4" />
                           </button>
 
                           {/* Delete */}
                           <button
+                            type="button"
                             onClick={() => handleDelete(drive._id, drive.title)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                             title="Delete Drive"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -731,7 +735,7 @@ const ManageDrives = () => {
         subtitle="Configure recruitment details, eligibility criteria, and process rounds"
         maxWidth="max-w-3xl"
       >
-        <form onSubmit={handleSubmit} className="space-y-5 text-xs max-h-[78vh] overflow-y-auto pr-1">
+        <form onSubmit={handleSubmit} className="space-y-5 text-xs">
           {/* SECTION 1: BASIC INFORMATION */}
           <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/90 space-y-3.5">
             <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
@@ -1119,8 +1123,8 @@ const ManageDrives = () => {
             </div>
           </div>
 
-          {/* Form Action Buttons */}
-          <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+          {/* Form Action Buttons - Clean bottom bar */}
+          <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100 bg-white sticky bottom-0 -mx-5 -mb-5 p-5 sm:-mx-6 sm:-mb-6 sm:p-6 shadow-sm">
             <Button
               variant="outline"
               size="sm"

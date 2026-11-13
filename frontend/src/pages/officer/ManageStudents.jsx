@@ -151,19 +151,19 @@ const ManageStudents = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
                 <tr>
-                  <th className="py-3 px-4">Student & Roll No</th>
-                  <th className="py-3 px-4">Department & Batch</th>
-                  <th className="py-3 px-4 text-center">CGPA</th>
-                  <th className="py-3 px-4 text-center">Backlogs</th>
-                  <th className="py-3 px-4">Skills</th>
-                  <th className="py-3 px-4">Placement Status</th>
-                  <th className="py-3 px-4 text-right">Resume</th>
+                  <th className="py-3 px-4 min-w-[200px]">Student & Roll No</th>
+                  <th className="py-3 px-4 min-w-[170px]">Department & Batch</th>
+                  <th className="py-3 px-4 text-center min-w-[80px]">CGPA</th>
+                  <th className="py-3 px-4 text-center min-w-[80px]">Backlogs</th>
+                  <th className="py-3 px-4 min-w-[160px]">Skills</th>
+                  <th className="py-3 px-4 min-w-[130px]">Placement Status</th>
+                  <th className="py-3 px-4 text-right whitespace-nowrap min-w-[100px]">Resume</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {students.map((profile) => (
-                  <tr key={profile._id} className="hover:bg-slate-50/70">
-                    <td className="py-3.5 px-4">
+                  <tr key={profile._id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3.5 px-4 min-w-[200px]">
                       <div className="font-semibold text-slate-900 leading-tight">
                         {profile.user?.name || 'Student Name'}
                       </div>
@@ -176,18 +176,18 @@ const ManageStudents = () => {
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4 text-slate-600">
+                    <td className="py-3.5 px-4 text-slate-600 min-w-[170px]">
                       <div>{profile.department}</div>
                       <div className="text-[11px] text-slate-400">Class of {profile.batch}</div>
                     </td>
 
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-3.5 px-4 text-center min-w-[80px]">
                       <span className="font-bold text-slate-900 text-sm">
                         {profile.cgpa ? profile.cgpa.toFixed(2) : '0.00'}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-3.5 px-4 text-center min-w-[80px]">
                       <span
                         className={`inline-block px-2 py-0.5 rounded font-medium ${
                           profile.backlogs > 0
@@ -199,7 +199,7 @@ const ManageStudents = () => {
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 max-w-xs">
+                    <td className="py-3.5 px-4 min-w-[160px]">
                       <div className="flex flex-wrap gap-1">
                         {profile.skills?.slice(0, 3).map((skill, i) => (
                           <span
@@ -217,7 +217,7 @@ const ManageStudents = () => {
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 min-w-[130px]">
                       <Badge
                         variant={profile.placementStatus === 'Placed' ? 'success' : 'secondary'}
                         size="sm"
@@ -228,13 +228,13 @@ const ManageStudents = () => {
                       </Badge>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[100px]">
                       {profile.resumeUrl ? (
                         <a
                           href={profile.resumeUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-blue-600 hover:underline font-medium"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100 transition-colors"
                         >
                           CV <ExternalLink className="w-3 h-3" />
                         </a>

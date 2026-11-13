@@ -172,7 +172,7 @@ const StudentDashboard = () => {
   return (
     <div className="space-y-6">
       {/* 1. TOP DASHBOARD OVERVIEW SECTION */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative">
         {/* Left: Welcome & Student Overview */}
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">

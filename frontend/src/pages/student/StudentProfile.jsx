@@ -930,11 +930,11 @@ const StudentProfile = () => {
 
         {/* Save Changes Floating Action Bar in Edit Mode */}
         {isEditing && (
-          <div className="sticky bottom-4 z-20 bg-white border border-slate-300 rounded-xl shadow-lg p-4 flex items-center justify-between">
-            <span className="text-xs text-slate-600 font-medium">
-              You have unsaved edits in your profile.
+          <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-sm border border-slate-200/90 rounded-xl shadow-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 mt-6">
+            <span className="text-xs text-slate-700 font-medium text-center sm:text-left">
+              You have unsaved edits in your academic profile.
             </span>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
               <Button
                 type="button"
                 variant="outline"

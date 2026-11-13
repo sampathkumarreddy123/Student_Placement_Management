@@ -185,20 +185,20 @@ const ManageApplications = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
                 <tr>
-                  <th className="py-3 px-4">Candidate & Roll</th>
-                  <th className="py-3 px-4">Target Drive & Company</th>
-                  <th className="py-3 px-4 text-center">CGPA</th>
-                  <th className="py-3 px-4 text-center">Round</th>
-                  <th className="py-3 px-4">Applied Date</th>
-                  <th className="py-3 px-4">Current Status</th>
-                  <th className="py-3 px-4">Officer Notes</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3 px-4 min-w-[180px]">Candidate & Roll</th>
+                  <th className="py-3 px-4 min-w-[170px]">Target Drive & Company</th>
+                  <th className="py-3 px-4 text-center min-w-[80px]">CGPA</th>
+                  <th className="py-3 px-4 text-center min-w-[80px]">Round</th>
+                  <th className="py-3 px-4 min-w-[110px]">Applied Date</th>
+                  <th className="py-3 px-4 min-w-[110px]">Current Status</th>
+                  <th className="py-3 px-4 min-w-[150px]">Officer Notes</th>
+                  <th className="py-3 px-4 text-right whitespace-nowrap min-w-[120px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {applications.map((app) => (
-                  <tr key={app._id} className="hover:bg-slate-50/70">
-                    <td className="py-3.5 px-4">
+                  <tr key={app._id} className="hover:bg-slate-50/70 transition-colors">
+                    <td className="py-3.5 px-4 min-w-[180px]">
                       <div className="font-semibold text-slate-900 leading-tight">
                         {app.student?.name || 'Applicant'}
                       </div>
@@ -212,36 +212,36 @@ const ManageApplications = () => {
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 min-w-[170px]">
                       <div className="font-medium text-slate-900">
                         {app.drive?.company?.name || 'Company'}
                       </div>
                       <div className="text-[11px] text-slate-500">{app.drive?.jobRole}</div>
                     </td>
 
-                    <td className="py-3.5 px-4 text-center font-bold text-slate-800">
+                    <td className="py-3.5 px-4 text-center font-bold text-slate-800 min-w-[80px]">
                       {app.studentProfile?.cgpa ? app.studentProfile.cgpa.toFixed(2) : 'N/A'}
                     </td>
 
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-3.5 px-4 text-center min-w-[80px]">
                       <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium text-[11px]">
                         R{app.currentRound}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-slate-600">
+                    <td className="py-3.5 px-4 text-slate-600 min-w-[110px]">
                       {formatDate(app.appliedAt)}
                     </td>
 
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-4 min-w-[110px]">
                       <Badge status={app.status} size="sm" />
                     </td>
 
-                    <td className="py-3.5 px-4 max-w-xs truncate text-[11px] text-slate-600">
+                    <td className="py-3.5 px-4 max-w-xs truncate text-[11px] text-slate-600 min-w-[150px]">
                       {app.officerNotes || '—'}
                     </td>
 
-                    <td className="py-3.5 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[120px]">
                       <Button
                         size="sm"
                         variant="outline"
