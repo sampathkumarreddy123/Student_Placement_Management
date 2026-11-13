@@ -25,12 +25,15 @@ import Button from '../../components/common/Button';
 import Badge from '../../components/common/Badge';
 import Alert from '../../components/common/Alert';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import EmptyState from '../../components/common/EmptyState';
+import { useToast } from '../../context/ToastContext';
 import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters';
 
 import EligibilityModal from '../../components/drives/EligibilityModal';
 import ApplyConfirmModal from '../../components/drives/ApplyConfirmModal';
 
 const DriveDetails = () => {
+  const toast = useToast();
   const { id } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -64,12 +67,15 @@ const DriveDetails = () => {
       setApplying(true);
       setActionAlert(null);
       const res = await applicationService.applyForDrive(drive._id);
+      toast.success(res.message || 'Application submitted successfully!');
       setActionAlert({ type: 'success', text: res.message });
       await fetchDetails();
     } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Failed to submit application.';
+      toast.error(msg);
       setActionAlert({
         type: 'error',
-        text: err.response?.data?.message || err.message || 'Failed to submit application.',
+        text: msg,
       });
     } finally {
       setApplying(false);
@@ -82,15 +88,13 @@ const DriveDetails = () => {
 
   if (!drive) {
     return (
-      <div className="text-center py-12">
-        <p className="text-sm text-slate-600">Drive details could not be found or you do not have permission.</p>
-        <Link
-          to={isOfficer ? '/officer/drives' : '/student/drives'}
-          className="text-xs text-blue-600 hover:underline mt-2 inline-block"
-        >
-          Return to Drives List
-        </Link>
-      </div>
+      <EmptyState
+        icon={Briefcase}
+        title="Placement drive not found"
+        description="The requested placement drive could not be located or you may not have authorization to view it."
+        actionLabel={isOfficer ? 'Return to Manage Drives' : 'Browse Available Drives'}
+        actionLink={isOfficer ? '/officer/drives' : '/student/drives'}
+      />
     );
   }
 

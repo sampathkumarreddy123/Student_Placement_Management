@@ -167,3 +167,4 @@ export const clearReadNotifications = async (req, res, next) => {
     next(error);
   }
 };
+

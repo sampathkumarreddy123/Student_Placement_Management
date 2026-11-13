@@ -22,3 +22,4 @@ router.delete('/clear-read', clearReadNotifications);
 router.delete('/:id', deleteNotification);
 
 export default router;
+

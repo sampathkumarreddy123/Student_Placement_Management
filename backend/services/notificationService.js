@@ -263,3 +263,4 @@ export const notifyOnApplicationStatusChange = async (
     console.error('[Notification Service Error] notifyOnApplicationStatusChange:', err.message);
   }
 };
+

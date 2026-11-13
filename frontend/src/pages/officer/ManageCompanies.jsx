@@ -33,6 +33,10 @@ import Modal from '../../components/common/Modal';
 import Alert from '../../components/common/Alert';
 import Badge from '../../components/common/Badge';
 import { TableSkeleton } from '../../components/common/Skeleton';
+import PageHeader from '../../components/common/PageHeader';
+import EmptyState from '../../components/common/EmptyState';
+import Pagination from '../../components/common/Pagination';
+import { useToast } from '../../context/ToastContext';
 
 const INDUSTRIES = [
   'Information Technology',
@@ -48,6 +52,7 @@ const INDUSTRIES = [
 ];
 
 const ManageCompanies = () => {
+  const toast = useToast();
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionAlert, setActionAlert] = useState(null);
@@ -225,10 +230,12 @@ const ManageCompanies = () => {
       if (editingCompany) {
         const res = await companyService.updateCompany(editingCompany._id, form);
         companyId = editingCompany._id;
+        toast.success(`"${form.name}" updated successfully!`);
         setActionAlert({ type: 'success', text: `"${form.name}" updated successfully!` });
       } else {
         const res = await companyService.createCompany(form);
         companyId = res.company?._id;
+        toast.success(`"${form.name}" added to partner directory!`);
         setActionAlert({ type: 'success', text: `"${form.name}" added to partner directory!` });
       }
 
@@ -242,6 +249,7 @@ const ManageCompanies = () => {
       setIsModalOpen(false);
       await fetchCompanies();
     } catch (err) {
+      toast.error(err.message || 'Failed to save company information.');
       setActionAlert({
         type: 'error',
         text: err.message || 'Failed to save company information.',
@@ -272,9 +280,11 @@ const ManageCompanies = () => {
       setActionAlert(null);
 
       const res = await companyService.deleteCompany(comp._id, archiveOnly);
+      const msg = res.message || (archiveOnly ? 'Company safely archived.' : 'Company deleted.');
+      toast.success(msg);
       setActionAlert({
         type: 'success',
-        text: res.message || (archiveOnly ? 'Company safely archived.' : 'Company deleted.'),
+        text: msg,
       });
 
       setDeleteModalState({
@@ -288,6 +298,7 @@ const ManageCompanies = () => {
 
       await fetchCompanies();
     } catch (err) {
+      toast.error(err.message || 'Operation failed.');
       setActionAlert({
         type: 'error',
         text: err.message || 'Operation failed.',
@@ -300,9 +311,11 @@ const ManageCompanies = () => {
     try {
       setActionAlert(null);
       const res = await companyService.toggleArchive(company._id);
+      toast.success(res.message);
       setActionAlert({ type: 'success', text: res.message });
       await fetchCompanies();
     } catch (err) {
+      toast.error(err.message || 'Failed to toggle archive status.');
       setActionAlert({
         type: 'error',
         text: err.message || 'Failed to toggle archive status.',
@@ -313,27 +326,17 @@ const ManageCompanies = () => {
   return (
     <div className="space-y-6">
       {/* 1. Header Banner */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900">
-              Corporate Partner Directory
-            </h1>
-            <Badge variant="primary" size="sm">
-              {totalCount} Total
-            </Badge>
-          </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Maintain authorized corporate recruiters, primary POC contacts, and company hiring profiles
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2.5">
+      <PageHeader
+        category="Corporate Partners"
+        title="Corporate Partner Directory"
+        subtitle="Maintain authorized corporate recruiters, primary POC contacts, and company hiring profiles"
+        badge={`${totalCount} Companies`}
+        actions={
           <Button size="sm" icon={Plus} onClick={openCreateModal}>
             Add Company
           </Button>
-        </div>
-      </div>
+        }
+      />
 
       {actionAlert && (
         <Alert
@@ -427,22 +430,17 @@ const ManageCompanies = () => {
           </div>
         </Card>
       ) : companies.length === 0 ? (
-        <Card className="text-center py-12">
-          <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-800">
-            {search || selectedIndustry !== 'All' ? 'No matching companies found' : 'No partner companies registered'}
-          </h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            {search || selectedIndustry !== 'All'
+        <EmptyState
+          icon={Building2}
+          title={search || selectedIndustry !== 'All' ? 'No matching companies found' : 'No partner companies registered'}
+          description={
+            search || selectedIndustry !== 'All'
               ? 'Try adjusting your search criteria or resetting filters.'
-              : 'Add recruiting organizations to begin associating on-campus placement drives.'}
-          </p>
-          <div className="mt-4">
-            <Button size="sm" icon={Plus} onClick={openCreateModal}>
-              Add First Company
-            </Button>
-          </div>
-        </Card>
+              : 'Add recruiting organizations to begin associating on-campus placement drives.'
+          }
+          actionLabel="Add Partner Company"
+          onAction={openCreateModal}
+        />
       ) : viewMode === 'table' ? (
         /* TABLE VIEW */
         <Card noPadding>
@@ -685,34 +683,13 @@ const ManageCompanies = () => {
       )}
 
       {/* 4. Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs text-slate-500 px-2">
-          <span>
-            Showing Page <strong className="text-slate-800">{page}</strong> of{' '}
-            <strong className="text-slate-800">{totalPages}</strong> ({totalCount} total)
-          </span>
-
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <span className="px-3 py-1 font-semibold text-blue-700 bg-blue-50 border border-blue-200 rounded-lg">
-              {page}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        totalCount={totalCount}
+        pageSize={10}
+        onPageChange={setPage}
+      />
 
       {/* 5. ADD / EDIT COMPANY MODAL */}
       <Modal

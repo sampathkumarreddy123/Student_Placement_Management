@@ -25,6 +25,9 @@ import Card from '../components/common/Card';
 import Button from '../components/common/Button';
 import Badge from '../components/common/Badge';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import PageHeader from '../components/common/PageHeader';
+import EmptyState from '../components/common/EmptyState';
+import { useToast } from '../context/ToastContext';
 
 const formatDateTime = (dateString) => {
   if (!dateString) return '';
@@ -52,6 +55,7 @@ const formatRelativeTime = (dateString) => {
 };
 
 const NotificationsPage = () => {
+  const toast = useToast();
   const { isOfficer, isStudent } = useAuth();
   const navigate = useNavigate();
 
@@ -119,9 +123,11 @@ const NotificationsPage = () => {
       await notificationService.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
+      toast.success('All notifications marked as read.');
       setActionAlert({ type: 'success', text: 'All notifications marked as read.' });
     } catch (err) {
       console.error('Failed to mark all as read', err);
+      toast.error('Failed to mark all notifications as read.');
     }
   };
 
@@ -129,9 +135,11 @@ const NotificationsPage = () => {
     try {
       await notificationService.clearReadNotifications();
       setNotifications((prev) => prev.filter((n) => !n.isRead));
+      toast.success('Read notifications cleared.');
       setActionAlert({ type: 'success', text: 'Read notifications cleared.' });
     } catch (err) {
       console.error('Failed to clear read notifications', err);
+      toast.error('Failed to clear read notifications.');
     }
   };
 
@@ -144,8 +152,10 @@ const NotificationsPage = () => {
       if (target && !target.isRead) {
         setUnreadCount((prev) => Math.max(0, prev - 1));
       }
+      toast.success('Notification removed.');
     } catch (err) {
       console.error('Failed to delete notification', err);
+      toast.error('Failed to remove notification.');
     }
   };
 
@@ -168,28 +178,13 @@ const NotificationsPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
-      {/* Top Banner */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                Placement Notifications & Alerts
-              </span>
-              {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white">
-                  {unreadCount} unread
-                </span>
-              )}
-            </div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              Activity & Recruitment Updates
-            </h1>
-            <p className="text-xs text-slate-500 mt-1">
-              Instant alerts regarding campus drives, application progression, and evaluation rounds.
-            </p>
-          </div>
-
+      {/* Top Page Header */}
+      <PageHeader
+        category="Activity Stream"
+        title="Recruitment Notifications & Alerts"
+        subtitle="Instant alerts regarding campus drives, application progression, and evaluation rounds"
+        badge={unreadCount > 0 ? `${unreadCount} Unread` : 'All Caught Up'}
+        actions={
           <div className="flex flex-wrap items-center gap-2">
             <Button
               variant="outline"
@@ -209,26 +204,8 @@ const NotificationsPage = () => {
               Clear Read
             </Button>
           </div>
-        </div>
-
-        {actionAlert && (
-          <div
-            className={`mt-4 p-3 rounded-xl border text-xs flex items-center justify-between ${
-              actionAlert.type === 'success'
-                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                : 'bg-rose-50 text-rose-800 border-rose-200'
-            }`}
-          >
-            <span>{actionAlert.text}</span>
-            <button
-              onClick={() => setActionAlert(null)}
-              className="text-slate-400 hover:text-slate-600 font-bold ml-2"
-            >
-              ✕
-            </button>
-          </div>
-        )}
-      </div>
+        }
+      />
 
       {/* Filter Tabs */}
       <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2 overflow-x-auto">
@@ -293,22 +270,17 @@ const NotificationsPage = () => {
           <LoadingSpinner text="Retrieving verified notifications..." />
         </div>
       ) : notifications.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
-          <Inbox className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-800">No notifications found</h3>
-          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-            {activeTab === 'unread'
+        <EmptyState
+          icon={Inbox}
+          title="No notifications found"
+          description={
+            activeTab === 'unread'
               ? 'You have caught up with all your notifications! Check back later for new updates.'
-              : 'When placement drives are announced or application evaluations are updated, notifications will arrive here.'}
-          </p>
-          <div className="mt-5">
-            <Link to={isOfficer ? '/officer/dashboard' : '/student/dashboard'}>
-              <Button size="sm" variant="outline">
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
+              : 'When placement drives are announced or application evaluations are updated, notifications will arrive here.'
+          }
+          actionLabel="Back to Dashboard"
+          actionLink={isOfficer ? '/officer/dashboard' : '/student/dashboard'}
+        />
       ) : (
         <div className="space-y-3">
           {notifications.map((item) => {
@@ -384,3 +356,4 @@ const NotificationsPage = () => {
 };
 
 export default NotificationsPage;
+

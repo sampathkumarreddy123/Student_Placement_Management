@@ -8,6 +8,7 @@ import {
   Building2,
   GraduationCap,
   RotateCcw,
+  Sparkles,
 } from 'lucide-react';
 import { driveService } from '../../services/driveService';
 import { companyService } from '../../services/companyService';
@@ -15,8 +16,10 @@ import DriveCard from '../../components/drives/DriveCard';
 import ApplyConfirmModal from '../../components/drives/ApplyConfirmModal';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
-import Alert from '../../components/common/Alert';
+import PageHeader from '../../components/common/PageHeader';
+import EmptyState from '../../components/common/EmptyState';
+import { DriveCardSkeleton } from '../../components/common/Skeleton';
+import { useToast } from '../../context/ToastContext';
 
 const DEPARTMENTS = [
   'Computer Science and Engineering',
@@ -29,6 +32,7 @@ const DEPARTMENTS = [
 ];
 
 const DrivesList = () => {
+  const toast = useToast();
   const [drives, setDrives] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -106,10 +110,7 @@ const DrivesList = () => {
   };
 
   const handleApplySuccess = (res) => {
-    setActionAlert({
-      type: 'success',
-      text: res.message || 'Your placement application has been successfully submitted!',
-    });
+    toast.success(res.message || 'Your placement application has been successfully submitted!');
     fetchDrives();
   };
 
@@ -122,31 +123,28 @@ const DrivesList = () => {
     onlyEligible;
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Campus Placement Drives</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Explore ongoing corporate recruitment opportunities and submit your applications
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
+    <div className="space-y-6 pb-12">
+      {/* 1. Consistent Page Header */}
+      <PageHeader
+        title="Campus Placement Drives"
+        subtitle="Explore verified corporate recruitment schedules and submit your job applications"
+        category="Student Placement Operations"
+        badge={`${drives.length} Drives Available`}
+        actions={
           <button
             type="button"
             onClick={() => setOnlyEligible(!onlyEligible)}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
               onlyEligible
-                ? 'bg-blue-50 text-blue-700 border-blue-300 font-semibold'
-                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
             }`}
           >
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            Eligible Only ({drives.filter((d) => d.isEligible).length})
+            <CheckCircle2 className={`w-4 h-4 ${onlyEligible ? 'text-white' : 'text-emerald-600'}`} />
+            <span>Eligible Only ({drives.filter((d) => d.isEligible).length})</span>
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {actionAlert && (
         <Alert
@@ -249,22 +247,23 @@ const DrivesList = () => {
 
       {/* Drives Grid */}
       {loading ? (
-        <LoadingSpinner text="Fetching campus placement drives..." />
-      ) : drives.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
-          <Briefcase className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-800">No matching drives found</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            Try adjusting your search criteria, clearing filters, or checking back soon for new drives.
-          </p>
-          {hasActiveFilters && (
-            <div className="mt-4">
-              <Button variant="outline" size="sm" onClick={handleResetFilters}>
-                Clear All Filters
-              </Button>
-            </div>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, idx) => (
+            <DriveCardSkeleton key={idx} />
+          ))}
         </div>
+      ) : drives.length === 0 ? (
+        <EmptyState
+          icon={Briefcase}
+          title="No matching placement drives found"
+          description={
+            hasActiveFilters
+              ? 'No campus recruitment drives match your current filter parameters. Try clearing or expanding your search filters.'
+              : 'There are currently no published placement drives available. Check back soon as new drives are announced by recruiters.'
+          }
+          actionText={hasActiveFilters ? 'Clear All Filters' : undefined}
+          onAction={hasActiveFilters ? handleResetFilters : undefined}
+        />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {drives.map((drive) => (

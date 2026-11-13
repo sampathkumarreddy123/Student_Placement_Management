@@ -33,6 +33,10 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import StatusUpdateModal from '../../components/officer/StatusUpdateModal';
 import StudentProfileModal from '../../components/officer/StudentProfileModal';
 import StatusHistoryModal from '../../components/officer/StatusHistoryModal';
+import PageHeader from '../../components/common/PageHeader';
+import EmptyState from '../../components/common/EmptyState';
+import Pagination from '../../components/common/Pagination';
+import { useToast } from '../../context/ToastContext';
 import { formatDate, formatLPA } from '../../utils/formatters';
 
 const STATUS_OPTIONS = [
@@ -76,6 +80,7 @@ const SORT_OPTIONS = [
 ];
 
 const ManageApplications = () => {
+  const toast = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialDriveId = searchParams.get('driveId') || '';
 
@@ -219,6 +224,7 @@ const ManageApplications = () => {
       link.remove();
       window.URL.revokeObjectURL(url);
 
+      toast.success(`Resume for ${app.student?.name || 'candidate'} downloaded.`);
       setActionAlert({
         type: 'success',
         text: `Resume for ${app.student?.name || 'candidate'} downloaded successfully.`,
@@ -228,7 +234,9 @@ const ManageApplications = () => {
       const fallbackUrl = app.resumeSnapshot?.resumeUrl || app.studentProfile?.resumeUrl;
       if (fallbackUrl) {
         window.open(fallbackUrl, '_blank');
+        toast.info('Opened resume link in a new tab.');
       } else {
+        toast.error('Resume document could not be retrieved.');
         setActionAlert({
           type: 'error',
           text: 'Resume document could not be retrieved.',
@@ -252,20 +260,23 @@ const ManageApplications = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Placement Drive Applicants</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Review candidate qualifications, inspect academic profiles, download resumes, and manage hiring outcomes
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Badge variant="primary" size="lg">
-            {totalApplicants} {totalApplicants === 1 ? 'Applicant' : 'Total Applicants'}
-          </Badge>
-        </div>
-      </div>
+      <PageHeader
+        category="Applicant Management"
+        title="Placement Drive Applicants"
+        subtitle="Review candidate qualifications, inspect academic profiles, download resumes, and manage hiring outcomes"
+        badge={`${totalApplicants} ${totalApplicants === 1 ? 'Applicant' : 'Total Applicants'}`}
+        actions={
+          selectedDriveId && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedDriveId('')}
+            >
+              Clear Drive Filter
+            </Button>
+          )
+        }
+      />
 
       {actionAlert && (
         <Alert
@@ -448,24 +459,19 @@ const ManageApplications = () => {
       {loading ? (
         <LoadingSpinner text="Retrieving applicant pool records..." />
       ) : applications.length === 0 ? (
-        <Card className="text-center py-12">
-          <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-800">No applicants found</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            {hasActiveFilters
+        <EmptyState
+          icon={Users}
+          title="No applicants found"
+          description={
+            hasActiveFilters
               ? 'No candidates match your current search and filter criteria. Try resetting filters.'
               : selectedDriveId
               ? 'No students have applied for this placement drive yet.'
-              : 'No applicants have submitted applications across your placement drives.'}
-          </p>
-          {hasActiveFilters && (
-            <div className="mt-4">
-              <Button variant="outline" size="sm" onClick={handleResetFilters}>
-                Clear Active Filters
-              </Button>
-            </div>
-          )}
-        </Card>
+              : 'No applicants have submitted applications across your placement drives.'
+          }
+          actionLabel={hasActiveFilters ? 'Clear Active Filters' : undefined}
+          onAction={hasActiveFilters ? handleResetFilters : undefined}
+        />
       ) : (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
@@ -650,67 +656,13 @@ const ManageApplications = () => {
           </div>
 
           {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="p-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs bg-slate-50/50">
-              <span className="text-slate-500 text-[11px]">
-                Showing <strong>{(currentPage - 1) * limit + 1}</strong> to{' '}
-                <strong>{Math.min(currentPage * limit, totalApplicants)}</strong> of{' '}
-                <strong>{totalApplicants}</strong> applicants
-              </span>
-
-              <div className="flex items-center gap-1.5">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={currentPage <= 1}
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  icon={ChevronLeft}
-                >
-                  Previous
-                </Button>
-
-                <div className="flex items-center gap-1 px-2">
-                  {Array.from({ length: totalPages }, (_, idx) => idx + 1)
-                    .filter(
-                      (p) =>
-                        p === 1 ||
-                        p === totalPages ||
-                        (p >= currentPage - 1 && p <= currentPage + 1)
-                    )
-                    .map((p, idx, arr) => {
-                      const showEllipsis = idx > 0 && p - arr[idx - 1] > 1;
-                      return (
-                        <React.Fragment key={p}>
-                          {showEllipsis && (
-                            <span className="text-slate-400 px-1 text-xs">…</span>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => handlePageChange(p)}
-                            className={`w-7 h-7 rounded-md font-semibold text-xs transition-colors ${
-                              currentPage === p
-                                ? 'bg-blue-600 text-white'
-                                : 'text-slate-600 hover:bg-slate-200'
-                            }`}
-                          >
-                            {p}
-                          </button>
-                        </React.Fragment>
-                      );
-                    })}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => handlePageChange(currentPage + 1)}
-                >
-                  Next <ChevronRight className="w-4 h-4 ml-1 inline" />
-                </Button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            page={currentPage}
+            totalPages={totalPages}
+            totalCount={totalApplicants}
+            pageSize={limit}
+            onPageChange={handlePageChange}
+          />
         </div>
       )}
 
@@ -720,6 +672,7 @@ const ManageApplications = () => {
         onClose={() => setAppForStatusUpdate(null)}
         application={appForStatusUpdate}
         onSuccess={(res) => {
+          toast.success(res.message || 'Applicant status updated successfully.');
           setActionAlert({
             type: 'success',
             text: res.message || 'Applicant status updated successfully.',

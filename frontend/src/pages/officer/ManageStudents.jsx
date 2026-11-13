@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Users,
   Search,
@@ -7,6 +7,9 @@ import {
   GraduationCap,
   Award,
   BookOpen,
+  Eye,
+  RotateCcw,
+  FileText,
 } from 'lucide-react';
 import { studentService } from '../../services/studentService';
 import Card from '../../components/common/Card';
@@ -14,6 +17,10 @@ import Badge from '../../components/common/Badge';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import PageHeader from '../../components/common/PageHeader';
+import EmptyState from '../../components/common/EmptyState';
+import Pagination from '../../components/common/Pagination';
+import StudentProfileModal from '../../components/officer/StudentProfileModal';
 
 const DEPARTMENTS = [
   'All Departments',
@@ -32,6 +39,12 @@ const ManageStudents = () => {
   const [department, setDepartment] = useState('All Departments');
   const [statusFilter, setStatusFilter] = useState('');
   const [minCgpa, setMinCgpa] = useState('');
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
+  // Student Profile Inspection Modal
+  const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const fetchStudents = async () => {
     try {
@@ -44,6 +57,7 @@ const ManageStudents = () => {
 
       const res = await studentService.getAllStudents(params);
       setStudents(res.students || []);
+      setPage(1);
     } catch (err) {
       console.error('Failed to load students', err);
     } finally {
@@ -60,27 +74,46 @@ const ManageStudents = () => {
     fetchStudents();
   };
 
+  const handleReset = () => {
+    setSearch('');
+    setDepartment('All Departments');
+    setStatusFilter('');
+    setMinCgpa('');
+    setPage(1);
+  };
+
+  const openStudentModal = (studentId) => {
+    setSelectedStudentId(studentId);
+    setIsProfileModalOpen(true);
+  };
+
+  // Pagination slice
+  const totalCount = students.length;
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  const paginatedStudents = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return students.slice(start, start + pageSize);
+  }, [students, page, pageSize]);
+
+  const hasActiveFilters =
+    Boolean(search) ||
+    department !== 'All Departments' ||
+    Boolean(statusFilter) ||
+    Boolean(minCgpa);
+
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Student Placement Directory</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Access academic profiles, backlogs verification, resumes, and hiring milestones
-          </p>
-        </div>
+    <div className="space-y-6 pb-12">
+      {/* 1. Consistent Page Header */}
+      <PageHeader
+        title="Student Placement Directory"
+        subtitle="Verified academic records, backlogs evaluation, skills portfolios, and hiring milestones"
+        category="Placement Cell Administration"
+        badge={`${students.length} Registered Students`}
+      />
 
-        <div className="flex items-center gap-2">
-          <Badge variant="primary" size="lg">
-            Total Students: {students.length}
-          </Badge>
-        </div>
-      </div>
-
-      {/* Filters Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-sm">
-        <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+      {/* 2. Filters Bar */}
+      <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-sm">
+        <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
             <Input
               placeholder="Search by student name or roll no..."
@@ -122,7 +155,8 @@ const ManageStudents = () => {
               onChange={(e) => setMinCgpa(e.target.value)}
               className="flex-1 h-[38px] rounded-lg border border-slate-200 text-xs px-3 focus:outline-none focus:border-blue-500 bg-white"
             >
-              <option value="">Any CGPA</option>
+              <option value="">Any CGPA Cutoff</option>
+              <option value="6">CGPA &gt;= 6.0</option>
               <option value="7">CGPA &gt;= 7.0</option>
               <option value="8">CGPA &gt;= 8.0</option>
               <option value="8.5">CGPA &gt;= 8.5</option>
@@ -130,26 +164,35 @@ const ManageStudents = () => {
             <Button type="submit" size="sm">
               Filter
             </Button>
+            {hasActiveFilters && (
+              <Button type="button" variant="outline" size="sm" onClick={handleReset} title="Reset filters">
+                <RotateCcw className="w-4 h-4" />
+              </Button>
+            )}
           </div>
         </form>
       </div>
 
-      {/* Table */}
+      {/* 3. Table or Empty State */}
       {loading ? (
         <LoadingSpinner text="Querying registered student database..." />
       ) : students.length === 0 ? (
-        <Card className="text-center py-12">
-          <Users className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-800">No students match filter</h3>
-          <p className="text-xs text-slate-500 mt-1">
-            Adjust your criteria to broaden results.
-          </p>
-        </Card>
+        <EmptyState
+          icon={Users}
+          title="No students match criteria"
+          description={
+            hasActiveFilters
+              ? 'No registered candidates match your active search or branch/CGPA filter parameters.'
+              : 'There are currently no student accounts registered in the portal. Students must register through the registration page.'
+          }
+          actionText={hasActiveFilters ? 'Reset Filters' : undefined}
+          onAction={hasActiveFilters ? handleReset : undefined}
+        />
       ) : (
-        <Card noPadding>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
                 <tr>
                   <th className="py-3 px-4 min-w-[200px]">Student & Roll No</th>
                   <th className="py-3 px-4 min-w-[170px]">Department & Batch</th>
@@ -157,18 +200,18 @@ const ManageStudents = () => {
                   <th className="py-3 px-4 text-center min-w-[80px]">Backlogs</th>
                   <th className="py-3 px-4 min-w-[160px]">Skills</th>
                   <th className="py-3 px-4 min-w-[130px]">Placement Status</th>
-                  <th className="py-3 px-4 text-right whitespace-nowrap min-w-[100px]">Resume</th>
+                  <th className="py-3 px-4 text-right whitespace-nowrap min-w-[130px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {students.map((profile) => (
+                {paginatedStudents.map((profile) => (
                   <tr key={profile._id} className="hover:bg-slate-50/70 transition-colors">
                     <td className="py-3.5 px-4 min-w-[200px]">
                       <div className="font-semibold text-slate-900 leading-tight">
                         {profile.user?.name || 'Student Name'}
                       </div>
                       <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1.5">
-                        <span className="font-mono text-blue-700 bg-blue-50 px-1 rounded">
+                        <span className="font-mono text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded font-semibold">
                           {profile.rollNumber}
                         </span>
                         <span>•</span>
@@ -177,7 +220,7 @@ const ManageStudents = () => {
                     </td>
 
                     <td className="py-3.5 px-4 text-slate-600 min-w-[170px]">
-                      <div>{profile.department}</div>
+                      <div className="font-medium text-slate-800">{profile.department}</div>
                       <div className="text-[11px] text-slate-400">Class of {profile.batch}</div>
                     </td>
 
@@ -190,12 +233,12 @@ const ManageStudents = () => {
                     <td className="py-3.5 px-4 text-center min-w-[80px]">
                       <span
                         className={`inline-block px-2 py-0.5 rounded font-medium ${
-                          profile.backlogs > 0
+                          (profile.activeBacklogs || profile.backlogs || 0) > 0
                             ? 'bg-rose-50 text-rose-700 font-semibold'
                             : 'bg-slate-100 text-slate-600'
                         }`}
                       >
-                        {profile.backlogs}
+                        {profile.activeBacklogs || profile.backlogs || 0}
                       </span>
                     </td>
 
@@ -210,7 +253,7 @@ const ManageStudents = () => {
                           </span>
                         ))}
                         {profile.skills?.length > 3 && (
-                          <span className="text-[10px] text-slate-400">
+                          <span className="text-[10px] text-slate-400 font-medium">
                             +{profile.skills.length - 3} more
                           </span>
                         )}
@@ -224,34 +267,62 @@ const ManageStudents = () => {
                       >
                         {profile.placementStatus === 'Placed'
                           ? `Placed @ ${profile.placedCompany?.name || 'Recruiter'}`
-                          : 'Not Placed'}
+                          : 'Seeking Placement'}
                       </Badge>
                     </td>
 
-                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[100px]">
-                      {profile.resumeUrl ? (
-                        <a
-                          href={profile.resumeUrl}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100 transition-colors"
+                    <td className="py-3.5 px-4 text-right whitespace-nowrap min-w-[130px]">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          icon={Eye}
+                          onClick={() => openStudentModal(profile.user?._id || profile.user)}
+                          title="Inspect Student Profile"
                         >
-                          CV <ExternalLink className="w-3 h-3" />
-                        </a>
-                      ) : (
-                        <span className="text-slate-400 text-[11px]">No CV</span>
-                      )}
+                          Profile
+                        </Button>
+                        {profile.resumeUrl && (
+                          <a
+                            href={profile.resumeUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100 transition-colors text-xs"
+                            title="Download Resume"
+                          >
+                            CV <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        </Card>
+
+          {/* Pagination Controls */}
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalCount={totalCount}
+            pageSize={pageSize}
+            onPageChange={(p) => setPage(p)}
+          />
+        </div>
       )}
+
+      {/* Student Profile Inspection Modal */}
+      <StudentProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => {
+          setIsProfileModalOpen(false);
+          setSelectedStudentId(null);
+        }}
+        studentId={selectedStudentId}
+      />
     </div>
   );
 };
 
 export default ManageStudents;
-

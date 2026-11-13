@@ -35,6 +35,8 @@ import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
 import Badge from '../../components/common/Badge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import PageHeader from '../../components/common/PageHeader';
+import { useToast } from '../../context/ToastContext';
 
 const DEPARTMENTS = [
   'Computer Science',
@@ -66,6 +68,7 @@ const COMMON_SKILLS = [
 ];
 
 const StudentProfile = () => {
+  const toast = useToast();
   const { user, updateUserProfile } = useAuth();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -237,11 +240,13 @@ const StudentProfile = () => {
       setCompletion(res.completion);
       updateUserProfile(res.profile);
       setIsEditing(false);
+      toast.success('Academic and personal records saved successfully!');
       setNotification({
         type: 'success',
         text: 'Academic and personal records saved successfully!',
       });
     } catch (err) {
+      toast.error(err.message || 'Failed to update profile.');
       setNotification({
         type: 'error',
         text: err.message || 'Failed to update profile.',
@@ -256,6 +261,7 @@ const StudentProfile = () => {
     if (!file) return;
 
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      toast.error('Only PDF files (.pdf) are accepted for resumes.');
       setNotification({
         type: 'error',
         text: 'Invalid file format. Only PDF files (.pdf) are accepted for resumes.',
@@ -265,6 +271,7 @@ const StudentProfile = () => {
     }
 
     if (file.size > 5 * 1024 * 1024) {
+      toast.error('Resume file size must be less than 5 MB.');
       setNotification({
         type: 'error',
         text: 'File is too large. Resume file size must be less than 5 MB.',
@@ -290,11 +297,13 @@ const StudentProfile = () => {
       if (res.completion) {
         setCompletion(res.completion);
       }
+      toast.success('Resume PDF uploaded and verified successfully!');
       setNotification({
         type: 'success',
         text: 'Resume PDF uploaded and verified successfully!',
       });
     } catch (err) {
+      toast.error(err.message || 'Failed to upload resume document.');
       setNotification({
         type: 'error',
         text: err.message || 'Failed to upload resume document.',
@@ -311,6 +320,7 @@ const StudentProfile = () => {
 
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
+      toast.error('Please choose an image file (JPG, PNG, WebP).');
       setNotification({
         type: 'error',
         text: 'Please choose an image file (JPG, PNG, WebP).',
@@ -320,6 +330,7 @@ const StudentProfile = () => {
     }
 
     if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size must be smaller than 2 MB.');
       setNotification({
         type: 'error',
         text: 'Image size must be smaller than 2 MB.',
@@ -336,11 +347,13 @@ const StudentProfile = () => {
 
       const res = await studentService.uploadAvatar(data);
       setProfile((prev) => ({ ...prev, profilePhoto: res.profilePhoto }));
+      toast.success('Profile photo updated successfully!');
       setNotification({
         type: 'success',
         text: 'Profile photo updated successfully!',
       });
     } catch (err) {
+      toast.error(err.message || 'Failed to upload profile photo.');
       setNotification({
         type: 'error',
         text: err.message || 'Failed to upload profile photo.',
@@ -362,7 +375,9 @@ const StudentProfile = () => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
+      toast.success('Resume downloaded successfully.');
     } catch (err) {
+      toast.error('Could not download resume.');
       setNotification({
         type: 'error',
         text: 'Could not download resume. Please verify the file is available.',
@@ -385,6 +400,22 @@ const StudentProfile = () => {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
+      <PageHeader
+        category="Student Profile"
+        title="Academic & Placement Profile"
+        subtitle="Manage verified student records, contact details, academic percentages, backlog declarations, and resume"
+        badge={`${completion.percentage || 0}% Complete`}
+        actions={
+          <Button
+            size="sm"
+            variant={isEditing ? 'outline' : 'primary'}
+            icon={isEditing ? X : Edit3}
+            onClick={() => setIsEditing(!isEditing)}
+          >
+            {isEditing ? 'Cancel Editing' : 'Edit Profile'}
+          </Button>
+        }
+      />
       {/* Top Notification */}
       {notification && (
         <Alert

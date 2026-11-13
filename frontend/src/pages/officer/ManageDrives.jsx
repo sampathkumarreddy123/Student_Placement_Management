@@ -31,6 +31,9 @@ import Input from '../../components/common/Input';
 import Modal from '../../components/common/Modal';
 import Alert from '../../components/common/Alert';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import PageHeader from '../../components/common/PageHeader';
+import EmptyState from '../../components/common/EmptyState';
+import { useToast } from '../../context/ToastContext';
 import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters';
 
 const ALL_DEPTS = [
@@ -56,6 +59,7 @@ const DEFAULT_ROUNDS = [
 ];
 
 const ManageDrives = () => {
+  const toast = useToast();
   const [searchParams] = useSearchParams();
   const [drives, setDrives] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -297,9 +301,11 @@ const ManageDrives = () => {
 
       if (editingDriveId) {
         await driveService.updateDrive(editingDriveId, payload);
+        toast.success('Placement drive updated successfully!');
         setActionAlert({ type: 'success', text: 'Placement drive updated successfully!' });
       } else {
         await driveService.createDrive(payload);
+        toast.success(`Placement drive created as "${form.status}"!`);
         setActionAlert({
           type: 'success',
           text: `Placement drive created successfully as "${form.status}"!`,
@@ -309,9 +315,11 @@ const ManageDrives = () => {
       setIsModalOpen(false);
       await fetchData();
     } catch (err) {
+      const msg = err.response?.data?.message || err.message || 'Operation failed.';
+      toast.error(msg);
       setActionAlert({
         type: 'error',
-        text: err.response?.data?.message || err.message || 'Operation failed.',
+        text: msg,
       });
     } finally {
       setSaving(false);
@@ -323,15 +331,18 @@ const ManageDrives = () => {
     try {
       setActionAlert(null);
       await driveService.publishDrive(drive._id);
+      toast.success(`Drive "${drive.title}" is now Published and live!`);
       setActionAlert({
         type: 'success',
         text: `Drive "${drive.title}" is now Published and live for students!`,
       });
       await fetchData();
     } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to publish drive.';
+      toast.error(msg);
       setActionAlert({
         type: 'error',
-        text: err.response?.data?.message || 'Failed to publish drive.',
+        text: msg,
       });
     }
   };
@@ -343,15 +354,18 @@ const ManageDrives = () => {
     try {
       setActionAlert(null);
       await driveService.closeDrive(drive._id);
+      toast.success(`Applications for "${drive.title}" have been closed.`);
       setActionAlert({
         type: 'success',
         text: `Applications for "${drive.title}" have been closed.`,
       });
       await fetchData();
     } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to close drive applications.';
+      toast.error(msg);
       setActionAlert({
         type: 'error',
-        text: err.response?.data?.message || 'Failed to close drive applications.',
+        text: msg,
       });
     }
   };
@@ -363,15 +377,18 @@ const ManageDrives = () => {
     try {
       setActionAlert(null);
       await driveService.archiveDrive(drive._id);
+      toast.success(`Drive "${drive.title}" has been archived as Completed.`);
       setActionAlert({
         type: 'success',
         text: `Drive "${drive.title}" has been archived as Completed.`,
       });
       await fetchData();
     } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to archive drive.';
+      toast.error(msg);
       setActionAlert({
         type: 'error',
-        text: err.response?.data?.message || 'Failed to archive drive.',
+        text: msg,
       });
     }
   };
@@ -384,12 +401,15 @@ const ManageDrives = () => {
     try {
       setActionAlert(null);
       await driveService.deleteDrive(id);
+      toast.success('Drive deleted successfully.');
       setActionAlert({ type: 'success', text: 'Drive deleted successfully.' });
       await fetchData();
     } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to delete drive.';
+      toast.error(msg);
       setActionAlert({
         type: 'error',
-        text: err.response?.data?.message || 'Failed to delete drive.',
+        text: msg,
       });
     }
   };
@@ -422,18 +442,17 @@ const ManageDrives = () => {
   return (
     <div className="space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-slate-900">Placement Drive Management</h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Create, publish, monitor, and close on-campus and virtual hiring drives
-          </p>
-        </div>
-
-        <Button size="sm" icon={Plus} onClick={openCreateModal}>
-          Create Drive
-        </Button>
-      </div>
+      <PageHeader
+        category="Recruitment Campaigns"
+        title="Placement Drive Management"
+        subtitle="Create, publish, monitor, and close on-campus and virtual hiring drives"
+        badge={`${stats.total} Total Drives`}
+        actions={
+          <Button size="sm" icon={Plus} onClick={openCreateModal}>
+            Create Drive
+          </Button>
+        }
+      />
 
       {actionAlert && (
         <Alert
@@ -520,22 +539,19 @@ const ManageDrives = () => {
       {loading ? (
         <LoadingSpinner text="Loading placement drives list..." />
       ) : filteredDrives.length === 0 ? (
-        <Card className="text-center py-12">
-          <Briefcase className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-semibold text-slate-800">No placement drives found</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            {companies.length === 0
+        <EmptyState
+          icon={Briefcase}
+          title="No placement drives found"
+          description={
+            companies.length === 0
               ? 'Please add companies in the Company Management section before scheduling a drive.'
-              : 'Create a new placement drive to begin accepting applications.'}
-          </p>
-          {companies.length > 0 && (
-            <div className="mt-4">
-              <Button size="sm" icon={Plus} onClick={openCreateModal}>
-                Create Drive
-              </Button>
-            </div>
-          )}
-        </Card>
+              : search || statusFilter !== 'All'
+              ? 'No drives match your search and filter criteria.'
+              : 'Create a new placement drive to begin accepting applications.'
+          }
+          actionLabel={companies.length > 0 ? 'Create Placement Drive' : undefined}
+          onAction={companies.length > 0 ? openCreateModal : undefined}
+        />
       ) : (
         <Card noPadding>
           <div className="overflow-x-auto">
