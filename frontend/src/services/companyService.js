@@ -21,9 +21,24 @@ export const companyService = {
     return response.data;
   },
 
-  deleteCompany: async (id) => {
-    const response = await api.delete(`/companies/${id}`);
+  uploadLogo: async (id, formData) => {
+    const response = await api.post(`/companies/${id}/logo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
+
+  deleteCompany: async (id, archive = false) => {
+    const response = await api.delete(`/companies/${id}`, {
+      params: archive ? { archive: 'true' } : {},
+    });
+    return response.data;
+  },
+
+  toggleArchive: async (id) => {
+    const response = await api.patch(`/companies/${id}/archive`);
     return response.data;
   },
 };
-

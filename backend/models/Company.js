@@ -48,12 +48,18 @@ const companySchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    isArchived: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
   }
 );
 
+// Index for search optimization
+companySchema.index({ name: 'text', industry: 'text', location: 'text' });
+
 const Company = mongoose.model('Company', companySchema);
 export default Company;
-

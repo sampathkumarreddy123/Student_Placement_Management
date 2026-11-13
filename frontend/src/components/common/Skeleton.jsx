@@ -81,3 +81,4 @@ export const TableSkeleton = () => {
 };
 
 export default Skeleton;
+
