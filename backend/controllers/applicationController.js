@@ -5,6 +5,10 @@ import Application from '../models/Application.js';
 import PlacementDrive from '../models/PlacementDrive.js';
 import StudentProfile from '../models/StudentProfile.js';
 import { checkEligibility } from '../services/eligibilityService.js';
+import {
+  notifyOnApplicationSubmitted,
+  notifyOnApplicationStatusChange,
+} from '../services/notificationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -149,6 +153,11 @@ export const applyForDrive = async (req, res, next) => {
         },
       ],
     });
+
+    // Notify Student and Placement Officers
+    notifyOnApplicationSubmitted(application, req.user, drive, drive.company).catch((err) =>
+      console.error('Failed to dispatch application notifications:', err)
+    );
 
     res.status(201).json({
       success: true,
@@ -618,6 +627,18 @@ export const updateApplicationStatus = async (req, res, next) => {
     }
 
     await application.populate('statusHistory.updatedBy', 'name email');
+
+    // Notify student of selection/shortlisting/rejection/status change
+    if (previousStatus !== newStatus) {
+      notifyOnApplicationStatusChange(
+        application,
+        previousStatus,
+        newStatus,
+        selectionRemarks || officerNotes || feedback || ''
+      ).catch((err) =>
+        console.error('Failed to dispatch status change notification:', err)
+      );
+    }
 
     res.status(200).json({
       success: true,

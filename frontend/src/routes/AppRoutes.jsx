@@ -28,6 +28,7 @@ import ManageDrives from '../pages/officer/ManageDrives';
 import ManageCompanies from '../pages/officer/ManageCompanies';
 import ManageStudents from '../pages/officer/ManageStudents';
 import ManageApplications from '../pages/officer/ManageApplications';
+import NotificationsPage from '../pages/NotificationsPage';
 
 // Hook
 import { useAuth } from '../hooks/useAuth';
@@ -93,6 +94,22 @@ const AppRoutes = () => {
         }
       >
         <Route index element={<DriveDetails />} />
+      </Route>
+
+      {/* Notifications Route - works for both Student and Officer */}
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            {user?.role === 'officer' ? (
+              <OfficerLayout />
+            ) : (
+              <StudentLayout />
+            )}
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<NotificationsPage />} />
       </Route>
 
       {/* 404 Catch-All */}

@@ -9,6 +9,7 @@ import {
   Users,
   CheckCircle,
   X,
+  Bell,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -20,6 +21,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { label: 'Placement Drives', to: '/student/drives', icon: Briefcase },
     { label: 'My Applications', to: '/student/applications', icon: FileText },
     { label: 'Student Profile', to: '/student/profile', icon: User },
+    { label: 'Notifications', to: '/notifications', icon: Bell },
   ];
 
   const officerLinks = [
@@ -28,6 +30,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { label: 'Companies', to: '/officer/companies', icon: Building2 },
     { label: 'Student Database', to: '/officer/students', icon: Users },
     { label: 'Applications & Results', to: '/officer/applications', icon: CheckCircle },
+    { label: 'Notifications', to: '/notifications', icon: Bell },
   ];
 
   const links = isOfficer ? officerLinks : studentLinks;

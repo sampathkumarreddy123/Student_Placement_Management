@@ -4,6 +4,7 @@ import Company from '../models/Company.js';
 import StudentProfile from '../models/StudentProfile.js';
 import Application from '../models/Application.js';
 import { checkEligibility } from '../services/eligibilityService.js';
+import { notifyStudentsOnDrivePublished } from '../services/notificationService.js';
 
 // @desc    Get all placement drives with eligibility status if student
 // @route   GET /api/drives
@@ -357,6 +358,12 @@ export const createDrive = async (req, res, next) => {
 
     const populatedDrive = await PlacementDrive.findById(drive._id).populate('company');
 
+    if (drive.status === 'Published') {
+      notifyStudentsOnDrivePublished(populatedDrive).catch((err) =>
+        console.error('Failed to notify students on drive creation:', err)
+      );
+    }
+
     res.status(201).json({
       success: true,
       message: `Placement drive "${drive.title}" created successfully as ${drive.status}`,
@@ -444,6 +451,12 @@ export const updateDrive = async (req, res, next) => {
       runValidators: true,
     }).populate('company');
 
+    if (existing.status !== 'Published' && drive.status === 'Published') {
+      notifyStudentsOnDrivePublished(drive).catch((err) =>
+        console.error('Failed to notify students on updateDrive publish:', err)
+      );
+    }
+
     res.status(200).json({
       success: true,
       message: 'Placement drive updated successfully',
@@ -471,6 +484,10 @@ export const publishDrive = async (req, res, next) => {
     await drive.save();
 
     const populated = await PlacementDrive.findById(drive._id).populate('company');
+
+    notifyStudentsOnDrivePublished(populated).catch((err) =>
+      console.error('Failed to notify students on publishDrive:', err)
+    );
 
     res.status(200).json({
       success: true,

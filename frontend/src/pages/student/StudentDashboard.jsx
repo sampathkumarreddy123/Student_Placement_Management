@@ -23,6 +23,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { driveService } from '../../services/driveService';
 import { applicationService } from '../../services/applicationService';
 import { studentService } from '../../services/studentService';
+import { notificationService } from '../../services/notificationService';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Badge from '../../components/common/Badge';
@@ -48,21 +49,27 @@ const StudentDashboard = () => {
 
   // Notification Drawer / Popover
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [readNotifications, setReadNotifications] = useState(new Set());
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [drivesRes, appsRes, profileRes] = await Promise.all([
+      const [drivesRes, appsRes, profileRes, notifsRes] = await Promise.all([
         driveService.getAllDrives(),
         applicationService.getMyApplications(),
         studentService.getMyProfile(),
+        notificationService.getNotifications({ limit: 6 }).catch(() => ({ notifications: [], unreadCount: 0 })),
       ]);
 
       setDrives(drivesRes.drives || []);
       setApplications(appsRes.applications || []);
       if (profileRes.completion) {
         setProfileCompletion(profileRes.completion);
+      }
+      if (notifsRes) {
+        setNotifications(notifsRes.notifications || []);
+        setUnreadCount(notifsRes.unreadCount || 0);
       }
     } catch (err) {
       console.error('Failed to load dashboard data:', err);
@@ -91,77 +98,30 @@ const StudentDashboard = () => {
     fetchDashboardData();
   };
 
-  // Compute live notifications dynamically from MongoDB data
-  const notifications = useMemo(() => {
-    const list = [];
-    const now = new Date();
-
-    // 1. Applications with positive statuses or officer notes
-    applications.forEach((app) => {
-      const companyName = app.drive?.company?.name || 'Company';
-      if (app.status === 'Selected') {
-        list.push({
-          id: `app-selected-${app._id}`,
-          title: 'Offer Extended! 🎉',
-          message: `Congratulations! You have been selected by ${companyName} for the role of ${app.drive?.jobRole || 'Engineer'}.`,
-          type: 'success',
-          time: app.appliedAt,
-          link: '/student/applications',
-        });
-      } else if (app.status === 'Shortlisted' || app.status === 'Interviewing') {
-        list.push({
-          id: `app-progress-${app._id}`,
-          title: `Application ${app.status}`,
-          message: `${companyName} has moved your application to Round ${app.currentRound}.${
-            app.officerNotes ? ` Note: "${app.officerNotes}"` : ''
-          }`,
-          type: 'info',
-          time: app.appliedAt,
-          link: '/student/applications',
-        });
+  const handleNotificationItemClick = async (item) => {
+    try {
+      if (!item.isRead) {
+        await notificationService.markAsRead(item._id);
+        setNotifications((prev) =>
+          prev.map((n) => (n._id === item._id ? { ...n, isRead: true } : n))
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
       }
-    });
-
-    // 2. Upcoming drive registration deadlines (within 3 days)
-    drives.forEach((drive) => {
-      if (drive.registrationDeadline && !drive.userApplicationStatus) {
-        const deadline = new Date(drive.registrationDeadline);
-        const diffDays = Math.ceil((deadline - now) / (1000 * 60 * 60 * 24));
-        if (diffDays >= 0 && diffDays <= 3) {
-          list.push({
-            id: `drive-deadline-${drive._id}`,
-            title: 'Drive Deadline Approaching',
-            message: `Registration for ${drive.company?.name || 'Drive'} (${drive.jobRole}) closes in ${
-              diffDays === 0 ? 'a few hours' : `${diffDays} day(s)`
-            }.`,
-            type: 'warning',
-            time: drive.createdAt,
-            link: `/drives/${drive._id}`,
-          });
-        }
-      }
-    });
-
-    // 3. Profile completion notification if < 100%
-    if (profileCompletion.percentage < 100) {
-      list.push({
-        id: 'profile-completion-notice',
-        title: 'Complete Your Academic Profile',
-        message: `Your profile is currently ${profileCompletion.percentage}% complete. Finish remaining sections to ensure full company eligibility.`,
-        type: 'info',
-        time: new Date(),
-        link: '/student/profile',
-      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsNotificationsOpen(false);
     }
+  };
 
-    return list;
-  }, [applications, drives, profileCompletion]);
-
-  const unreadCount = notifications.filter((n) => !readNotifications.has(n.id)).length;
-
-  const markAllRead = () => {
-    const allIds = new Set(notifications.map((n) => n.id));
-    setReadNotifications(allIds);
+  const markAllRead = async () => {
+    try {
+      await notificationService.markAllAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Dynamic Statistics
@@ -277,23 +237,20 @@ const StudentDashboard = () => {
                     ) : (
                       notifications.map((item) => (
                         <div
-                          key={item.id}
+                          key={item._id}
                           className={`p-3.5 hover:bg-slate-50 transition-colors ${
-                            readNotifications.has(item.id) ? 'opacity-70' : 'bg-blue-50/20'
+                            item.isRead ? 'opacity-70' : 'bg-blue-50/20'
                           }`}
                         >
                           <Link
-                            to={item.link}
-                            onClick={() => {
-                              setReadNotifications((prev) => new Set(prev).add(item.id));
-                              setIsNotificationsOpen(false);
-                            }}
+                            to={item.link || '/student/applications'}
+                            onClick={() => handleNotificationItemClick(item)}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <h4 className="text-xs font-semibold text-slate-900">
                                 {item.title}
                               </h4>
-                              {!readNotifications.has(item.id) && (
+                              {!item.isRead && (
                                 <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 mt-1" />
                               )}
                             </div>
@@ -304,6 +261,17 @@ const StudentDashboard = () => {
                         </div>
                       ))
                     )}
+                  </div>
+
+                  <div className="p-2.5 bg-slate-50 border-t border-slate-100 text-center">
+                    <Link
+                      to="/notifications"
+                      onClick={() => setIsNotificationsOpen(false)}
+                      className="text-xs text-blue-600 font-semibold hover:underline inline-flex items-center gap-1"
+                    >
+                      <span>View All Notifications</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
                   </div>
                 </div>
               </>
