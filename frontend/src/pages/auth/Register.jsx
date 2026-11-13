@@ -169,7 +169,7 @@ const Register = () => {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3.5">
+      <form onSubmit={handleSubmit} className="space-y-3.5" autoComplete="off">
         <Input
           label="Full Legal Name"
           id="name"
@@ -188,12 +188,13 @@ const Register = () => {
             id="email"
             name="email"
             type="email"
-            placeholder="student@college.edu"
+            placeholder=""
             icon={Mail}
             value={formData.email}
             onChange={handleChange}
             error={fieldErrors.email}
             required
+            autoComplete="off"
           />
 
           <Input
@@ -280,13 +281,14 @@ const Register = () => {
             id="password"
             name="password"
             type="password"
-            placeholder="••••••••"
+            placeholder=""
             icon={Lock}
             showPasswordToggle
             value={formData.password}
             onChange={handleChange}
             error={fieldErrors.password}
             required
+            autoComplete="new-password"
           />
 
           <Input
@@ -294,13 +296,14 @@ const Register = () => {
             id="confirmPassword"
             name="confirmPassword"
             type="password"
-            placeholder="••••••••"
+            placeholder=""
             icon={Lock}
             showPasswordToggle
             value={formData.confirmPassword}
             onChange={handleChange}
             error={fieldErrors.confirmPassword}
             required
+            autoComplete="new-password"
           />
         </div>
 

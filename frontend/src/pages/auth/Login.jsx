@@ -158,13 +158,13 @@ const Login = () => {
         />
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
         <Input
           label="College Email Address"
           id="email"
           name="email"
           type="email"
-          placeholder="your.email@college.edu"
+          placeholder=""
           icon={Mail}
           value={email}
           onChange={(e) => {
@@ -173,7 +173,7 @@ const Login = () => {
           }}
           error={fieldErrors.email}
           required
-          autoComplete="email"
+          autoComplete="off"
         />
 
         <Input
@@ -181,7 +181,7 @@ const Login = () => {
           id="password"
           name="password"
           type="password"
-          placeholder="••••••••"
+          placeholder=""
           icon={Lock}
           showPasswordToggle
           value={password}
@@ -191,7 +191,7 @@ const Login = () => {
           }}
           error={fieldErrors.password}
           required
-          autoComplete="current-password"
+          autoComplete="new-password"
         />
 
         {/* Remember Session checkbox */}
