@@ -64,20 +64,66 @@ export const checkEligibility = (profile, drive) => {
     };
   }
 
+  // Normalize student profile academic fields (supporting both flat MongoDB model and nested schemas)
+  const studentCgpa =
+    profile.cgpa !== undefined && profile.cgpa !== null
+      ? Number(profile.cgpa)
+      : profile.academics?.currentCgpa !== undefined && profile.academics?.currentCgpa !== null
+      ? Number(profile.academics.currentCgpa)
+      : 0;
+
+  const studentDept = profile.department || profile.academics?.department || '';
+  const studentBatch =
+    profile.batch !== undefined && profile.batch !== null
+      ? Number(profile.batch)
+      : profile.academics?.graduationYear !== undefined && profile.academics?.graduationYear !== null
+      ? Number(profile.academics.graduationYear)
+      : null;
+
+  const studentTenth =
+    profile.tenthPercentage !== undefined && profile.tenthPercentage !== null
+      ? Number(profile.tenthPercentage)
+      : profile.academics?.tenthPercentage !== undefined && profile.academics?.tenthPercentage !== null
+      ? Number(profile.academics.tenthPercentage)
+      : 0;
+
+  const studentTwelfth =
+    profile.twelfthPercentage !== undefined && profile.twelfthPercentage !== null
+      ? Number(profile.twelfthPercentage)
+      : profile.academics?.intermediatePercentage !== undefined && profile.academics?.intermediatePercentage !== null
+      ? Number(profile.academics.intermediatePercentage)
+      : 0;
+
+  const studentActiveBacklogs =
+    profile.activeBacklogs !== undefined && profile.activeBacklogs !== null
+      ? Number(profile.activeBacklogs)
+      : profile.academics?.activeBacklogs !== undefined && profile.academics?.activeBacklogs !== null
+      ? Number(profile.academics.activeBacklogs)
+      : profile.backlogs !== undefined && profile.backlogs !== null
+      ? Number(profile.backlogs)
+      : 0;
+
+  const studentTotalBacklogs =
+    profile.totalBacklogs !== undefined && profile.totalBacklogs !== null
+      ? Number(profile.totalBacklogs)
+      : profile.academics?.totalBacklogs !== undefined && profile.academics?.totalBacklogs !== null
+      ? Number(profile.academics.totalBacklogs)
+      : studentActiveBacklogs;
+
   // Check for incomplete profile fields
-  if (profile.cgpa === undefined || profile.cgpa === null || profile.cgpa <= 0) {
+  if (studentCgpa <= 0) {
     missingProfileFields.push('CGPA');
   }
-  if (!profile.department) {
+  if (!studentDept) {
     missingProfileFields.push('Department / Branch');
   }
-  if (!profile.batch) {
+  if (!studentBatch) {
     missingProfileFields.push('Graduation Year / Batch');
   }
-  if (!profile.tenthPercentage || profile.tenthPercentage <= 0) {
+  if (studentTenth <= 0) {
     missingProfileFields.push('10th Standard Percentage');
   }
-  if (!profile.twelfthPercentage || profile.twelfthPercentage <= 0) {
+  if (studentTwelfth <= 0) {
     missingProfileFields.push('12th / Intermediate / Diploma Percentage');
   }
 
@@ -87,7 +133,6 @@ export const checkEligibility = (profile, drive) => {
   // CONDITION 1: MINIMUM CGPA
   // ==========================================
   const minCgpa = eligibilityCriteria?.minCgpa !== undefined ? Number(eligibilityCriteria.minCgpa) : 0;
-  const studentCgpa = profile.cgpa !== undefined && profile.cgpa !== null ? Number(profile.cgpa) : 0;
   const cgpaPass = studentCgpa >= minCgpa;
 
   criteriaDetails.push({
@@ -109,7 +154,6 @@ export const checkEligibility = (profile, drive) => {
   // CONDITION 2: MINIMUM 10TH PERCENTAGE
   // ==========================================
   const minTenth = eligibilityCriteria?.minTenthPercentage !== undefined ? Number(eligibilityCriteria.minTenthPercentage) : 0;
-  const studentTenth = profile.tenthPercentage !== undefined && profile.tenthPercentage !== null ? Number(profile.tenthPercentage) : 0;
   const tenthPass = minTenth === 0 || studentTenth >= minTenth;
 
   criteriaDetails.push({
@@ -130,8 +174,12 @@ export const checkEligibility = (profile, drive) => {
   // ==========================================
   // CONDITION 3: MINIMUM INTERMEDIATE / DIPLOMA PERCENTAGE
   // ==========================================
-  const minTwelfth = eligibilityCriteria?.minTwelfthPercentage !== undefined ? Number(eligibilityCriteria.minTwelfthPercentage) : 0;
-  const studentTwelfth = profile.twelfthPercentage !== undefined && profile.twelfthPercentage !== null ? Number(profile.twelfthPercentage) : 0;
+  const minTwelfth =
+    eligibilityCriteria?.minTwelfthPercentage !== undefined
+      ? Number(eligibilityCriteria.minTwelfthPercentage)
+      : eligibilityCriteria?.minIntermediatePercentage !== undefined
+      ? Number(eligibilityCriteria.minIntermediatePercentage)
+      : 0;
   const twelfthPass = minTwelfth === 0 || studentTwelfth >= minTwelfth;
 
   criteriaDetails.push({
@@ -153,7 +201,6 @@ export const checkEligibility = (profile, drive) => {
   // CONDITION 4: ALLOWED DEPARTMENT
   // ==========================================
   const allowedDepts = eligibilityCriteria?.allowedDepartments || [];
-  const studentDept = profile.department || '';
   const deptPass = allowedDepts.length === 0 || isDepartmentAllowed(studentDept, allowedDepts);
 
   criteriaDetails.push({
@@ -174,8 +221,12 @@ export const checkEligibility = (profile, drive) => {
   // ==========================================
   // CONDITION 5: GRADUATION YEAR
   // ==========================================
-  const requiredBatch = eligibilityCriteria?.batch ? Number(eligibilityCriteria.batch) : null;
-  const studentBatch = profile.batch ? Number(profile.batch) : null;
+  const requiredBatch =
+    eligibilityCriteria?.batch !== undefined && eligibilityCriteria.batch !== null
+      ? Number(eligibilityCriteria.batch)
+      : eligibilityCriteria?.graduationYear !== undefined && eligibilityCriteria.graduationYear !== null
+      ? Number(eligibilityCriteria.graduationYear)
+      : null;
   const batchPass = !requiredBatch || !studentBatch || studentBatch === requiredBatch;
 
   criteriaDetails.push({
@@ -203,28 +254,21 @@ export const checkEligibility = (profile, drive) => {
       ? Number(eligibilityCriteria.maxBacklogs)
       : 0;
 
-  const studentActive =
-    profile.activeBacklogs !== undefined && profile.activeBacklogs !== null
-      ? Number(profile.activeBacklogs)
-      : profile.backlogs !== undefined && profile.backlogs !== null
-      ? Number(profile.backlogs)
-      : 0;
-
-  const activePass = studentActive <= maxActive;
+  const activePass = studentActiveBacklogs <= maxActive;
 
   criteriaDetails.push({
     conditionNumber: 6,
     criterion: 'Maximum Active Backlogs',
     required: `${maxActive} active backlog${maxActive === 1 ? '' : 's'} max`,
-    actual: `${studentActive} active`,
+    actual: `${studentActiveBacklogs} active`,
     status: activePass ? 'PASS' : 'FAIL',
     reason: activePass
-      ? `Your active backlogs (${studentActive}) satisfy the limit (max ${maxActive}).`
-      : `You currently have ${studentActive} active backlog(s), which exceeds the limit of ${maxActive}.`,
+      ? `Your active backlogs (${studentActiveBacklogs}) satisfy the limit (max ${maxActive}).`
+      : `You currently have ${studentActiveBacklogs} active backlog(s), which exceeds the limit of ${maxActive}.`,
   });
 
   if (!activePass) {
-    reasons.push(`Maximum allowed active backlogs is ${maxActive}, but you currently have ${studentActive}.`);
+    reasons.push(`Maximum allowed active backlogs is ${maxActive}, but you currently have ${studentActiveBacklogs}.`);
   }
 
   // ==========================================
@@ -235,26 +279,21 @@ export const checkEligibility = (profile, drive) => {
       ? Number(eligibilityCriteria.maxTotalBacklogs)
       : maxActive;
 
-  const studentTotal =
-    profile.totalBacklogs !== undefined && profile.totalBacklogs !== null
-      ? Number(profile.totalBacklogs)
-      : studentActive;
-
-  const totalPass = studentTotal <= maxTotal;
+  const totalPass = studentTotalBacklogs <= maxTotal;
 
   criteriaDetails.push({
     conditionNumber: 7,
-    criterion: 'Maximum Total Historical Backlogs',
+    criterion: 'Maximum Total Backlogs',
     required: `${maxTotal} total backlog${maxTotal === 1 ? '' : 's'} max`,
-    actual: `${studentTotal} total`,
+    actual: `${studentTotalBacklogs} total`,
     status: totalPass ? 'PASS' : 'FAIL',
     reason: totalPass
-      ? `Your total historical backlogs (${studentTotal}) satisfy the limit (max ${maxTotal}).`
-      : `You have ${studentTotal} total historical backlog(s), which exceeds the limit of ${maxTotal}.`,
+      ? `Your total backlogs history (${studentTotalBacklogs}) is within the allowable limit (max ${maxTotal}).`
+      : `Your cumulative backlog count is ${studentTotalBacklogs}, exceeding the maximum of ${maxTotal}.`,
   });
 
   if (!totalPass) {
-    reasons.push(`Maximum total historical backlogs allowed is ${maxTotal}, but you have ${studentTotal}.`);
+    reasons.push(`Maximum allowed cumulative backlogs is ${maxTotal}, but your total is ${studentTotalBacklogs}.`);
   }
 
   // ==========================================

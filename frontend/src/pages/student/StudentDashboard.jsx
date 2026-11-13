@@ -28,6 +28,7 @@ import Button from '../../components/common/Button';
 import Badge from '../../components/common/Badge';
 import Alert from '../../components/common/Alert';
 import DriveCard from '../../components/drives/DriveCard';
+import ApplyConfirmModal from '../../components/drives/ApplyConfirmModal';
 import {
   StatsCardSkeleton,
   DriveCardSkeleton,
@@ -42,7 +43,8 @@ const StudentDashboard = () => {
   const [profileCompletion, setProfileCompletion] = useState({ percentage: 0, items: [] });
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState(null);
-  const [applyingDriveId, setApplyingDriveId] = useState(null);
+  const [selectedDriveForApply, setSelectedDriveForApply] = useState(null);
+  const [isApplyModalOpen, setIsApplyModalOpen] = useState(false);
 
   // Notification Drawer / Popover
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -73,21 +75,20 @@ const StudentDashboard = () => {
     fetchDashboardData();
   }, []);
 
-  const handleApply = async (driveId) => {
-    try {
-      setApplyingDriveId(driveId);
-      setActionMessage(null);
-      const res = await applicationService.applyForDrive(driveId);
-      setActionMessage({ type: 'success', text: res.message });
-      await fetchDashboardData();
-    } catch (err) {
-      setActionMessage({
-        type: 'error',
-        text: err.message || 'Failed to submit application. Check eligibility requirements.',
-      });
-    } finally {
-      setApplyingDriveId(null);
+  const handleApplyClick = (driveId) => {
+    const d = drives.find((item) => item._id === driveId);
+    if (d) {
+      setSelectedDriveForApply(d);
+      setIsApplyModalOpen(true);
     }
+  };
+
+  const handleApplySuccess = (res) => {
+    setActionMessage({
+      type: 'success',
+      text: res.message || 'Application submitted successfully!',
+    });
+    fetchDashboardData();
   };
 
   // Compute live notifications dynamically from MongoDB data
@@ -451,8 +452,8 @@ const StudentDashboard = () => {
               <DriveCard
                 key={drive._id}
                 drive={drive}
-                onApply={handleApply}
-                applying={applyingDriveId === drive._id}
+                onApply={handleApplyClick}
+                applying={false}
               />
             ))}
           </div>
@@ -590,6 +591,17 @@ const StudentDashboard = () => {
           </Card>
         )}
       </div>
+
+      {/* Placement Application Confirmation Modal */}
+      <ApplyConfirmModal
+        isOpen={isApplyModalOpen}
+        onClose={() => {
+          setIsApplyModalOpen(false);
+          setSelectedDriveForApply(null);
+        }}
+        drive={selectedDriveForApply}
+        onSuccess={handleApplySuccess}
+      />
     </div>
   );
 };

@@ -28,6 +28,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters';
 
 import EligibilityModal from '../../components/drives/EligibilityModal';
+import ApplyConfirmModal from '../../components/drives/ApplyConfirmModal';
 
 const DriveDetails = () => {
   const { id } = useParams();
@@ -38,6 +39,7 @@ const DriveDetails = () => {
   const [applying, setApplying] = useState(false);
   const [actionAlert, setActionAlert] = useState(null);
   const [showEligibilityModal, setShowEligibilityModal] = useState(false);
+  const [showApplyConfirmModal, setShowApplyConfirmModal] = useState(false);
 
   const isOfficer = user?.role === 'officer';
 
@@ -174,7 +176,7 @@ const DriveDetails = () => {
                 size="md"
                 disabled={!drive.isEligible || deadline.isClosed || isClosedStatus}
                 isLoading={applying}
-                onClick={handleApply}
+                onClick={() => setShowApplyConfirmModal(true)}
               >
                 {isClosedStatus
                   ? 'Applications Closed'
@@ -421,8 +423,27 @@ const DriveDetails = () => {
           isOpen={showEligibilityModal}
           onClose={() => setShowEligibilityModal(false)}
           drive={drive}
-          onApply={handleApply}
+          onApply={() => {
+            setShowEligibilityModal(false);
+            setShowApplyConfirmModal(true);
+          }}
           applying={applying}
+        />
+      )}
+
+      {/* Placement Application Confirmation Modal */}
+      {!isOfficer && (
+        <ApplyConfirmModal
+          isOpen={showApplyConfirmModal}
+          onClose={() => setShowApplyConfirmModal(false)}
+          drive={drive}
+          onSuccess={(res) => {
+            setActionAlert({
+              type: 'success',
+              text: res.message || 'Application submitted successfully!',
+            });
+            fetchDetails();
+          }}
         />
       )}
     </div>

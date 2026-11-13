@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import PlacementDrive from '../models/PlacementDrive.js';
 import Company from '../models/Company.js';
 import StudentProfile from '../models/StudentProfile.js';
@@ -9,7 +10,7 @@ import { checkEligibility } from '../services/eligibilityService.js';
 // @access  Private
 export const getDrives = async (req, res, next) => {
   try {
-    const { status, search, minPackage, department } = req.query;
+    const { status, search, minPackage, department, company, jobRole, eligibleOnly } = req.query;
     const filter = {};
 
     // STUDENT VISIBILITY RULE: Students strictly only see Published drives (or ongoing/upcoming legacy)
@@ -23,13 +24,28 @@ export const getDrives = async (req, res, next) => {
       filter.packageLPA = { $gte: Number(minPackage) };
     }
 
-    if (department) {
+    if (department && department !== 'All') {
       filter['eligibilityCriteria.allowedDepartments'] = { $in: [department] };
+    }
+
+    if (company && company !== 'All') {
+      if (mongoose.isValidObjectId(company)) {
+        filter.company = company;
+      }
+    }
+
+    if (jobRole && jobRole !== 'All') {
+      filter.jobRole = { $regex: jobRole, $options: 'i' };
     }
 
     let drives = await PlacementDrive.find(filter)
       .populate('company', 'name industry location website logoUrl')
       .sort({ createdAt: -1, applicationClosingDate: 1 });
+
+    if (company && company !== 'All' && !mongoose.isValidObjectId(company)) {
+      const cLower = company.toLowerCase();
+      drives = drives.filter((d) => d.company?.name?.toLowerCase().includes(cLower));
+    }
 
     if (search) {
       const q = search.toLowerCase();
@@ -51,7 +67,7 @@ export const getDrives = async (req, res, next) => {
       const appMap = new Map();
       userApplications.forEach((app) => appMap.set(app.drive.toString(), app.status));
 
-      const enrichedDrives = drives.map((drive) => {
+      let enrichedDrives = drives.map((drive) => {
         const driveObj = drive.toObject();
         const eligibility = checkEligibility(profile, drive);
 
@@ -66,6 +82,10 @@ export const getDrives = async (req, res, next) => {
           eligibilitySummary: eligibility.summary,
         };
       });
+
+      if (eligibleOnly === 'true' || eligibleOnly === true) {
+        enrichedDrives = enrichedDrives.filter((d) => d.isEligible);
+      }
 
       return res.status(200).json({
         success: true,

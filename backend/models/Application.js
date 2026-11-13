@@ -7,27 +7,64 @@ const applicationSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    studentProfile: {
+    company: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'StudentProfile',
+      ref: 'Company',
+      required: true,
     },
     drive: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'PlacementDrive',
       required: true,
     },
+    studentProfile: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'StudentProfile',
+    },
     appliedAt: {
       type: Date,
       default: Date.now,
     },
+    resumeSnapshot: {
+      resumeUrl: {
+        type: String,
+        default: '',
+      },
+      resumeOriginalName: {
+        type: String,
+        default: '',
+      },
+      resumeSize: {
+        type: Number,
+        default: 0,
+      },
+      studentCgpa: {
+        type: Number,
+      },
+      studentDepartment: {
+        type: String,
+        default: '',
+      },
+      studentRollNumber: {
+        type: String,
+        default: '',
+      },
+      skills: [{
+        type: String,
+      }],
+    },
     status: {
       type: String,
-      enum: ['Applied', 'Shortlisted', 'Interviewing', 'Selected', 'Rejected'],
+      enum: ['Applied', 'Under Review', 'Shortlisted', 'Interviewing', 'Selected', 'Rejected'],
       default: 'Applied',
     },
     currentRound: {
       type: Number,
       default: 1,
+    },
+    selectionRemarks: {
+      type: String,
+      default: '',
     },
     feedback: {
       type: String,
@@ -48,4 +85,5 @@ applicationSchema.index({ student: 1, drive: 1 }, { unique: true });
 
 const Application = mongoose.model('Application', applicationSchema);
 export default Application;
+
 

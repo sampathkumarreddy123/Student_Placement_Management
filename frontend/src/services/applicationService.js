@@ -6,8 +6,13 @@ export const applicationService = {
     return response.data;
   },
 
-  getMyApplications: async () => {
-    const response = await api.get('/applications/my');
+  getMyApplications: async (params = {}) => {
+    const response = await api.get('/applications/my', { params });
+    return response.data;
+  },
+
+  getApplicationById: async (id) => {
+    const response = await api.get(`/applications/${id}`);
     return response.data;
   },
 

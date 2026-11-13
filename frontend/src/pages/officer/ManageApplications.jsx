@@ -21,7 +21,7 @@ import Alert from '../../components/common/Alert';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { formatDate } from '../../utils/formatters';
 
-const STATUS_OPTIONS = ['Applied', 'Shortlisted', 'Interviewing', 'Selected', 'Rejected'];
+const STATUS_OPTIONS = ['Applied', 'Under Review', 'Shortlisted', 'Interviewing', 'Selected', 'Rejected'];
 
 const ManageApplications = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -40,6 +40,7 @@ const ManageApplications = () => {
   const [statusForm, setStatusForm] = useState({
     status: 'Applied',
     currentRound: 1,
+    selectionRemarks: '',
     officerNotes: '',
   });
   const [updating, setUpdating] = useState(false);
@@ -87,6 +88,7 @@ const ManageApplications = () => {
     setStatusForm({
       status: app.status || 'Applied',
       currentRound: app.currentRound || 1,
+      selectionRemarks: app.selectionRemarks || '',
       officerNotes: app.officerNotes || '',
     });
     setIsModalOpen(true);
@@ -277,6 +279,7 @@ const ManageApplications = () => {
               className="w-full h-[38px] rounded-lg border border-slate-200 px-3 bg-white focus:outline-none focus:border-blue-500"
             >
               <option value="Applied">Applied (Initial Submission)</option>
+              <option value="Under Review">Under Review (Evaluating Profile)</option>
               <option value="Shortlisted">Shortlisted (Passed Resume Screening)</option>
               <option value="Interviewing">Interviewing (In Active Assessment Rounds)</option>
               <option value="Selected">Selected (Job Offer Accepted / Placed)</option>
@@ -297,6 +300,19 @@ const ManageApplications = () => {
             value={statusForm.currentRound}
             onChange={(e) => setStatusForm({ ...statusForm, currentRound: e.target.value })}
           />
+
+          <div>
+            <label className="block text-xs font-medium text-slate-700 mb-1.5">
+              Selection Remarks (Official announcement / outcome notes)
+            </label>
+            <textarea
+              rows={2}
+              value={statusForm.selectionRemarks}
+              onChange={(e) => setStatusForm({ ...statusForm, selectionRemarks: e.target.value })}
+              placeholder="e.g. Extended offer letter for SDE-1; Joining date June 2026."
+              className="w-full rounded-lg border border-slate-200 p-2.5 text-xs focus:outline-none focus:border-blue-500 bg-white"
+            />
+          </div>
 
           <div>
             <label className="block text-xs font-medium text-slate-700 mb-1.5">
