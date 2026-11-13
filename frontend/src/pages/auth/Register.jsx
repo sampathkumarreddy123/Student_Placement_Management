@@ -5,12 +5,9 @@ import {
   Lock,
   User,
   Hash,
-  BookOpen,
   GraduationCap,
-  ArrowRight,
-  ShieldAlert,
-  CheckCircle2,
-  Phone,
+  ArrowLeft,
+  UserPlus,
 } from 'lucide-react';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
@@ -32,12 +29,11 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    password: '',
-    confirmPassword: '',
     rollNumber: '',
     department: '',
     graduationYear: '',
-    phone: '',
+    password: '',
+    confirmPassword: '',
   });
 
   const [fieldErrors, setFieldErrors] = useState({});
@@ -109,26 +105,26 @@ const Register = () => {
 
     try {
       setLoading(true);
-      const payload = {
+      await register({
         name: formData.name.trim(),
         email: formData.email.trim(),
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
         rollNumber: formData.rollNumber.trim(),
         department: formData.department,
         graduationYear: Number(formData.graduationYear),
-      };
+        password: formData.password,
+        confirmPassword: formData.confirmPassword,
+      });
 
-      const data = await register(payload);
-      setSuccess('Account created successfully! Redirecting to student dashboard...');
-
+      setSuccess('Account created successfully! Directing to student dashboard...');
       setTimeout(() => {
         navigate('/student/dashboard', { replace: true });
-      }, 700);
+      }, 500);
     } catch (err) {
-      setError(
-        err.message || 'Registration failed. Please review your inputs and try again.'
-      );
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        'Registration failed. Please check your details and try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -136,10 +132,32 @@ const Register = () => {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-xl font-bold text-slate-900">Student Registration</h2>
-        <p className="text-xs text-slate-500 mt-1">
-          Create your verified placement profile to apply for campus hiring drives
+      {/* Header: Logo & Back to Home */}
+      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E2E8F0]">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-[#2563EB] flex items-center justify-center text-white shadow-sm">
+            <GraduationCap className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-[#0F172A] text-sm tracking-tight">
+            CampusPlacement
+          </span>
+        </Link>
+        <Link
+          to="/"
+          className="text-xs font-medium text-[#64748B] hover:text-[#2563EB] inline-flex items-center gap-1 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back to Home
+        </Link>
+      </div>
+
+      {/* Title & Subtitle */}
+      <div className="mb-5">
+        <h2 className="text-lg font-bold text-[#0F172A] tracking-tight">
+          Student Registration
+        </h2>
+        <p className="text-xs text-[#64748B] mt-0.5">
+          Create your student account to apply for recruitment drives
         </p>
       </div>
 
@@ -160,28 +178,22 @@ const Register = () => {
         />
       )}
 
-      {/* Notice about Officer Registration */}
-      <div className="mb-4 p-2.5 bg-slate-50 border border-slate-200 rounded-lg flex items-start gap-2 text-[11px] text-slate-600">
-        <ShieldAlert className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-        <p>
-          Placement Officer accounts are protected and provisioned by the university administration.
-          Officers should <Link to="/login" className="text-blue-600 font-medium underline">sign in here</Link>.
-        </p>
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-3.5" autoComplete="off">
+        {/* Full Name */}
         <Input
-          label="Full Legal Name"
+          label="Full Name"
           id="name"
           name="name"
-          placeholder="Enter your full name"
+          placeholder=""
           icon={User}
           value={formData.name}
           onChange={handleChange}
           error={fieldErrors.name}
           required
+          autoComplete="off"
         />
 
+        {/* College Email & Roll Number */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
             label="College Email"
@@ -201,31 +213,35 @@ const Register = () => {
             label="Roll Number / Student ID"
             id="rollNumber"
             name="rollNumber"
-            placeholder="Enter university roll number"
+            placeholder=""
             icon={Hash}
             value={formData.rollNumber}
             onChange={handleChange}
             error={fieldErrors.rollNumber}
             required
+            autoComplete="off"
           />
         </div>
 
+        {/* Department & Graduation Year */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label
               htmlFor="department"
-              className="block text-xs font-medium text-slate-700 mb-1.5"
+              className="block text-xs font-medium text-[#0F172A] mb-1.5"
             >
-              Academic Department <span className="text-rose-500">*</span>
+              Department <span className="text-rose-500">*</span>
             </label>
             <select
               id="department"
               name="department"
               value={formData.department}
               onChange={handleChange}
-              className="block w-full rounded-lg border border-slate-200 text-xs py-2 px-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white ${
+                fieldErrors.department ? 'border-rose-300' : 'border-[#E2E8F0]'
+              }`}
             >
-              <option value="">Select your Department</option>
+              <option value="">Select Department</option>
               {DEPARTMENTS.map((dept) => (
                 <option key={dept} value={dept}>
                   {dept}
@@ -240,7 +256,7 @@ const Register = () => {
           <div>
             <label
               htmlFor="graduationYear"
-              className="block text-xs font-medium text-slate-700 mb-1.5"
+              className="block text-xs font-medium text-[#0F172A] mb-1.5"
             >
               Graduation Year <span className="text-rose-500">*</span>
             </label>
@@ -249,9 +265,11 @@ const Register = () => {
               name="graduationYear"
               value={formData.graduationYear}
               onChange={handleChange}
-              className="block w-full rounded-lg border border-slate-200 text-xs py-2 px-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
+              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white ${
+                fieldErrors.graduationYear ? 'border-rose-300' : 'border-[#E2E8F0]'
+              }`}
             >
-              <option value="">Select Graduation Year</option>
+              <option value="">Select Year</option>
               {GRADUATION_YEARS.map((yr) => (
                 <option key={yr} value={yr}>
                   Class of {yr}
@@ -264,20 +282,10 @@ const Register = () => {
           </div>
         </div>
 
-        <Input
-          label="Contact Phone Number (Optional)"
-          id="phone"
-          name="phone"
-          type="tel"
-          placeholder="Enter 10-digit phone number"
-          icon={Phone}
-          value={formData.phone}
-          onChange={handleChange}
-        />
-
+        {/* Password & Confirm Password */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
-            label="Password (min 6 characters)"
+            label="Password"
             id="password"
             name="password"
             type="password"
@@ -287,6 +295,7 @@ const Register = () => {
             value={formData.password}
             onChange={handleChange}
             error={fieldErrors.password}
+            helperText="Minimum 6 characters"
             required
             autoComplete="new-password"
           />
@@ -309,22 +318,23 @@ const Register = () => {
 
         <Button
           type="submit"
-          className="w-full mt-4"
+          className="w-full mt-3"
           isLoading={loading}
-          icon={ArrowRight}
+          icon={UserPlus}
         >
-          {loading ? 'Creating Student Profile...' : 'Complete Student Registration'}
+          {loading ? 'Creating Account...' : 'Create Account'}
         </Button>
       </form>
 
-      <div className="mt-6 pt-4 border-t border-slate-100 text-center">
-        <p className="text-xs text-slate-600">
-          Already registered?{' '}
+      {/* Footer link */}
+      <div className="mt-5 pt-4 border-t border-[#E2E8F0] text-center text-xs">
+        <p className="text-[#64748B]">
+          Already have an account?{' '}
           <Link
-            to="/login"
-            className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+            to="/student/login"
+            className="font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
           >
-            Sign in here
+            Sign In
           </Link>
         </p>
       </div>

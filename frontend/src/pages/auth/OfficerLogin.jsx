@@ -4,23 +4,19 @@ import {
   ShieldCheck,
   Lock,
   Mail,
-  ArrowRight,
-  AlertCircle,
-  CheckCircle2,
-  Building2,
+  ArrowLeft,
   GraduationCap,
   LogOut,
+  AlertCircle,
 } from 'lucide-react';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
-import Badge from '../../components/common/Badge';
 import { useAuth } from '../../hooks/useAuth';
 
 const OfficerLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -66,10 +62,9 @@ const OfficerLogin = () => {
 
     try {
       setLoading(true);
-      const data = await officerLogin({
+      await officerLogin({
         email: email.trim(),
         password,
-        rememberMe,
       });
 
       setSuccess('Officer credentials verified. Directing to Placement Officer Dashboard...');
@@ -92,15 +87,15 @@ const OfficerLogin = () => {
   // If currently authenticated as student, prompt to sign out first
   if (user && user.role === 'student') {
     return (
-      <div className="space-y-5 text-center">
-        <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
-          <AlertCircle className="w-6 h-6" />
+      <div className="space-y-4 text-center">
+        <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center mx-auto">
+          <AlertCircle className="w-5 h-5" />
         </div>
 
         <div>
-          <h2 className="text-lg font-bold text-slate-900">Active Student Session Detected</h2>
-          <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-            You are currently signed in as <strong>{user.name}</strong> (Student). To access the Placement Officer portal, please sign out of your student session first.
+          <h2 className="text-base font-bold text-[#0F172A]">Active Student Session</h2>
+          <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
+            You are currently signed in as <strong>{user.name}</strong> (Student). To access the Placement Officer portal, please sign out first.
           </p>
         </div>
 
@@ -128,19 +123,32 @@ const OfficerLogin = () => {
 
   return (
     <div>
-      {/* Top Heading */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-            Placement Cell Administration
+      {/* Header: Logo & Back to Home */}
+      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E2E8F0]">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-md bg-[#2563EB] flex items-center justify-center text-white shadow-sm">
+            <ShieldCheck className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-[#0F172A] text-sm tracking-tight">
+            CampusPlacement
           </span>
-        </div>
-        <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-          Placement Officer Sign In
+        </Link>
+        <Link
+          to="/"
+          className="text-xs font-medium text-[#64748B] hover:text-[#2563EB] inline-flex items-center gap-1 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back to Home
+        </Link>
+      </div>
+
+      {/* Title & Subtitle */}
+      <div className="mb-5">
+        <h2 className="text-lg font-bold text-[#0F172A] tracking-tight">
+          Placement Officer Login
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
-          Authorized campus placement staff, directors, and recruiters only
+        <p className="text-xs text-[#64748B] mt-0.5">
+          Sign in with your official institutional email to access administrative controls
         </p>
       </div>
 
@@ -163,8 +171,8 @@ const OfficerLogin = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
         <Input
-          label="Official Institutional Email"
-          id="officer-email"
+          label="Official Email"
+          id="email"
           name="email"
           type="email"
           placeholder=""
@@ -181,7 +189,7 @@ const OfficerLogin = () => {
 
         <Input
           label="Password"
-          id="officer-password"
+          id="password"
           name="password"
           type="password"
           placeholder=""
@@ -197,56 +205,28 @@ const OfficerLogin = () => {
           autoComplete="new-password"
         />
 
-        {/* Remember Session checkbox */}
-        <div className="flex items-center justify-between pt-1">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="text-xs font-medium text-slate-600">
-              Remember session for 30 days
-            </span>
-          </label>
-        </div>
-
         <Button
           type="submit"
           className="w-full mt-2"
           isLoading={loading}
           icon={ShieldCheck}
         >
-          {loading ? 'Verifying Credentials...' : 'Sign In as Officer'}
+          {loading ? 'Verifying...' : 'Sign In'}
         </Button>
       </form>
 
-      {/* Register or Switch to Student Portal */}
-      <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col gap-2.5 text-center text-xs">
-        <p className="text-slate-600">
-          Need to set up an officer account?{' '}
-          <Link
-            to="/officer/register"
-            className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
-          >
-            Register Officer Account
-          </Link>
-        </p>
-
-        <p className="text-slate-500 pt-1">
-          Looking for student recruitment drives?{' '}
-          <Link
-            to="/student/login"
-            className="font-semibold text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center gap-1"
-          >
-            Go to Student Login <ArrowRight className="w-3 h-3" />
-          </Link>
-        </p>
+      {/* Back to Home bottom link */}
+      <div className="mt-5 pt-4 border-t border-[#E2E8F0] text-center text-xs">
+        <Link
+          to="/"
+          className="font-medium text-[#64748B] hover:text-[#2563EB] inline-flex items-center gap-1 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Back to Home
+        </Link>
       </div>
     </div>
   );
 };
 
 export default OfficerLogin;
-

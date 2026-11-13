@@ -1,41 +1,49 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   GraduationCap,
   Briefcase,
-  Users,
-  ShieldCheck,
-  CheckCircle,
+  CheckCircle2,
+  Clock,
   ArrowRight,
-  TrendingUp,
+  Menu,
+  X,
 } from 'lucide-react';
 import Button from '../components/common/Button';
 import { useAuth } from '../hooks/useAuth';
 
 const LandingPage = () => {
   const { user, isOfficer, isStudent } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const dashboardPath = isOfficer
     ? '/officer/dashboard'
     : isStudent
     ? '/student/dashboard'
-    : '/login';
+    : '/student/login';
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Top Navigation */}
-      <header className="bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-sm">
+    <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A] flex flex-col font-sans">
+      {/* 1. Minimal Navigation Bar */}
+      <header className="bg-white border-b border-[#E2E8F0] sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          {/* Left: Logo & Branding */}
+          <Link to="/" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-lg bg-[#2563EB] flex items-center justify-center text-white shadow-sm">
               <GraduationCap className="w-5 h-5" />
             </div>
-            <span className="font-bold text-slate-900 text-lg tracking-tight">
-              CampusPlacement
-            </span>
-          </div>
+            <div className="flex flex-col">
+              <span className="font-bold text-[#0F172A] text-base leading-tight tracking-tight">
+                CampusPlacement
+              </span>
+              <span className="text-[11px] text-[#64748B] font-medium leading-tight">
+                Recruitment Portal
+              </span>
+            </div>
+          </Link>
 
-          <div className="flex items-center gap-3">
+          {/* Right: Desktop Links */}
+          <div className="hidden sm:flex items-center gap-3">
             {user ? (
               <Link to={dashboardPath}>
                 <Button variant="primary" size="sm" icon={ArrowRight}>
@@ -44,116 +52,191 @@ const LandingPage = () => {
               </Link>
             ) : (
               <>
-                <Link to="/officer/login" className="text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors px-2 py-1">
-                  Officer Portal
+                <Link
+                  to="/student/login"
+                  className="text-xs font-semibold text-[#0F172A] hover:text-[#2563EB] transition-colors px-3 py-1.5 rounded-md hover:bg-slate-50"
+                >
+                  Student Login
                 </Link>
-                <Link to="/student/login">
-                  <Button variant="outline" size="sm">
-                    Student Sign In
-                  </Button>
-                </Link>
-                <Link to="/register">
+                <Link to="/student/register">
                   <Button variant="primary" size="sm">
                     Register
+                  </Button>
+                </Link>
+                <span className="h-4 w-px bg-[#E2E8F0]" />
+                <Link
+                  to="/officer/login"
+                  className="text-xs font-semibold text-[#64748B] hover:text-[#2563EB] transition-colors px-2 py-1"
+                >
+                  Officer Login
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="sm:hidden flex items-center">
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg text-[#64748B] hover:text-[#0F172A] hover:bg-slate-100 transition-colors focus:outline-none"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Dropdown */}
+        {mobileMenuOpen && (
+          <div className="sm:hidden bg-white border-b border-[#E2E8F0] px-4 pt-2 pb-4 space-y-2">
+            {user ? (
+              <Link
+                to={dashboardPath}
+                onClick={() => setMobileMenuOpen(false)}
+                className="block w-full"
+              >
+                <Button variant="primary" size="sm" className="w-full">
+                  Go to Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <div className="flex flex-col gap-2 pt-1">
+                <Link
+                  to="/student/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-semibold text-[#0F172A] hover:text-[#2563EB] py-2 px-3 rounded-lg hover:bg-slate-50"
+                >
+                  Student Login
+                </Link>
+                <Link
+                  to="/student/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-semibold text-[#2563EB] py-2 px-3 rounded-lg hover:bg-blue-50"
+                >
+                  Register
+                </Link>
+                <Link
+                  to="/officer/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-semibold text-[#64748B] hover:text-[#2563EB] py-2 px-3 rounded-lg hover:bg-slate-50"
+                >
+                  Officer Login
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col justify-center">
+        {/* 2. Hero Section */}
+        <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center">
+          {/* Small Label */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#2563EB] text-xs font-semibold mb-5">
+            Campus Recruitment Portal
+          </div>
+
+          {/* Main Heading */}
+          <h1 className="text-3xl sm:text-5xl font-extrabold text-[#0F172A] tracking-tight leading-tight">
+            Your Career Starts Here.
+          </h1>
+
+          {/* Description */}
+          <p className="mt-4 text-sm sm:text-base text-[#64748B] max-w-xl mx-auto leading-relaxed">
+            Explore placement opportunities, check your eligibility and track your applications in one place.
+          </p>
+
+          {/* Hero Action Buttons */}
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+            {user ? (
+              <Link to={dashboardPath}>
+                <Button size="md" icon={ArrowRight}>
+                  Open Your Dashboard
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/student/login" className="w-full sm:w-auto">
+                  <Button variant="primary" size="md" className="w-full sm:w-auto px-6">
+                    Student Login
+                  </Button>
+                </Link>
+                <Link to="/student/register" className="w-full sm:w-auto">
+                  <Button variant="outline" size="md" className="w-full sm:w-auto px-6">
+                    Create Student Account
                   </Button>
                 </Link>
               </>
             )}
           </div>
-        </div>
-      </header>
 
-      {/* Hero Section */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto text-center flex-1 flex flex-col justify-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mx-auto mb-6">
-          <TrendingUp className="w-3.5 h-3.5" />
-          Streamlined Campus Placement Workflow
-        </div>
-
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
-          Empowering College Placements with{' '}
-          <span className="text-blue-600">Precision & Transparency</span>
-        </h1>
-
-        <p className="mt-4 text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          A dedicated portal connecting students and placement officers. Check live
-          drive eligibility, manage corporate partners, track round-by-round selection
-          results, and celebrate student career milestones.
-        </p>
-
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-          {user ? (
-            <Link to={dashboardPath}>
-              <Button size="lg" icon={ArrowRight}>
-                Open Your Dashboard
-              </Button>
-            </Link>
-          ) : (
-            <>
-              <Link to="/register">
-                <Button size="lg" icon={ArrowRight}>
-                  Create Student Account
-                </Button>
+          {/* Text link below buttons */}
+          {!user && (
+            <p className="mt-5 text-xs text-[#64748B]">
+              Are you a Placement Officer?{' '}
+              <Link
+                to="/officer/login"
+                className="font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
+              >
+                Sign in here.
               </Link>
-              <Link to="/officer/login">
-                <Button variant="outline" size="lg">
-                  Placement Officer Sign In
-                </Button>
-              </Link>
-            </>
+            </p>
           )}
-        </div>
+        </section>
 
-        {/* Feature Highlights Grid */}
-        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-              <ShieldCheck className="w-5 h-5" />
+        {/* 3. Features Section (Exactly 3 clean cards) */}
+        <section className="pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto w-full">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* Card 1 */}
+            <div className="bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-sm flex flex-col">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center mb-4">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <h3 className="font-semibold text-[#0F172A] text-sm sm:text-base">
+                Smart Eligibility Checking
+              </h3>
+              <p className="mt-2 text-xs text-[#64748B] leading-relaxed">
+                Automatically verify academic eligibility for placement drives.
+              </p>
             </div>
-            <h3 className="font-semibold text-slate-900 text-base">
-              Automated Eligibility Engine
-            </h3>
-            <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-              Instantly verifies CGPA, active backlog limits, graduation batch, and
-              department eligibility before application submission.
-            </p>
-          </div>
 
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-              <Briefcase className="w-5 h-5" />
+            {/* Card 2 */}
+            <div className="bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-sm flex flex-col">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center mb-4">
+                <Briefcase className="w-5 h-5" />
+              </div>
+              <h3 className="font-semibold text-[#0F172A] text-sm sm:text-base">
+                Placement Opportunities
+              </h3>
+              <p className="mt-2 text-xs text-[#64748B] leading-relaxed">
+                Explore companies, job roles, packages and recruitment deadlines.
+              </p>
             </div>
-            <h3 className="font-semibold text-slate-900 text-base">
-              Placement Drive Tracking
-            </h3>
-            <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-              Explore open positions, packages (LPA), selection rounds, and deadlines
-              with structured multi-stage status tracking.
-            </p>
-          </div>
 
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-            <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-              <Users className="w-5 h-5" />
+            {/* Card 3 */}
+            <div className="bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-sm flex flex-col">
+              <div className="w-10 h-10 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center mb-4">
+                <Clock className="w-5 h-5" />
+              </div>
+              <h3 className="font-semibold text-[#0F172A] text-sm sm:text-base">
+                Application Tracking
+              </h3>
+              <p className="mt-2 text-xs text-[#64748B] leading-relaxed">
+                Monitor application progress and selection results.
+              </p>
             </div>
-            <h3 className="font-semibold text-slate-900 text-base">
-              Officer Administration
-            </h3>
-            <p className="mt-2 text-xs text-slate-600 leading-relaxed">
-              Comprehensive control panel to schedule drives, partner with companies,
-              shortlist candidates, and track overall placement rates.
-            </p>
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-        <p>© 2026 CampusPlacement Portal. Built for academic excellence.</p>
+      <footer className="bg-white border-t border-[#E2E8F0] py-5 text-center text-xs text-[#64748B]">
+        <p>© 2026 CampusPlacement. College Placement Management Portal.</p>
       </footer>
     </div>
   );
 };
 
 export default LandingPage;
-

@@ -48,6 +48,7 @@ const AppRoutes = () => {
       <Route element={<AuthLayout />}>
         <Route path="/login" element={<Login />} />
         <Route path="/student/login" element={<StudentLogin />} />
+        <Route path="/student/register" element={<Register />} />
         <Route path="/officer/login" element={<OfficerLogin />} />
         <Route path="/officer/register" element={<OfficerRegister />} />
         <Route path="/register" element={<Register />} />

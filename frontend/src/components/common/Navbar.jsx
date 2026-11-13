@@ -116,8 +116,9 @@ const Navbar = ({ onToggleSidebar }) => {
   };
 
   const handleLogout = async () => {
+    const wasOfficer = isOfficer;
     await logout();
-    navigate('/login');
+    navigate(wasOfficer ? '/officer/login' : '/student/login');
   };
 
   const getNotifIcon = (type) => {
@@ -355,13 +356,13 @@ const Navbar = ({ onToggleSidebar }) => {
         ) : (
           <div className="flex items-center gap-2">
             <Link
-              to="/login"
+              to="/student/login"
               className="px-3.5 py-1.5 text-xs font-medium text-slate-700 hover:text-blue-600"
             >
               Sign In
             </Link>
             <Link
-              to="/register"
+              to="/student/register"
               className="px-3.5 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm"
             >
               Register
