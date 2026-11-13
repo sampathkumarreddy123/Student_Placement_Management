@@ -16,7 +16,8 @@ import EligibilityBadge from './EligibilityBadge';
 import Button from '../common/Button';
 
 const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
-  const deadlineInfo = getDeadlineStatus(drive.registrationDeadline);
+  const deadlineInfo = getDeadlineStatus(drive.applicationClosingDate || drive.registrationDeadline);
+  const isClosedStatus = drive.status === 'Closed' || drive.status === 'Completed';
 
   return (
     <div className="bg-white rounded-xl border border-slate-200/90 hover:border-blue-300 transition-all shadow-sm hover:shadow-md p-5 flex flex-col justify-between">
@@ -48,7 +49,7 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
                 <Building2 className="w-3.5 h-3.5 text-slate-400" />
                 <span>{drive.company?.name || 'Company'}</span>
                 <span>•</span>
-                <span>{drive.company?.industry || 'Technology'}</span>
+                <span>{drive.employmentType || drive.company?.industry || 'Full-Time'}</span>
               </p>
             </div>
           </div>
@@ -102,20 +103,20 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
         <div className="flex items-center justify-between text-xs text-slate-500 py-1 border-t border-slate-100 mb-4">
           <div className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5 text-slate-400" />
-            <span>Drive: {formatDate(drive.driveDate)}</span>
+            <span>Drive: {formatDate(drive.driveDate || drive.applicationClosingDate)}</span>
           </div>
 
           <div
             className={`flex items-center gap-1 font-medium ${
               deadlineInfo.isUrgent
                 ? 'text-amber-600'
-                : deadlineInfo.isClosed
+                : deadlineInfo.isClosed || isClosedStatus
                 ? 'text-rose-600'
                 : 'text-slate-600'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
-            <span>{deadlineInfo.text}</span>
+            <span>{isClosedStatus ? 'Applications Closed' : deadlineInfo.text}</span>
           </div>
         </div>
       </div>
@@ -143,11 +144,11 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
             variant="primary"
             size="sm"
             className="flex-1"
-            disabled={!drive.isEligible || deadlineInfo.isClosed}
+            disabled={!drive.isEligible || deadlineInfo.isClosed || isClosedStatus}
             isLoading={applying}
             onClick={() => onApply && onApply(drive._id)}
           >
-            Apply Now
+            {isClosedStatus ? 'Closed' : deadlineInfo.isClosed ? 'Expired' : 'Apply Now'}
           </Button>
         )}
       </div>

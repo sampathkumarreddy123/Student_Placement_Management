@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Building2,
   MapPin,
@@ -12,7 +12,12 @@ import {
   AlertTriangle,
   ArrowLeft,
   Award,
+  Users,
+  Layers,
+  Sparkles,
+  FileText,
 } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 import { driveService } from '../../services/driveService';
 import { applicationService } from '../../services/applicationService';
 import Card from '../../components/common/Card';
@@ -24,10 +29,14 @@ import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters
 
 const DriveDetails = () => {
   const { id } = useParams();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [drive, setDrive] = useState(null);
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [actionAlert, setActionAlert] = useState(null);
+
+  const isOfficer = user?.role === 'officer';
 
   const fetchDetails = async () => {
     try {
@@ -55,7 +64,7 @@ const DriveDetails = () => {
     } catch (err) {
       setActionAlert({
         type: 'error',
-        text: err.message || 'Failed to submit application.',
+        text: err.response?.data?.message || err.message || 'Failed to submit application.',
       });
     } finally {
       setApplying(false);
@@ -69,22 +78,27 @@ const DriveDetails = () => {
   if (!drive) {
     return (
       <div className="text-center py-12">
-        <p className="text-sm text-slate-600">Drive details could not be found.</p>
-        <Link to="/student/drives" className="text-xs text-blue-600 hover:underline mt-2 inline-block">
+        <p className="text-sm text-slate-600">Drive details could not be found or you do not have permission.</p>
+        <Link
+          to={isOfficer ? '/officer/drives' : '/student/drives'}
+          className="text-xs text-blue-600 hover:underline mt-2 inline-block"
+        >
           Return to Drives List
         </Link>
       </div>
     );
   }
 
-  const deadline = getDeadlineStatus(drive.registrationDeadline);
+  const closingDate = drive.applicationClosingDate || drive.registrationDeadline;
+  const deadline = getDeadlineStatus(closingDate);
+  const isClosedStatus = drive.status === 'Closed' || drive.status === 'Completed';
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Back button */}
       <div>
         <Link
-          to="/student/drives"
+          to={isOfficer ? '/officer/drives' : '/student/drives'}
           className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-blue-600 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Drives
@@ -103,9 +117,22 @@ const DriveDetails = () => {
       <div className="bg-white rounded-xl border border-slate-200/90 p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
-            <div className="w-14 h-14 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl flex-shrink-0">
-              {drive.company?.name ? drive.company.name.charAt(0) : 'C'}
-            </div>
+            {drive.company?.logoUrl ? (
+              <img
+                src={drive.company.logoUrl}
+                alt={drive.company?.name || 'Company'}
+                className="w-14 h-14 rounded-xl object-contain p-1 border border-slate-200 bg-white flex-shrink-0"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="w-14 h-14 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl flex-shrink-0">
+                {drive.company?.name ? drive.company.name.charAt(0) : 'C'}
+              </div>
+            )}
+
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold text-slate-900 leading-tight">
@@ -116,7 +143,7 @@ const DriveDetails = () => {
               <p className="text-xs text-slate-500 flex items-center gap-2 mt-1">
                 <span className="font-medium text-slate-700">{drive.company?.name}</span>
                 <span>•</span>
-                <span>{drive.company?.industry}</span>
+                <span>{drive.employmentType || drive.company?.industry || 'Full-Time'}</span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3 h-3 text-slate-400" /> {drive.location}
@@ -127,20 +154,30 @@ const DriveDetails = () => {
 
           {/* Action / Application Button */}
           <div className="flex items-center gap-3">
-            {drive.userApplication ? (
+            {isOfficer ? (
+              <Link to={`/officer/applications?driveId=${drive._id}`}>
+                <Button variant="primary" size="md" icon={Users}>
+                  View Applicants ({drive.applicantCount ?? 0})
+                </Button>
+              </Link>
+            ) : drive.userApplication ? (
               <div className="text-right">
-                <span className="text-[11px] text-slate-500 block mb-1">Your Status:</span>
+                <span className="text-[11px] text-slate-500 block mb-1">Your Application:</span>
                 <Badge status={drive.userApplication.status} size="md" />
               </div>
             ) : (
               <Button
                 variant="primary"
                 size="md"
-                disabled={!drive.isEligible || deadline.isClosed}
+                disabled={!drive.isEligible || deadline.isClosed || isClosedStatus}
                 isLoading={applying}
                 onClick={handleApply}
               >
-                {deadline.isClosed ? 'Registration Closed' : 'Submit Application'}
+                {isClosedStatus
+                  ? 'Applications Closed'
+                  : deadline.isClosed
+                  ? 'Registration Closed'
+                  : 'Submit Application'}
               </Button>
             )}
           </div>
@@ -163,34 +200,57 @@ const DriveDetails = () => {
           </div>
 
           <div>
-            <span className="text-slate-400 block text-[11px]">Drive Date</span>
+            <span className="text-slate-400 block text-[11px]">Drive / Interview Date</span>
             <span className="font-medium text-slate-700 text-sm mt-0.5 block">
-              {formatDate(drive.driveDate)}
+              {formatDate(drive.driveDate || drive.applicationClosingDate)}
             </span>
           </div>
 
           <div>
-            <span className="text-slate-400 block text-[11px]">Registration Deadline</span>
+            <span className="text-slate-400 block text-[11px]">Application Deadline</span>
             <span
               className={`font-semibold text-sm mt-0.5 block ${
-                deadline.isUrgent ? 'text-amber-600' : 'text-slate-700'
+                deadline.isUrgent
+                  ? 'text-amber-600'
+                  : isClosedStatus || deadline.isClosed
+                  ? 'text-rose-600'
+                  : 'text-slate-700'
               }`}
             >
-              {formatDate(drive.registrationDeadline)} ({deadline.text})
+              {formatDate(closingDate)} ({isClosedStatus ? 'Closed' : deadline.text})
             </span>
           </div>
         </div>
       </div>
 
-      {/* Grid: Eligibility & Description */}
+      {/* Grid: Details, Eligibility, Rounds */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column: Description & Rounds (2 cols) */}
+        {/* Left Column: Description, Skills, Rounds (2 cols) */}
         <div className="md:col-span-2 space-y-6">
           <Card title="Job Role Description">
             <p className="text-xs text-slate-600 leading-relaxed whitespace-pre-line">
-              {drive.description ||
-                'No specific job description provided. Please refer to college placement guidelines.'}
+              {drive.jobDescription || drive.description ||
+                'No specific job description provided. Please refer to campus placement guidelines.'}
             </p>
+
+            {/* Required Skills */}
+            {drive.requiredSkills && drive.requiredSkills.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-slate-100">
+                <span className="text-xs font-semibold text-slate-700 block mb-2">
+                  Required Technical Skills
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {drive.requiredSkills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </Card>
 
           <Card title="Selection Process Rounds">
@@ -233,20 +293,36 @@ const DriveDetails = () => {
           {/* Eligibility Card */}
           <Card
             title="Eligibility Checklist"
-            subtitle={drive.isEligible ? 'You qualify for this drive' : 'Requirements check'}
+            subtitle={!isOfficer && drive.isEligible ? 'You qualify for this drive' : 'Academic Cutoffs'}
           >
             <div className="space-y-3 text-xs">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <span className="text-slate-600">Minimum CGPA</span>
                 <span className="font-semibold text-slate-900">
-                  {drive.eligibilityCriteria?.minCgpa ?? 'No min'}
+                  {drive.eligibilityCriteria?.minCgpa !== undefined
+                    ? `${drive.eligibilityCriteria.minCgpa} / 10.0`
+                    : 'No minimum cutoff'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <span className="text-slate-600">Max Active Backlogs</span>
                 <span className="font-semibold text-slate-900">
-                  {drive.eligibilityCriteria?.maxBacklogs ?? 0}
+                  {drive.eligibilityCriteria?.maxActiveBacklogs ?? drive.eligibilityCriteria?.maxBacklogs ?? 0}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span className="text-slate-600">Max Total Backlogs</span>
+                <span className="font-semibold text-slate-900">
+                  {drive.eligibilityCriteria?.maxTotalBacklogs ?? 'Any'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                <span className="text-slate-600">Target Graduation Batch</span>
+                <span className="font-semibold text-slate-900">
+                  Class of {drive.eligibilityCriteria?.batch || '2026'}
                 </span>
               </div>
 
@@ -272,32 +348,34 @@ const DriveDetails = () => {
                 </span>
               </div>
 
-              {/* Status banner */}
-              <div
-                className={`p-3 rounded-lg border flex items-start gap-2 mt-4 ${
-                  drive.isEligible
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                    : 'bg-rose-50 border-rose-200 text-rose-800'
-                }`}
-              >
-                {drive.isEligible ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                ) : (
-                  <XCircle className="w-4 h-4 text-rose-600 mt-0.5 flex-shrink-0" />
-                )}
-                <div>
-                  <p className="font-semibold text-xs">
-                    {drive.isEligible ? 'You Are Eligible' : 'Eligibility Not Met'}
-                  </p>
-                  {!drive.isEligible && drive.eligibilityReasons && (
-                    <ul className="list-disc pl-4 mt-1 text-[11px] space-y-0.5 opacity-90">
-                      {drive.eligibilityReasons.map((r, i) => (
-                        <li key={i}>{r}</li>
-                      ))}
-                    </ul>
+              {/* Status banner for students */}
+              {!isOfficer && (
+                <div
+                  className={`p-3 rounded-lg border flex items-start gap-2 mt-4 ${
+                    drive.isEligible
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                      : 'bg-rose-50 border-rose-200 text-rose-800'
+                  }`}
+                >
+                  {drive.isEligible ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-rose-600 mt-0.5 flex-shrink-0" />
                   )}
+                  <div>
+                    <p className="font-semibold text-xs">
+                      {drive.isEligible ? 'You Are Eligible' : 'Eligibility Not Met'}
+                    </p>
+                    {!drive.isEligible && drive.eligibilityReasons && (
+                      <ul className="list-disc pl-4 mt-1 text-[11px] space-y-0.5 opacity-90">
+                        {drive.eligibilityReasons.map((r, i) => (
+                          <li key={i}>{r}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </Card>
 
@@ -327,4 +405,5 @@ const DriveDetails = () => {
 };
 
 export default DriveDetails;
+
 

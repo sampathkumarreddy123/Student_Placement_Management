@@ -21,9 +21,25 @@ export const driveService = {
     return response.data;
   },
 
+  publishDrive: async (id) => {
+    const response = await api.patch(`/drives/${id}/publish`);
+    return response.data;
+  },
+
+  closeDrive: async (id) => {
+    const response = await api.patch(`/drives/${id}/close`);
+    return response.data;
+  },
+
+  archiveDrive: async (id) => {
+    const response = await api.patch(`/drives/${id}/archive`);
+    return response.data;
+  },
+
   deleteDrive: async (id) => {
     const response = await api.delete(`/drives/${id}`);
     return response.data;
   },
 };
+
 

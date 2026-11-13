@@ -118,9 +118,9 @@ const DrivesList = () => {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="w-full h-[38px] rounded-lg border border-slate-200 text-xs px-3 focus:outline-none focus:border-blue-500 bg-white"
             >
-              <option value="">All Drive Statuses</option>
-              <option value="Upcoming">Upcoming</option>
-              <option value="Ongoing">Ongoing</option>
+              <option value="">All Statuses</option>
+              <option value="Published">Published (Active)</option>
+              <option value="Closed">Closed</option>
               <option value="Completed">Completed</option>
             </select>
           </div>
