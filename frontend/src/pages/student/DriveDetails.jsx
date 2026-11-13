@@ -27,6 +27,8 @@ import Alert from '../../components/common/Alert';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters';
 
+import EligibilityModal from '../../components/drives/EligibilityModal';
+
 const DriveDetails = () => {
   const { id } = useParams();
   const { user } = useAuth();
@@ -35,6 +37,7 @@ const DriveDetails = () => {
   const [loading, setLoading] = useState(true);
   const [applying, setApplying] = useState(false);
   const [actionAlert, setActionAlert] = useState(null);
+  const [showEligibilityModal, setShowEligibilityModal] = useState(false);
 
   const isOfficer = user?.role === 'officer';
 
@@ -350,30 +353,41 @@ const DriveDetails = () => {
 
               {/* Status banner for students */}
               {!isOfficer && (
-                <div
-                  className={`p-3 rounded-lg border flex items-start gap-2 mt-4 ${
-                    drive.isEligible
-                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                      : 'bg-rose-50 border-rose-200 text-rose-800'
-                  }`}
-                >
-                  {drive.isEligible ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                  ) : (
-                    <XCircle className="w-4 h-4 text-rose-600 mt-0.5 flex-shrink-0" />
-                  )}
-                  <div>
-                    <p className="font-semibold text-xs">
-                      {drive.isEligible ? 'You Are Eligible' : 'Eligibility Not Met'}
-                    </p>
-                    {!drive.isEligible && drive.eligibilityReasons && (
-                      <ul className="list-disc pl-4 mt-1 text-[11px] space-y-0.5 opacity-90">
-                        {drive.eligibilityReasons.map((r, i) => (
-                          <li key={i}>{r}</li>
-                        ))}
-                      </ul>
+                <div className="space-y-3 mt-4">
+                  <div
+                    className={`p-3 rounded-lg border flex items-start gap-2 ${
+                      drive.isEligible
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : 'bg-rose-50 border-rose-200 text-rose-800'
+                    }`}
+                  >
+                    {drive.isEligible ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    ) : (
+                      <XCircle className="w-4 h-4 text-rose-600 mt-0.5 flex-shrink-0" />
                     )}
+                    <div className="flex-1">
+                      <p className="font-semibold text-xs">
+                        {drive.isEligible ? 'You Are Eligible' : 'Eligibility Not Met'}
+                      </p>
+                      {!drive.isEligible && drive.eligibilityReasons && (
+                        <ul className="list-disc pl-4 mt-1 text-[11px] space-y-0.5 opacity-90">
+                          {drive.eligibilityReasons.slice(0, 3).map((r, i) => (
+                            <li key={i}>{r}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
                   </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full justify-center text-xs"
+                    onClick={() => setShowEligibilityModal(true)}
+                  >
+                    View Full Eligibility Evaluation
+                  </Button>
                 </div>
               )}
             </div>
@@ -400,6 +414,17 @@ const DriveDetails = () => {
           </Card>
         </div>
       </div>
+
+      {/* Full Eligibility Modal */}
+      {!isOfficer && (
+        <EligibilityModal
+          isOpen={showEligibilityModal}
+          onClose={() => setShowEligibilityModal(false)}
+          drive={drive}
+          onApply={handleApply}
+          applying={applying}
+        />
+      )}
     </div>
   );
 };

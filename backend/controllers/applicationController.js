@@ -27,13 +27,18 @@ export const applyForDrive = async (req, res, next) => {
       });
     }
 
-    // Check eligibility
-    const { isEligible, reasons } = checkEligibility(profile, drive);
-    if (!isEligible) {
+    // Check eligibility using comprehensive evaluation
+    const eligibility = checkEligibility(profile, drive);
+    if (!eligibility.isEligible) {
       return res.status(400).json({
         success: false,
-        message: 'You are not eligible for this drive.',
-        reasons,
+        message: eligibility.hasIncompleteProfile
+          ? 'Cannot apply: Your student profile is incomplete. Please update all required academic information.'
+          : 'You are not eligible for this placement drive.',
+        reasons: eligibility.reasons,
+        eligibilityDetails: eligibility.criteriaDetails,
+        hasIncompleteProfile: eligibility.hasIncompleteProfile,
+        missingProfileFields: eligibility.missingProfileFields,
       });
     }
 

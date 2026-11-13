@@ -60,6 +60,10 @@ export const getDrives = async (req, res, next) => {
           userApplicationStatus: appMap.get(drive._id.toString()) || null,
           isEligible: eligibility.isEligible,
           eligibilityReasons: eligibility.reasons,
+          eligibilityDetails: eligibility.criteriaDetails,
+          hasIncompleteProfile: eligibility.hasIncompleteProfile,
+          missingProfileFields: eligibility.missingProfileFields,
+          eligibilitySummary: eligibility.summary,
         };
       });
 
@@ -129,6 +133,10 @@ export const getDriveById = async (req, res, next) => {
       responseData.userApplication = userApplication;
       responseData.isEligible = eligibility.isEligible;
       responseData.eligibilityReasons = eligibility.reasons;
+      responseData.eligibilityDetails = eligibility.criteriaDetails;
+      responseData.hasIncompleteProfile = eligibility.hasIncompleteProfile;
+      responseData.missingProfileFields = eligibility.missingProfileFields;
+      responseData.eligibilitySummary = eligibility.summary;
     } else {
       // For officer, get breakdown of applications
       const applicantCount = await Application.countDocuments({ drive: drive._id });
