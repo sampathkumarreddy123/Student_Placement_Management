@@ -115,12 +115,14 @@ const run = async () => {
     record('Test Setup: Student account registration', studentReg.status === 201);
 
     // 1. Test Valid Officer Login
+    const officerEmail = process.env.OFFICER_EMAIL || '25695a0545@mits.ac.in';
+    const officerPass = process.env.OFFICER_PASSWORD || 'sam@123';
     const validOfficerRes = await officerClient.request('/api/auth/officer/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: 'officer@college.edu',
-        password: 'Officer@123',
+        email: officerEmail,
+        password: officerPass,
         rememberMe: true,
       }),
     });
@@ -157,7 +159,7 @@ const run = async () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: 'officer@college.edu',
+        email: officerEmail,
         password: 'WrongPassword123!',
       }),
     });
@@ -195,8 +197,8 @@ const run = async () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: 'officer@college.edu',
-        password: 'Officer@123',
+        email: officerEmail,
+        password: officerPass,
       }),
     });
     const officerBlockedPassed =

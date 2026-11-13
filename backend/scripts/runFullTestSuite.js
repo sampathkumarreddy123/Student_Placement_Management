@@ -285,16 +285,18 @@ const run = async () => {
     console.log('\n👔 RUNNING PLACEMENT OFFICER FEATURE TESTS...');
 
     // 1. Officer Login
+    const officerEmail = process.env.OFFICER_EMAIL || '25695a0545@mits.ac.in';
+    const officerPassword = process.env.OFFICER_PASSWORD || 'sam@123';
     const officerLoginRes = await officerClient.request('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: 'officer@college.edu',
-        password: 'Officer@123',
+        email: officerEmail,
+        password: officerPassword,
       }),
     });
     const officerLoginPassed = officerLoginRes.status === 200 && officerLoginRes.data.user?.role === 'officer';
-    recordTest('Officer Authentication (officer@college.edu)', 'Officer', officerLoginPassed, officerLoginRes.data.message);
+    recordTest(`Officer Authentication (${officerEmail})`, 'Officer', officerLoginPassed, officerLoginRes.data.message);
 
     // Sec 5: Role-based authorization - Student blocked from Officer endpoints
     const studentBlockedRes = await studentClient.request('/api/users/officer/dashboard');
