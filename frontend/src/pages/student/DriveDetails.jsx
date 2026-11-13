@@ -134,19 +134,19 @@ const DriveDetails = () => {
             )}
 
             <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold text-slate-900 leading-tight">
+              <div className="flex flex-wrap items-center gap-2.5 mb-1">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">
                   {drive.title}
                 </h1>
                 <Badge status={drive.status} size="sm" />
               </div>
-              <p className="text-xs text-slate-500 flex items-center gap-2 mt-1">
+              <p className="text-xs text-slate-500 flex flex-wrap items-center gap-2 mt-1">
                 <span className="font-medium text-slate-700">{drive.company?.name}</span>
                 <span>•</span>
                 <span>{drive.employmentType || drive.company?.industry || 'Full-Time'}</span>
                 <span>•</span>
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3 text-slate-400" /> {drive.location}
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> {drive.location}
                 </span>
               </p>
             </div>
