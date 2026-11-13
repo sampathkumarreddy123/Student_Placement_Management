@@ -1,0 +1,21 @@
+{
+  "name": "student-placement-management-portal",
+  "version": "1.0.0",
+  "description": "Full-stack Student Placement Management Portal for Colleges",
+  "scripts": {
+    "server": "npm --prefix backend run dev",
+    "client": "npm --prefix frontend run dev",
+    "seed": "npm --prefix backend run seed",
+    "build:client": "npm --prefix frontend run build"
+  },
+  "keywords": [
+    "placement-portal",
+    "react",
+    "express",
+    "mongodb",
+    "college-placements"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+
