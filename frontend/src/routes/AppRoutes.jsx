@@ -14,6 +14,7 @@ import LandingPage from '../pages/LandingPage';
 import Login from '../pages/auth/Login';
 import StudentLogin from '../pages/auth/StudentLogin';
 import OfficerLogin from '../pages/auth/OfficerLogin';
+import OfficerRegister from '../pages/auth/OfficerRegister';
 import Register from '../pages/auth/Register';
 import NotFound from '../pages/NotFound';
 
@@ -48,6 +49,7 @@ const AppRoutes = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/student/login" element={<StudentLogin />} />
         <Route path="/officer/login" element={<OfficerLogin />} />
+        <Route path="/officer/register" element={<OfficerRegister />} />
         <Route path="/register" element={<Register />} />
       </Route>
 

@@ -304,9 +304,9 @@ export const studentLogin = async (req, res, next) => {
 // @access  Protected (Requires active Officer session OR valid server setup token)
 export const createOfficerAccount = async (req, res, next) => {
   try {
-    const setupTokenHeader = req.headers['x-setup-token'];
+    const setupToken = req.headers['x-setup-token'] || req.body?.setupToken;
     const validServerToken = process.env.OFFICER_SETUP_TOKEN || process.env.JWT_SECRET;
-    const isTokenAuthorized = Boolean(setupTokenHeader && setupTokenHeader === validServerToken);
+    const isTokenAuthorized = Boolean(setupToken && setupToken === validServerToken);
     let sessionUser = req.user;
     if (!sessionUser) {
       const rawToken =

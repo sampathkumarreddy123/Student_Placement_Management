@@ -33,6 +33,15 @@ export const authService = {
     return response.data;
   },
 
+  registerOfficer: async (officerData) => {
+    const response = await api.post('/auth/officer/create', officerData, {
+      headers: {
+        'x-setup-token': officerData.setupToken,
+      },
+    });
+    return response.data;
+  },
+
   logout: async () => {
     try {
       await api.post('/auth/logout');

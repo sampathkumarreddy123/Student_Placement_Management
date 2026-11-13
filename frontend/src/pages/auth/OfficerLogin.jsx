@@ -222,9 +222,19 @@ const OfficerLogin = () => {
         </Button>
       </form>
 
-      {/* Switch to Student Portal */}
+      {/* Register or Switch to Student Portal */}
       <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col gap-2.5 text-center text-xs">
-        <p className="text-slate-500">
+        <p className="text-slate-600">
+          Need to set up an officer account?{' '}
+          <Link
+            to="/officer/register"
+            className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+          >
+            Register Officer Account
+          </Link>
+        </p>
+
+        <p className="text-slate-500 pt-1">
           Looking for student recruitment drives?{' '}
           <Link
             to="/student/login"
