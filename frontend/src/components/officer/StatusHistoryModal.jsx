@@ -96,3 +96,4 @@ const StatusHistoryModal = ({ isOpen, onClose, application }) => {
 };
 
 export default StatusHistoryModal;
+

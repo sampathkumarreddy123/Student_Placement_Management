@@ -264,3 +264,4 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
 };
 
 export default StatusUpdateModal;
+

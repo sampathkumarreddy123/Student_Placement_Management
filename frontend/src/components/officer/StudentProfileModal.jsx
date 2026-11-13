@@ -333,3 +333,4 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
 };
 
 export default StudentProfileModal;
+

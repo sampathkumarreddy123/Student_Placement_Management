@@ -121,13 +121,14 @@ export const register = async (req, res, next) => {
       role: 'student',
     });
 
-    // Create Associated Student Profile
+    // Create Associated Student Profile (no fake default scores or numbers)
     const profile = await StudentProfile.create({
       user: user._id,
       rollNumber: normalizedRoll,
       department: department.trim(),
       batch: targetGraduationYear,
-      cgpa: req.body.cgpa !== undefined ? Number(req.body.cgpa) : 7.0,
+      cgpa: req.body.cgpa !== undefined && req.body.cgpa !== null ? Number(req.body.cgpa) : 0,
+      phone: req.body.phone ? req.body.phone.trim() : '',
       backlogs: req.body.backlogs !== undefined ? Number(req.body.backlogs) : 0,
     });
 

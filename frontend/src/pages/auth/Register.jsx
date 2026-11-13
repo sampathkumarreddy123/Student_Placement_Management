@@ -10,6 +10,7 @@ import {
   ArrowRight,
   ShieldAlert,
   CheckCircle2,
+  Phone,
 } from 'lucide-react';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
@@ -34,8 +35,9 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     rollNumber: '',
-    department: 'Computer Science',
-    graduationYear: 2026,
+    department: '',
+    graduationYear: '',
+    phone: '',
   });
 
   const [fieldErrors, setFieldErrors] = useState({});
@@ -172,7 +174,7 @@ const Register = () => {
           label="Full Legal Name"
           id="name"
           name="name"
-          placeholder="e.g. Rahul Verma"
+          placeholder="Enter your full name"
           icon={User}
           value={formData.name}
           onChange={handleChange}
@@ -186,7 +188,7 @@ const Register = () => {
             id="email"
             name="email"
             type="email"
-            placeholder="rollno@college.edu"
+            placeholder="student@college.edu"
             icon={Mail}
             value={formData.email}
             onChange={handleChange}
@@ -198,7 +200,7 @@ const Register = () => {
             label="Roll Number / Student ID"
             id="rollNumber"
             name="rollNumber"
-            placeholder="CS2026-042"
+            placeholder="Enter university roll number"
             icon={Hash}
             value={formData.rollNumber}
             onChange={handleChange}
@@ -222,6 +224,7 @@ const Register = () => {
               onChange={handleChange}
               className="block w-full rounded-lg border border-slate-200 text-xs py-2 px-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
             >
+              <option value="">Select your Department</option>
               {DEPARTMENTS.map((dept) => (
                 <option key={dept} value={dept}>
                   {dept}
@@ -247,6 +250,7 @@ const Register = () => {
               onChange={handleChange}
               className="block w-full rounded-lg border border-slate-200 text-xs py-2 px-3 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 bg-white"
             >
+              <option value="">Select Graduation Year</option>
               {GRADUATION_YEARS.map((yr) => (
                 <option key={yr} value={yr}>
                   Class of {yr}
@@ -258,6 +262,17 @@ const Register = () => {
             )}
           </div>
         </div>
+
+        <Input
+          label="Contact Phone Number (Optional)"
+          id="phone"
+          name="phone"
+          type="tel"
+          placeholder="Enter 10-digit phone number"
+          icon={Phone}
+          value={formData.phone}
+          onChange={handleChange}
+        />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input

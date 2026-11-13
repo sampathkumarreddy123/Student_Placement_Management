@@ -81,17 +81,17 @@ const StudentProfile = () => {
   const [profile, setProfile] = useState(null);
   const [completion, setCompletion] = useState({ percentage: 0, items: [] });
 
-  // Editable Form Data
+  // Editable Form Data (no pre-filled dummy credentials or phone numbers)
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    department: 'Computer Science',
-    batch: 2026,
-    cgpa: 0,
+    department: '',
+    batch: '',
+    cgpa: '',
     activeBacklogs: 0,
     totalBacklogs: 0,
-    tenthPercentage: 0,
-    twelfthPercentage: 0,
+    tenthPercentage: '',
+    twelfthPercentage: '',
     githubUrl: '',
     linkedinUrl: '',
     skills: [],
@@ -112,13 +112,13 @@ const StudentProfile = () => {
       setFormData({
         name: p.name || user?.name || '',
         phone: p.phone || '',
-        department: p.department || 'Computer Science',
-        batch: p.batch || 2026,
-        cgpa: p.cgpa !== undefined ? p.cgpa : 0,
+        department: p.department || '',
+        batch: p.batch || '',
+        cgpa: p.cgpa !== undefined && p.cgpa !== null && p.cgpa > 0 ? p.cgpa : '',
         activeBacklogs: p.activeBacklogs !== undefined ? p.activeBacklogs : p.backlogs || 0,
         totalBacklogs: p.totalBacklogs !== undefined ? p.totalBacklogs : 0,
-        tenthPercentage: p.tenthPercentage || 0,
-        twelfthPercentage: p.twelfthPercentage || 0,
+        tenthPercentage: p.tenthPercentage && p.tenthPercentage > 0 ? p.tenthPercentage : '',
+        twelfthPercentage: p.twelfthPercentage && p.twelfthPercentage > 0 ? p.twelfthPercentage : '',
         githubUrl: p.githubUrl || '',
         linkedinUrl: p.linkedinUrl || '',
         skills: Array.isArray(p.skills) ? p.skills : [],
@@ -170,6 +170,13 @@ const StudentProfile = () => {
 
     if (numActiveBacklogs > numTotalBacklogs) {
       errs.activeBacklogs = 'Active backlogs cannot exceed total backlogs';
+    }
+
+    if (formData.phone && formData.phone.trim()) {
+      const cleanPhone = formData.phone.replace(/[\s\-\(\)\+]/g, '');
+      if (cleanPhone.length < 7 || cleanPhone.length > 15) {
+        errs.phone = 'Please enter a valid phone number';
+      }
     }
 
     const urlRegex = /^https?:\/\/.+/i;
@@ -438,10 +445,18 @@ const StudentProfile = () => {
                 <span className="font-mono font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">
                   {profile?.rollNumber}
                 </span>
-                <span>•</span>
-                <span>{profile?.department}</span>
-                <span>•</span>
-                <span>Class of {profile?.batch}</span>
+                {profile?.department && (
+                  <>
+                    <span>•</span>
+                    <span>{profile.department}</span>
+                  </>
+                )}
+                {profile?.batch ? (
+                  <>
+                    <span>•</span>
+                    <span>Class of {profile.batch}</span>
+                  </>
+                ) : null}
               </div>
 
               <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-slate-500">
@@ -593,7 +608,7 @@ const StudentProfile = () => {
               label="Contact Phone Number"
               name="phone"
               type="tel"
-              placeholder="+91 98765 43210"
+              placeholder="Enter contact phone number"
               icon={Phone}
               value={formData.phone}
               onChange={handleInputChange}
@@ -621,6 +636,7 @@ const StudentProfile = () => {
                 disabled={!isEditing}
                 className="w-full rounded-lg border border-slate-200 text-xs py-2 px-3 focus:outline-none focus:border-blue-500 bg-white disabled:bg-slate-50 disabled:text-slate-500"
               >
+                <option value="">Select Department</option>
                 {DEPARTMENTS.map((dept) => (
                   <option key={dept} value={dept}>
                     {dept}
@@ -640,6 +656,7 @@ const StudentProfile = () => {
                 disabled={!isEditing}
                 className="w-full rounded-lg border border-slate-200 text-xs py-2 px-3 focus:outline-none focus:border-blue-500 bg-white disabled:bg-slate-50 disabled:text-slate-500"
               >
+                <option value="">Select Graduation Year</option>
                 {GRADUATION_YEARS.map((yr) => (
                   <option key={yr} value={yr}>
                     Class of {yr}
@@ -655,7 +672,7 @@ const StudentProfile = () => {
               step="0.01"
               min="0"
               max="10"
-              placeholder="8.50"
+              placeholder="e.g. 8.20"
               value={formData.cgpa}
               onChange={handleInputChange}
               disabled={!isEditing}
@@ -699,7 +716,7 @@ const StudentProfile = () => {
               step="0.1"
               min="0"
               max="100"
-              placeholder="85.5"
+              placeholder="e.g. 85.0"
               value={formData.tenthPercentage}
               onChange={handleInputChange}
               disabled={!isEditing}
@@ -714,7 +731,7 @@ const StudentProfile = () => {
               step="0.1"
               min="0"
               max="100"
-              placeholder="82.0"
+              placeholder="e.g. 82.0"
               value={formData.twelfthPercentage}
               onChange={handleInputChange}
               disabled={!isEditing}
@@ -905,7 +922,7 @@ const StudentProfile = () => {
             <Input
               label="GitHub Profile URL"
               name="githubUrl"
-              placeholder="https://github.com/yourusername"
+              placeholder="https://github.com/username"
               icon={Github}
               value={formData.githubUrl}
               onChange={handleInputChange}
@@ -917,7 +934,7 @@ const StudentProfile = () => {
             <Input
               label="LinkedIn Profile URL"
               name="linkedinUrl"
-              placeholder="https://linkedin.com/in/yourprofile"
+              placeholder="https://linkedin.com/in/username"
               icon={Linkedin}
               value={formData.linkedinUrl}
               onChange={handleInputChange}

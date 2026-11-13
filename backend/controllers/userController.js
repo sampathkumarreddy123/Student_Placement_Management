@@ -117,12 +117,9 @@ export const getMyProfile = async (req, res, next) => {
     );
 
     if (!profile) {
-      profile = await StudentProfile.create({
-        user: req.user._id,
-        rollNumber: `STU-${Date.now().toString().slice(-6)}`,
-        department: 'Computer Science',
-        batch: new Date().getFullYear(),
-        cgpa: 0,
+      return res.status(404).json({
+        success: false,
+        message: 'Student profile record not found. Please register through the registration page.',
       });
     }
 
