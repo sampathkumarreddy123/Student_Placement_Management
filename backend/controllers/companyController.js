@@ -429,6 +429,7 @@ export const toggleArchiveCompany = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: `"${company.name}" is now ${company.isArchived ? 'archived' : 'active'}.`,
+      isArchived: company.isArchived,
       company,
     });
   } catch (error) {

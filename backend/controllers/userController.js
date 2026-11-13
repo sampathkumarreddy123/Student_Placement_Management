@@ -453,6 +453,7 @@ export const getAllStudents = async (req, res, next) => {
     res.status(200).json({
       success: true,
       count: profiles.length,
+      total: profiles.length,
       students: profiles,
     });
   } catch (error) {

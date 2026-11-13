@@ -140,6 +140,7 @@ export const register = async (req, res, next) => {
       message: 'Student account registered successfully!',
       token,
       user: {
+        _id: user._id,
         id: user._id,
         name: user.name,
         email: user.email,
@@ -207,6 +208,7 @@ export const login = async (req, res, next) => {
       message: `Welcome back, ${user.name}!`,
       token,
       user: {
+        _id: user._id,
         id: user._id,
         name: user.name,
         email: user.email,

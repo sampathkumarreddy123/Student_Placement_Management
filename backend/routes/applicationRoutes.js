@@ -3,6 +3,7 @@ import {
   applyForDrive,
   getMyApplications,
   getApplicationById,
+  getApplicationStatusHistory,
   downloadApplicantResume,
   getDriveApplicants,
   getAllApplications,
@@ -14,17 +15,18 @@ const router = express.Router();
 
 router.use(protect);
 
-// Student routes
+// 1. Specific static & sub-routes (MUST be registered before /:id to prevent route hijacking)
 router.post('/apply/:driveId', authorize('student'), applyForDrive);
 router.get('/my', authorize('student'), getMyApplications);
+router.get('/my-applications', authorize('student'), getMyApplications);
+router.get('/drive/:driveId', authorize('officer'), getDriveApplicants);
+router.get('/officer/all', authorize('officer'), getAllApplications);
+router.get('/', authorize('officer'), getAllApplications);
 
-// Shared / Detail & Resume download routes (protected; controller enforces student owns app or officer for their drive)
+// 2. Parameterized /:id routes
 router.get('/:id', getApplicationById);
 router.get('/:id/resume', downloadApplicantResume);
-
-// Officer routes
-router.get('/drive/:driveId', authorize('officer'), getDriveApplicants);
-router.get('/', authorize('officer'), getAllApplications);
+router.get('/:id/history', getApplicationStatusHistory);
 router.patch('/:id/status', authorize('officer'), updateApplicationStatus);
 
 export default router;

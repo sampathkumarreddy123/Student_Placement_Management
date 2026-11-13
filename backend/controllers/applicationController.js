@@ -494,6 +494,7 @@ export const getDriveApplicants = async (req, res, next) => {
       totalPages: result.totalPages,
       currentPage: result.currentPage,
       applications: result.paginated,
+      applicants: result.paginated,
     });
   } catch (error) {
     next(error);
@@ -550,6 +551,7 @@ export const getAllApplications = async (req, res, next) => {
       totalPages: result.totalPages,
       currentPage: result.currentPage,
       applications: result.paginated,
+      applicants: result.paginated,
     });
   } catch (error) {
     next(error);
@@ -649,6 +651,42 @@ export const updateApplicationStatus = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Get status change history audit trail for an application
+// @route   GET /api/applications/:id/history
+// @access  Private (Student for own app, or Officer)
+export const getApplicationStatusHistory = async (req, res, next) => {
+  try {
+    const application = await Application.findById(req.params.id)
+      .populate('statusHistory.updatedBy', 'name email role')
+      .populate('student', 'name email')
+      .populate('drive', 'title jobRole');
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: 'Application record not found.',
+      });
+    }
+
+    // Role check: Students can only view history of their own applications
+    if (req.user.role === 'student' && application.student._id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You can only view audit history for your own applications.',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: application.statusHistory?.length || 0,
+      history: application.statusHistory || [],
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 
 

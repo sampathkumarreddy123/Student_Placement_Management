@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import { ensureOfficerAccount } from '../utils/initOfficer.js';
+import Application from '../models/Application.js';
+import Notification from '../models/Notification.js';
 
 const connectDB = async () => {
   try {
@@ -7,6 +9,10 @@ const connectDB = async () => {
     const conn = await mongoose.connect(mongoUri);
     console.log(`[Database] MongoDB Connected: ${conn.connection.host}`);
     await ensureOfficerAccount();
+    await Promise.all([
+      Application.syncIndexes().catch((err) => console.warn('[Index Sync Warning]', err.message)),
+      Notification.syncIndexes().catch((err) => console.warn('[Index Sync Warning]', err.message)),
+    ]);
   } catch (error) {
     console.error(`[Database Error] ${error.message}`);
     console.log(
