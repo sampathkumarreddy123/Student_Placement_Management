@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Building2,
   Plus,
@@ -51,6 +51,8 @@ const ManageCompanies = () => {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionAlert, setActionAlert] = useState(null);
+
+  const [searchParams] = useSearchParams();
 
   // Search & Filter state
   const [search, setSearch] = useState('');
@@ -131,6 +133,12 @@ const ManageCompanies = () => {
   useEffect(() => {
     fetchCompanies();
   }, [page, statusFilter, selectedIndustry, selectedLocation]);
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'new') {
+      openCreateModal();
+    }
+  }, [searchParams]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

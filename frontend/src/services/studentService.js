@@ -50,4 +50,9 @@ export const studentService = {
     const response = await api.get('/users/stats');
     return response.data;
   },
+
+  getOfficerDashboard: async () => {
+    const response = await api.get('/users/officer/dashboard');
+    return response.data;
+  },
 };

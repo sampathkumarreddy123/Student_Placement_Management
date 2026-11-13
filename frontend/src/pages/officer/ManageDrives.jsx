@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Plus,
   Briefcase,
@@ -56,6 +56,7 @@ const DEFAULT_ROUNDS = [
 ];
 
 const ManageDrives = () => {
+  const [searchParams] = useSearchParams();
   const [drives, setDrives] = useState([]);
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -115,6 +116,12 @@ const ManageDrives = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (searchParams.get('action') === 'new' && companies.length > 0) {
+      openCreateModal();
+    }
+  }, [searchParams, companies]);
 
   const openCreateModal = () => {
     setEditingDriveId(null);

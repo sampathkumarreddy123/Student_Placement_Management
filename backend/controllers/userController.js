@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import StudentProfile from '../models/StudentProfile.js';
 import Application from '../models/Application.js';
 import PlacementDrive from '../models/PlacementDrive.js';
+import Company from '../models/Company.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -514,13 +515,16 @@ export const getStudentById = async (req, res, next) => {
 export const getPlacementStats = async (req, res, next) => {
   try {
     const totalStudents = await StudentProfile.countDocuments();
+    const totalCompanies = await Company.countDocuments();
     const placedStudents = await StudentProfile.countDocuments({ placementStatus: 'Placed' });
     const unplacedStudents = totalStudents - placedStudents;
     const totalDrives = await PlacementDrive.countDocuments();
     const activeDrives = await PlacementDrive.countDocuments({
-      status: { $in: ['Upcoming', 'Ongoing'] },
+      status: { $in: ['Published', 'Upcoming', 'Ongoing'] },
     });
     const totalApplications = await Application.countDocuments();
+    const selectedStudents = await Application.countDocuments({ status: 'Selected' });
+    const shortlistedStudents = await Application.countDocuments({ status: 'Shortlisted' });
 
     // Department breakdown
     const deptStats = await StudentProfile.aggregate([
@@ -540,14 +544,330 @@ export const getPlacementStats = async (req, res, next) => {
       success: true,
       stats: {
         totalStudents,
+        totalCompanies,
         placedStudents,
         unplacedStudents,
         placementRate: totalStudents > 0 ? Math.round((placedStudents / totalStudents) * 100) : 0,
         totalDrives,
         activeDrives,
         totalApplications,
+        selectedStudents,
+        shortlistedStudents,
         deptStats,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get complete Officer Dashboard Data (KPIs, Recent Drives, Recent Applications, Analytics, Activity)
+// @route   GET /api/users/officer/dashboard
+// @access  Private (Officer only)
+export const getOfficerDashboardData = async (req, res, next) => {
+  try {
+    // 1. KPI Numbers
+    const [
+      totalStudents,
+      totalCompanies,
+      activeDrives,
+      totalDrives,
+      totalApplications,
+      selectedStudents,
+      shortlistedStudents,
+    ] = await Promise.all([
+      StudentProfile.countDocuments(),
+      Company.countDocuments(),
+      PlacementDrive.countDocuments({ status: { $in: ['Published', 'Upcoming', 'Ongoing'] } }),
+      PlacementDrive.countDocuments(),
+      Application.countDocuments(),
+      Application.countDocuments({ status: 'Selected' }),
+      Application.countDocuments({ status: 'Shortlisted' }),
+    ]);
+
+    // 2. Recent Placement Drives (top 5 sorted by createdAt desc)
+    const rawDrives = await PlacementDrive.find()
+      .populate('company', 'name logoUrl industry location')
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
+    const recentDrives = await Promise.all(
+      rawDrives.map(async (drive) => {
+        const applicantCount = await Application.countDocuments({ drive: drive._id });
+        return {
+          _id: drive._id,
+          title: drive.title,
+          jobRole: drive.jobRole,
+          packageLPA: drive.packageLPA,
+          applicationClosingDate: drive.applicationClosingDate || drive.registrationDeadline,
+          status: drive.status,
+          company: drive.company || null,
+          applicantCount,
+          createdAt: drive.createdAt,
+        };
+      })
+    );
+
+    // 3. Recent Applications (top 6 sorted by appliedAt/createdAt desc)
+    const rawApplications = await Application.find()
+      .populate('student', 'name email')
+      .populate('studentProfile', 'rollNumber department cgpa')
+      .populate('company', 'name logoUrl')
+      .populate('drive', 'title jobRole packageLPA status')
+      .sort({ appliedAt: -1, createdAt: -1 })
+      .limit(6)
+      .lean();
+
+    const recentApplications = rawApplications.map((app) => ({
+      _id: app._id,
+      studentName: app.student?.name || 'Student',
+      studentEmail: app.student?.email || '',
+      rollNumber: app.studentProfile?.rollNumber || app.resumeSnapshot?.studentRollNumber || 'N/A',
+      department: app.studentProfile?.department || app.resumeSnapshot?.studentDepartment || 'N/A',
+      companyName: app.company?.name || 'Company',
+      companyLogo: app.company?.logoUrl || '',
+      jobRole: app.drive?.jobRole || 'Role',
+      packageLPA: app.drive?.packageLPA || 0,
+      appliedAt: app.appliedAt || app.createdAt,
+      status: app.status,
+      currentRound: app.currentRound || 1,
+    }));
+
+    // 4. Analytics:
+    // 4a. Applications by Company (top 6)
+    const applicationsByCompany = await Application.aggregate([
+      {
+        $group: {
+          _id: '$company',
+          count: { $sum: 1 },
+          selected: { $sum: { $cond: [{ $eq: ['$status', 'Selected'] }, 1, 0] } },
+          shortlisted: { $sum: { $cond: [{ $eq: ['$status', 'Shortlisted'] }, 1, 0] } },
+        },
+      },
+      { $sort: { count: -1 } },
+      { $limit: 6 },
+      {
+        $lookup: {
+          from: 'companies',
+          localField: '_id',
+          foreignField: '_id',
+          as: 'companyInfo',
+        },
+      },
+      { $unwind: { path: '$companyInfo', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          companyId: '$_id',
+          companyName: { $ifNull: ['$companyInfo.name', 'Unspecified'] },
+          count: 1,
+          selected: 1,
+          shortlisted: 1,
+        },
+      },
+    ]);
+
+    // 4b. Selected Students by Department
+    const selectedByDeptRaw = await Application.aggregate([
+      { $match: { status: 'Selected' } },
+      {
+        $lookup: {
+          from: 'studentprofiles',
+          localField: 'studentProfile',
+          foreignField: '_id',
+          as: 'profile',
+        },
+      },
+      { $unwind: { path: '$profile', preserveNullAndEmptyArrays: true } },
+      {
+        $group: {
+          _id: { $ifNull: ['$profile.department', 'Other'] },
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+    const selectedByDepartment = selectedByDeptRaw.map((d) => ({
+      department: d._id,
+      count: d.count,
+    }));
+
+    // 4c. Application Status Distribution
+    const statusDistributionRaw = await Application.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+    const statusDistribution = statusDistributionRaw.map((s) => ({
+      status: s._id,
+      count: s.count,
+    }));
+
+    // 4d. Placement Drive Statistics by Status & Package
+    const driveStatusStats = await PlacementDrive.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          avgPackage: { $avg: '$packageLPA' },
+          maxPackage: { $max: '$packageLPA' },
+          minPackage: { $min: '$packageLPA' },
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    const overallPackageAgg = await PlacementDrive.aggregate([
+      {
+        $group: {
+          _id: null,
+          avgPackage: { $avg: '$packageLPA' },
+          maxPackage: { $max: '$packageLPA' },
+          minPackage: { $min: '$packageLPA' },
+        },
+      },
+    ]);
+
+    const driveStats = {
+      byStatus: driveStatusStats.map((d) => ({
+        status: d._id,
+        count: d.count,
+        avgPackage: d.avgPackage ? Number(d.avgPackage.toFixed(2)) : 0,
+      })),
+      totalDrives,
+      activeDrives,
+      avgPackage: overallPackageAgg[0]?.avgPackage ? Number(overallPackageAgg[0].avgPackage.toFixed(2)) : 0,
+      maxPackage: overallPackageAgg[0]?.maxPackage || 0,
+      minPackage: overallPackageAgg[0]?.minPackage || 0,
+    };
+
+    // 4e. Department Placement breakdown (Registered vs Placed)
+    const deptStats = await StudentProfile.aggregate([
+      {
+        $group: {
+          _id: '$department',
+          total: { $sum: 1 },
+          placed: {
+            $sum: { $cond: [{ $eq: ['$placementStatus', 'Placed'] }, 1, 0] },
+          },
+          avgCgpa: { $avg: '$cgpa' },
+        },
+      },
+      { $sort: { total: -1 } },
+    ]);
+
+    // 5. Recent Officer Activity (Aggregated from real database events)
+    const activities = [];
+
+    // 5a. Recent Companies added
+    const recentCompanyDocs = await Company.find()
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .select('name createdAt')
+      .lean();
+    recentCompanyDocs.forEach((c) => {
+      activities.push({
+        id: `comp-${c._id}`,
+        type: 'company_added',
+        title: 'Company Added',
+        description: `Added "${c.name}" to campus recruitment registry`,
+        timestamp: c.createdAt,
+        link: '/officer/companies',
+      });
+    });
+
+    // 5b. Recent Drives Created
+    const recentDriveDocs = await PlacementDrive.find()
+      .populate('company', 'name')
+      .sort({ createdAt: -1 })
+      .limit(4)
+      .select('title status createdAt company jobRole')
+      .lean();
+    recentDriveDocs.forEach((d) => {
+      activities.push({
+        id: `drive-create-${d._id}`,
+        type: 'drive_created',
+        title: 'Placement Drive Created',
+        description: `Scheduled "${d.title}" (${d.jobRole}) for ${d.company?.name || 'Company'}`,
+        timestamp: d.createdAt,
+        link: '/officer/drives',
+      });
+    });
+
+    // 5c. Recent Closed/Completed Drives
+    const recentClosedDocs = await PlacementDrive.find({ status: { $in: ['Closed', 'Completed'] } })
+      .populate('company', 'name')
+      .sort({ updatedAt: -1 })
+      .limit(3)
+      .select('title status updatedAt company')
+      .lean();
+    recentClosedDocs.forEach((d) => {
+      activities.push({
+        id: `drive-close-${d._id}`,
+        type: 'drive_closed',
+        title: 'Drive Closed',
+        description: `Applications concluded for "${d.title}"`,
+        timestamp: d.updatedAt,
+        link: '/officer/drives',
+      });
+    });
+
+    // 5d. Recent Status Updates from Application statusHistory
+    const recentAppsWithHistory = await Application.find({
+      'statusHistory.0': { $exists: true },
+    })
+      .populate('student', 'name')
+      .populate('company', 'name')
+      .populate('drive', 'jobRole')
+      .sort({ updatedAt: -1 })
+      .limit(6)
+      .lean();
+
+    recentAppsWithHistory.forEach((app) => {
+      const latestHistory = app.statusHistory?.[app.statusHistory.length - 1];
+      if (latestHistory) {
+        activities.push({
+          id: `app-status-${app._id}-${latestHistory._id || latestHistory.updatedDate}`,
+          type: 'status_updated',
+          title: 'Application Status Updated',
+          description: `${app.student?.name || 'Student'} marked as "${latestHistory.newStatus}" for ${app.company?.name || 'Drive'}${latestHistory.remarks ? ` (${latestHistory.remarks})` : ''}`,
+          timestamp: latestHistory.updatedDate || app.updatedAt,
+          link: '/officer/applications',
+        });
+      }
+    });
+
+    // Sort all real activities by timestamp descending and take top 8
+    activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const recentActivity = activities.slice(0, 8);
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalStudents,
+        totalCompanies,
+        activeDrives,
+        totalDrives,
+        totalApplications,
+        selectedStudents,
+        shortlistedStudents,
+        placedStudents: selectedStudents,
+        placementRate: totalStudents > 0 ? Math.round((selectedStudents / totalStudents) * 100) : 0,
+      },
+      recentDrives,
+      recentApplications,
+      analytics: {
+        applicationsByCompany,
+        selectedByDepartment,
+        statusDistribution,
+        driveStats,
+        deptPerformance: deptStats,
+      },
+      recentActivity,
     });
   } catch (error) {
     next(error);

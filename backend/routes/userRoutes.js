@@ -8,6 +8,7 @@ import {
   getAllStudents,
   getStudentById,
   getPlacementStats,
+  getOfficerDashboardData,
 } from '../controllers/userController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 import { uploadResume, uploadAvatar } from '../middleware/uploadMiddleware.js';
@@ -37,5 +38,6 @@ router.post(
 router.get('/students', protect, authorize('officer'), getAllStudents);
 router.get('/students/:id', protect, authorize('officer'), getStudentById);
 router.get('/stats', protect, authorize('officer'), getPlacementStats);
+router.get('/officer/dashboard', protect, authorize('officer'), getOfficerDashboardData);
 
 export default router;
