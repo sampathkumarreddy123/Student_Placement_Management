@@ -8,6 +8,7 @@ import {
   Briefcase,
   ChevronRight,
   CheckCircle,
+  GraduationCap,
 } from 'lucide-react';
 import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters';
 import Badge from '../common/Badge';
@@ -23,11 +24,24 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
         {/* Header: Company & Badges */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg flex-shrink-0">
-              {drive.company?.name ? drive.company.name.charAt(0) : 'C'}
-            </div>
+            {drive.company?.logoUrl ? (
+              <img
+                src={drive.company.logoUrl}
+                alt={drive.company?.name || 'Company'}
+                className="w-12 h-12 rounded-xl object-contain p-1 border border-slate-200 bg-white flex-shrink-0"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = 'none';
+                }}
+              />
+            ) : null}
+            {(!drive.company?.logoUrl || undefined) && (
+              <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg flex-shrink-0">
+                {drive.company?.name ? drive.company.name.charAt(0).toUpperCase() : 'C'}
+              </div>
+            )}
             <div>
-              <h3 className="font-semibold text-slate-900 text-base leading-tight hover:text-blue-600 transition-colors">
+              <h3 className="font-semibold text-slate-900 text-sm sm:text-base leading-tight hover:text-blue-600 transition-colors">
                 <Link to={`/drives/${drive._id}`}>{drive.title}</Link>
               </h3>
               <p className="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
@@ -50,19 +64,19 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
           </div>
         </div>
 
-        {/* Highlights: Role, Package, Location */}
+        {/* Highlights: Role, Package, Location, CGPA */}
         <div className="grid grid-cols-2 gap-2 my-4 p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs">
           <div>
-            <span className="text-slate-400 block text-[11px]">Role</span>
+            <span className="text-slate-400 block text-[11px]">Job Role</span>
             <span className="font-medium text-slate-800 flex items-center gap-1 mt-0.5 truncate">
-              <Briefcase className="w-3.5 h-3.5 text-blue-600" />
-              {drive.jobRole}
+              <Briefcase className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+              <span className="truncate">{drive.jobRole}</span>
             </span>
           </div>
 
           <div>
-            <span className="text-slate-400 block text-[11px]">Package</span>
-            <span className="font-semibold text-blue-700 mt-0.5 block">
+            <span className="text-slate-400 block text-[11px]">Package / CTC</span>
+            <span className="font-semibold text-blue-700 mt-0.5 block truncate">
               {formatLPA(drive.packageLPA)}
             </span>
           </div>
@@ -70,15 +84,16 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
           <div className="mt-1">
             <span className="text-slate-400 block text-[11px]">Location</span>
             <span className="font-medium text-slate-700 flex items-center gap-1 mt-0.5 truncate">
-              <MapPin className="w-3.5 h-3.5 text-slate-400" />
-              {drive.location || 'Multiple'}
+              <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+              <span className="truncate">{drive.location || 'Multiple'}</span>
             </span>
           </div>
 
           <div className="mt-1">
-            <span className="text-slate-400 block text-[11px]">Min CGPA</span>
-            <span className="font-medium text-slate-700 mt-0.5 block">
-              {drive.eligibilityCriteria?.minCgpa ?? 'No limit'}
+            <span className="text-slate-400 block text-[11px]">Required CGPA</span>
+            <span className="font-medium text-slate-700 flex items-center gap-1 mt-0.5">
+              <GraduationCap className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+              <span>{drive.eligibilityCriteria?.minCgpa ? `${drive.eligibilityCriteria.minCgpa}+ CGPA` : 'No min cutoff'}</span>
             </span>
           </div>
         </div>
@@ -109,7 +124,7 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
       <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
         <Link to={`/drives/${drive._id}`} className="flex-1">
           <Button variant="outline" size="sm" className="w-full">
-            Details
+            View Details
           </Button>
         </Link>
 
@@ -141,4 +156,3 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
 };
 
 export default DriveCard;
-

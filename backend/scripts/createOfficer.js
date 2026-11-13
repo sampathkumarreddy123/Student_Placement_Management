@@ -50,3 +50,4 @@ const createOfficer = async () => {
 };
 
 createOfficer();
+
