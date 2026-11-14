@@ -83,7 +83,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
                       isCollapsed ? 'justify-center lg:px-2' : ''
                     } ${
                       isActive
-                        ? 'bg-blue-50 text-blue-600 font-semibold shadow-xs'
+                        ? 'bg-slate-100 text-slate-900 font-semibold border-l-2 border-slate-900'
                         : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     }`
                   }

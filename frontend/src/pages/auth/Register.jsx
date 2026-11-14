@@ -135,7 +135,7 @@ const Register = () => {
       {/* Header: Logo & Back to Home */}
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E2E8F0]">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-[#2563EB] flex items-center justify-center text-white shadow-sm">
+          <div className="w-7 h-7 rounded-md bg-slate-900 flex items-center justify-center text-white shadow-sm">
             <GraduationCap className="w-4 h-4" />
           </div>
           <span className="font-bold text-[#0F172A] text-sm tracking-tight">
@@ -144,7 +144,7 @@ const Register = () => {
         </Link>
         <Link
           to="/"
-          className="text-xs font-medium text-[#64748B] hover:text-[#2563EB] inline-flex items-center gap-1 transition-colors"
+          className="text-xs font-medium text-[#64748B] hover:text-slate-900 inline-flex items-center gap-1 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Home
@@ -230,15 +230,15 @@ const Register = () => {
               htmlFor="department"
               className="block text-xs font-medium text-[#0F172A] mb-1.5"
             >
-              Department <span className="text-rose-500">*</span>
+              Department <span className="text-stone-500">*</span>
             </label>
             <select
               id="department"
               name="department"
               value={formData.department}
               onChange={handleChange}
-              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white ${
-                fieldErrors.department ? 'border-rose-300' : 'border-[#E2E8F0]'
+              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-slate-600 focus:ring-1 focus:ring-slate-600 bg-white ${
+                fieldErrors.department ? 'border-stone-300' : 'border-[#E2E8F0]'
               }`}
             >
               <option value="">Select Department</option>
@@ -249,7 +249,7 @@ const Register = () => {
               ))}
             </select>
             {fieldErrors.department && (
-              <p className="mt-1 text-xs text-rose-600">{fieldErrors.department}</p>
+              <p className="mt-1 text-xs text-stone-600 font-medium">{fieldErrors.department}</p>
             )}
           </div>
 
@@ -258,15 +258,15 @@ const Register = () => {
               htmlFor="graduationYear"
               className="block text-xs font-medium text-[#0F172A] mb-1.5"
             >
-              Graduation Year <span className="text-rose-500">*</span>
+              Graduation Year <span className="text-stone-500">*</span>
             </label>
             <select
               id="graduationYear"
               name="graduationYear"
               value={formData.graduationYear}
               onChange={handleChange}
-              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white ${
-                fieldErrors.graduationYear ? 'border-rose-300' : 'border-[#E2E8F0]'
+              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-slate-600 focus:ring-1 focus:ring-slate-600 bg-white ${
+                fieldErrors.graduationYear ? 'border-stone-300' : 'border-[#E2E8F0]'
               }`}
             >
               <option value="">Select Year</option>
@@ -277,7 +277,7 @@ const Register = () => {
               ))}
             </select>
             {fieldErrors.graduationYear && (
-              <p className="mt-1 text-xs text-rose-600">{fieldErrors.graduationYear}</p>
+              <p className="mt-1 text-xs text-stone-600 font-medium">{fieldErrors.graduationYear}</p>
             )}
           </div>
         </div>
@@ -332,7 +332,7 @@ const Register = () => {
           Already have an account?{' '}
           <Link
             to="/student/login"
-            className="font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
+            className="font-semibold text-slate-900 hover:underline"
           >
             Sign In
           </Link>

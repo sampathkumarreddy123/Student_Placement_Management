@@ -98,8 +98,8 @@ const OfficerDashboard = () => {
       value: stats.totalStudents || 0,
       subtext: 'Enrolled candidates',
       icon: Users,
-      color: 'blue',
-      bgColor: 'bg-blue-50 text-blue-600 border-blue-100',
+      color: 'slate',
+      bgColor: 'bg-slate-100 text-slate-800 border-slate-200',
       to: '/officer/students',
     },
     {
@@ -108,8 +108,8 @@ const OfficerDashboard = () => {
       value: stats.totalCompanies || 0,
       subtext: 'Recruiting employers',
       icon: Building2,
-      color: 'indigo',
-      bgColor: 'bg-indigo-50 text-indigo-600 border-indigo-100',
+      color: 'slate',
+      bgColor: 'bg-slate-100 text-slate-800 border-slate-200',
       to: '/officer/companies',
     },
     {
@@ -118,8 +118,8 @@ const OfficerDashboard = () => {
       value: stats.activeDrives || 0,
       subtext: `${stats.totalDrives || 0} scheduled in total`,
       icon: Briefcase,
-      color: 'amber',
-      bgColor: 'bg-amber-50 text-amber-600 border-amber-100',
+      color: 'slate',
+      bgColor: 'bg-slate-100 text-slate-800 border-slate-200',
       to: '/officer/drives',
     },
     {
@@ -128,8 +128,8 @@ const OfficerDashboard = () => {
       value: stats.totalApplications || 0,
       subtext: 'Student applications filed',
       icon: FileText,
-      color: 'purple',
-      bgColor: 'bg-purple-50 text-purple-600 border-purple-100',
+      color: 'slate',
+      bgColor: 'bg-slate-100 text-slate-800 border-slate-200',
       to: '/officer/applications',
     },
     {
@@ -138,8 +138,8 @@ const OfficerDashboard = () => {
       value: stats.selectedStudents || 0,
       subtext: `${stats.placementRate || 0}% overall placement rate`,
       icon: Award,
-      color: 'emerald',
-      bgColor: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+      color: 'slate',
+      bgColor: 'bg-slate-100 text-slate-800 border-slate-200',
       to: '/officer/applications?status=Selected',
     },
     {
@@ -148,8 +148,8 @@ const OfficerDashboard = () => {
       value: stats.shortlistedStudents || 0,
       subtext: 'Advancing in interview rounds',
       icon: UserCheck,
-      color: 'cyan',
-      bgColor: 'bg-cyan-50 text-cyan-700 border-cyan-100',
+      color: 'slate',
+      bgColor: 'bg-slate-100 text-slate-800 border-slate-200',
       to: '/officer/applications?status=Shortlisted',
     },
   ];
@@ -162,7 +162,7 @@ const OfficerDashboard = () => {
       icon: Building2,
       to: '/officer/companies?action=new',
       btnText: 'Add New Company',
-      color: 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100',
+      color: 'text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200',
     },
     {
       title: 'Create Placement Drive',
@@ -170,7 +170,7 @@ const OfficerDashboard = () => {
       icon: PlusCircle,
       to: '/officer/drives?action=new',
       btnText: 'Create Drive',
-      color: 'text-blue-600 bg-blue-50 hover:bg-blue-100',
+      color: 'text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200',
     },
     {
       title: 'View Applicants',
@@ -178,7 +178,7 @@ const OfficerDashboard = () => {
       icon: Users,
       to: '/officer/applications',
       btnText: 'Manage Applicants',
-      color: 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100',
+      color: 'text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200',
     },
     {
       title: 'Manage Companies',
@@ -186,18 +186,18 @@ const OfficerDashboard = () => {
       icon: Layers,
       to: '/officer/companies',
       btnText: 'Explore Directory',
-      color: 'text-amber-600 bg-amber-50 hover:bg-amber-100',
+      color: 'text-slate-800 bg-slate-100 hover:bg-slate-200 border border-slate-200',
     },
   ];
 
   // Colors for Application Status Distribution
   const statusColors = {
     Applied: { bar: 'bg-slate-400', badge: 'bg-slate-100 text-slate-700' },
-    'Under Review': { bar: 'bg-blue-500', badge: 'bg-blue-50 text-blue-700' },
-    Shortlisted: { bar: 'bg-indigo-500', badge: 'bg-indigo-50 text-indigo-700' },
-    Interviewing: { bar: 'bg-amber-500', badge: 'bg-amber-50 text-amber-700' },
-    Selected: { bar: 'bg-emerald-500', badge: 'bg-emerald-50 text-emerald-700' },
-    Rejected: { bar: 'bg-rose-500', badge: 'bg-rose-50 text-rose-700' },
+    'Under Review': { bar: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700' },
+    Shortlisted: { bar: 'bg-slate-600', badge: 'bg-slate-100 text-slate-800' },
+    Interviewing: { bar: 'bg-slate-400', badge: 'bg-slate-100 text-slate-700' },
+    Selected: { bar: 'bg-slate-800', badge: 'bg-slate-900 text-white' },
+    Rejected: { bar: 'bg-stone-400', badge: 'bg-stone-100 text-stone-700' },
   };
 
   const applicationsByCompany = analytics.applicationsByCompany || [];

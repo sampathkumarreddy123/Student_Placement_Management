@@ -57,8 +57,8 @@ const Input = forwardRef(
               isPasswordType || endSlot ? 'pr-10' : 'pr-3'
             } py-2 ${
               error
-                ? 'border-rose-300 text-rose-900 focus:border-rose-500 focus:ring-rose-200'
-                : 'border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-500 focus:ring-blue-100'
+                ? 'border-stone-300 text-stone-900 focus:border-slate-600 focus:ring-slate-100'
+                : 'border-slate-200 text-slate-800 placeholder-slate-400 focus:border-slate-600 focus:ring-slate-100'
             } ${className}`}
             {...props}
           />
@@ -86,7 +86,7 @@ const Input = forwardRef(
           )}
         </div>
 
-        {error && <p className="mt-1 text-xs text-rose-600">{error}</p>}
+        {error && <p className="mt-1 text-xs text-stone-600 font-medium">{error}</p>}
         {helperText && !error && (
           <p className="mt-1 text-xs text-slate-500">{helperText}</p>
         )}

@@ -21,7 +21,7 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-slate-200/90 hover:border-blue-300 transition-all shadow-sm hover:shadow-md p-5 flex flex-col justify-between">
+      <div className="bg-white rounded-2xl border border-slate-200/90 hover:border-slate-300 transition-all shadow-sm hover:shadow-md p-5 flex flex-col justify-between">
         <div>
           {/* ROW 1: Company Logo & Details (Left) + Badges (Right) */}
           <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-100">
@@ -38,7 +38,7 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
                 />
               ) : null}
               {(!drive.company?.logoUrl || undefined) && (
-                <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-base flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-800 font-bold text-base flex-shrink-0">
                   {drive.company?.name ? drive.company.name.charAt(0).toUpperCase() : 'C'}
                 </div>
               )}
@@ -65,7 +65,7 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
           </div>
 
           {/* ROW 2: Drive Title (Gets 100% full card width, no overlap!) */}
-          <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-snug hover:text-blue-600 transition-colors my-3 min-h-[2.5rem] flex items-center">
+          <h3 className="font-bold text-slate-900 text-sm sm:text-base leading-snug hover:text-slate-700 transition-colors my-3 min-h-[2.5rem] flex items-center">
             <Link to={`/drives/${drive._id}`} className="line-clamp-2">
               {drive.title}
             </Link>
@@ -76,14 +76,14 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
             <div>
               <span className="text-slate-400 block text-[11px]">Job Role</span>
               <span className="font-medium text-slate-800 flex items-center gap-1.5 mt-0.5 truncate">
-                <Briefcase className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                <Briefcase className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
                 <span className="truncate" title={drive.jobRole}>{drive.jobRole}</span>
               </span>
             </div>
 
             <div>
               <span className="text-slate-400 block text-[11px]">Package / CTC</span>
-              <span className="font-bold text-blue-700 mt-0.5 block truncate">
+              <span className="font-bold text-slate-900 mt-0.5 block truncate">
                 {formatLPA(drive.packageLPA)}
               </span>
             </div>

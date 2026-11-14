@@ -107,8 +107,8 @@ const OfficerRegister = () => {
     <div>
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-            <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+            <ShieldCheck className="w-3.5 h-3.5 text-slate-700" />
             Institutional Administration
           </span>
         </div>
@@ -121,11 +121,11 @@ const OfficerRegister = () => {
       </div>
 
       {/* Security notice banner */}
-      <div className="p-3 mb-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
-        <KeyRound className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+      <div className="p-3 mb-4 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs flex items-start gap-2.5">
+        <KeyRound className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
         <div>
-          <p className="font-semibold text-amber-800">Protected Administrator Portal</p>
-          <p className="text-[11px] text-amber-700 mt-0.5 leading-relaxed">
+          <p className="font-semibold text-slate-900">Protected Administrator Portal</p>
+          <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
             Officer registration requires the <strong>Institutional Setup Key</strong> configured in your server environment to prevent unauthorized student registrations.
           </p>
         </div>
@@ -239,7 +239,7 @@ const OfficerRegister = () => {
           Already have an officer account?{' '}
           <Link
             to="/officer/login"
-            className="font-semibold text-blue-600 hover:text-blue-700 hover:underline"
+            className="font-semibold text-slate-900 hover:underline"
           >
             Officer Sign In
           </Link>
@@ -249,7 +249,7 @@ const OfficerRegister = () => {
           Are you a student?{' '}
           <Link
             to="/student/login"
-            className="font-semibold text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center gap-1"
+            className="font-semibold text-slate-900 hover:underline inline-flex items-center gap-1"
           >
             Student Login <ArrowRight className="w-3 h-3" />
           </Link>

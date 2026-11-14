@@ -46,27 +46,27 @@ export const getDeadlineStatus = (deadlineString) => {
 export const getStatusColor = (status) => {
   const map = {
     // Placement Drive statuses
-    Draft: 'bg-slate-100 text-slate-700 border-slate-300',
-    Published: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    Closed: 'bg-rose-50 text-rose-700 border-rose-200',
-    Completed: 'bg-purple-50 text-purple-700 border-purple-200',
-    Upcoming: 'bg-blue-50 text-blue-700 border-blue-200',
-    Ongoing: 'bg-amber-50 text-amber-700 border-amber-200',
-    Cancelled: 'bg-rose-50 text-rose-700 border-rose-200',
+    Draft: 'bg-slate-100 text-slate-700 border-slate-200',
+    Published: 'bg-slate-100 text-slate-800 border-slate-300 font-medium',
+    Closed: 'bg-stone-100 text-stone-700 border-stone-200',
+    Completed: 'bg-slate-100 text-slate-700 border-slate-200',
+    Upcoming: 'bg-slate-100 text-slate-800 border-slate-200',
+    Ongoing: 'bg-stone-100 text-stone-700 border-stone-200',
+    Cancelled: 'bg-stone-100 text-stone-600 border-stone-200',
 
     // Application statuses
-    Applied: 'bg-slate-100 text-slate-700 border-slate-300',
-    'Under Review': 'bg-blue-50 text-blue-700 border-blue-200',
-    Shortlisted: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    Interviewing: 'bg-amber-50 text-amber-700 border-amber-200',
-    Selected: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    Rejected: 'bg-rose-50 text-rose-700 border-rose-200',
+    Applied: 'bg-slate-100 text-slate-700 border-slate-200',
+    'Under Review': 'bg-slate-100 text-slate-800 border-slate-200',
+    Shortlisted: 'bg-slate-200 text-slate-900 border-slate-300 font-medium',
+    Interviewing: 'bg-stone-100 text-stone-800 border-stone-200',
+    Selected: 'bg-slate-900 text-white border-slate-900 font-medium',
+    Rejected: 'bg-stone-100 text-stone-600 border-stone-200',
 
     // Placement status
-    Placed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    'Not Placed': 'bg-slate-100 text-slate-700 border-slate-300',
+    Placed: 'bg-slate-900 text-white border-slate-900 font-medium',
+    'Not Placed': 'bg-slate-100 text-slate-600 border-slate-200',
   };
 
-  return map[status] || 'bg-slate-100 text-slate-700 border-slate-300';
+  return map[status] || 'bg-slate-100 text-slate-700 border-slate-200';
 };
 

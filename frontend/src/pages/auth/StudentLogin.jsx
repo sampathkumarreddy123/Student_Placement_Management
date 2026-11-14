@@ -88,7 +88,7 @@ const StudentLogin = () => {
   if (user && user.role === 'officer') {
     return (
       <div className="space-y-4 text-center">
-        <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-[#2563EB] flex items-center justify-center mx-auto">
+        <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 flex items-center justify-center mx-auto">
           <ShieldCheck className="w-5 h-5" />
         </div>
 
@@ -126,7 +126,7 @@ const StudentLogin = () => {
       {/* Header: Logo & Back to Home */}
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E2E8F0]">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-[#2563EB] flex items-center justify-center text-white shadow-sm">
+          <div className="w-7 h-7 rounded-md bg-slate-900 flex items-center justify-center text-white shadow-sm">
             <GraduationCap className="w-4 h-4" />
           </div>
           <span className="font-bold text-[#0F172A] text-sm tracking-tight">
@@ -135,7 +135,7 @@ const StudentLogin = () => {
         </Link>
         <Link
           to="/"
-          className="text-xs font-medium text-[#64748B] hover:text-[#2563EB] inline-flex items-center gap-1 transition-colors"
+          className="text-xs font-medium text-[#64748B] hover:text-slate-900 inline-flex items-center gap-1 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Home
@@ -221,7 +221,7 @@ const StudentLogin = () => {
           Don't have an account?{' '}
           <Link
             to="/student/register"
-            className="font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
+            className="font-semibold text-slate-900 hover:underline"
           >
             Create a Student Account
           </Link>

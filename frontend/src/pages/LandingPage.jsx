@@ -29,7 +29,7 @@ const LandingPage = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Left: Logo & Branding */}
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-lg bg-[#2563EB] flex items-center justify-center text-white shadow-sm">
+            <div className="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center text-white shadow-sm">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div className="flex flex-col">
@@ -54,7 +54,7 @@ const LandingPage = () => {
               <>
                 <Link
                   to="/student/login"
-                  className="text-xs font-semibold text-[#0F172A] hover:text-[#2563EB] transition-colors px-3 py-1.5 rounded-md hover:bg-slate-50"
+                  className="text-xs font-semibold text-[#0F172A] hover:text-slate-600 transition-colors px-3 py-1.5 rounded-md hover:bg-slate-50"
                 >
                   Student Login
                 </Link>
@@ -66,7 +66,7 @@ const LandingPage = () => {
                 <span className="h-4 w-px bg-[#E2E8F0]" />
                 <Link
                   to="/officer/login"
-                  className="text-xs font-semibold text-[#64748B] hover:text-[#2563EB] transition-colors px-2 py-1"
+                  className="text-xs font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors px-2 py-1"
                 >
                   Officer Login
                 </Link>
@@ -105,21 +105,21 @@ const LandingPage = () => {
                 <Link
                   to="/student/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-[#0F172A] hover:text-[#2563EB] py-2 px-3 rounded-lg hover:bg-slate-50"
+                  className="text-sm font-semibold text-[#0F172A] hover:text-slate-600 py-2 px-3 rounded-lg hover:bg-slate-50"
                 >
                   Student Login
                 </Link>
                 <Link
                   to="/student/register"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-[#2563EB] py-2 px-3 rounded-lg hover:bg-blue-50"
+                  className="text-sm font-semibold text-[#0F172A] py-2 px-3 rounded-lg hover:bg-slate-100"
                 >
                   Register
                 </Link>
                 <Link
                   to="/officer/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-semibold text-[#64748B] hover:text-[#2563EB] py-2 px-3 rounded-lg hover:bg-slate-50"
+                  className="text-sm font-semibold text-[#64748B] hover:text-[#0F172A] py-2 px-3 rounded-lg hover:bg-slate-50"
                 >
                   Officer Login
                 </Link>
@@ -134,7 +134,7 @@ const LandingPage = () => {
         {/* 2. Hero Section */}
         <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center">
           {/* Small Label */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#2563EB] text-xs font-semibold mb-5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-slate-700 text-xs font-semibold mb-5">
             Campus Recruitment Portal
           </div>
 
@@ -178,7 +178,7 @@ const LandingPage = () => {
               Are you a Placement Officer?{' '}
               <Link
                 to="/officer/login"
-                className="font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:underline"
+                className="font-semibold text-slate-800 hover:text-black hover:underline"
               >
                 Sign in here.
               </Link>
@@ -191,7 +191,7 @@ const LandingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {/* Card 1 */}
             <div className="bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-sm flex flex-col">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center mb-4">
+              <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center mb-4">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <h3 className="font-semibold text-[#0F172A] text-sm sm:text-base">
@@ -204,7 +204,7 @@ const LandingPage = () => {
 
             {/* Card 2 */}
             <div className="bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-sm flex flex-col">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center mb-4">
+              <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center mb-4">
                 <Briefcase className="w-5 h-5" />
               </div>
               <h3 className="font-semibold text-[#0F172A] text-sm sm:text-base">
@@ -217,7 +217,7 @@ const LandingPage = () => {
 
             {/* Card 3 */}
             <div className="bg-white p-6 rounded-xl border border-[#E2E8F0] shadow-sm flex flex-col">
-              <div className="w-10 h-10 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center mb-4">
+              <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 flex items-center justify-center mb-4">
                 <Clock className="w-5 h-5" />
               </div>
               <h3 className="font-semibold text-[#0F172A] text-sm sm:text-base">

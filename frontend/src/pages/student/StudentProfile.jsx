@@ -448,7 +448,7 @@ const StudentProfile = () => {
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="absolute -bottom-1 -right-1 p-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm border-2 border-white transition-colors"
+                className="absolute -bottom-1 -right-1 p-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg shadow-sm border-2 border-white transition-colors"
                 title="Update Profile Photo"
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -537,10 +537,10 @@ const StudentProfile = () => {
         <div className="mt-6 pt-5 border-t border-slate-100">
           <div className="flex items-center justify-between text-xs mb-2">
             <span className="font-semibold text-slate-700 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-blue-600" />
+              <Sparkles className="w-4 h-4 text-slate-700" />
               Profile Completion Status
             </span>
-            <span className="font-bold text-blue-700">
+            <span className="font-bold text-slate-900">
               {completion.percentage}% Complete
             </span>
           </div>
@@ -549,10 +549,10 @@ const StudentProfile = () => {
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 completion.percentage === 100
-                  ? 'bg-emerald-500'
+                  ? 'bg-slate-700'
                   : completion.percentage >= 70
-                  ? 'bg-blue-600'
-                  : 'bg-amber-500'
+                  ? 'bg-slate-800'
+                  : 'bg-stone-500'
               }`}
               style={{ width: `${completion.percentage}%` }}
             />
@@ -815,7 +815,7 @@ const StudentProfile = () => {
                       key={skill}
                       type="button"
                       onClick={() => handleAddSkill(skill)}
-                      className="px-2 py-0.5 rounded text-[11px] bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 transition-colors"
+                      className="px-2 py-0.5 rounded text-[11px] bg-slate-100 hover:bg-slate-200 hover:text-slate-900 text-slate-600 transition-colors"
                     >
                       + {skill}
                     </button>
@@ -833,14 +833,14 @@ const StudentProfile = () => {
               {formData.skills.map((skill) => (
                 <span
                   key={skill}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200"
                 >
                   {skill}
                   {isEditing && (
                     <button
                       type="button"
                       onClick={() => handleRemoveSkill(skill)}
-                      className="text-blue-400 hover:text-rose-600 focus:outline-none"
+                      className="text-slate-400 hover:text-slate-700 focus:outline-none"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -858,9 +858,9 @@ const StudentProfile = () => {
         >
           <div className="space-y-4">
             {profile?.resumeUrl ? (
-              <div className="p-4 rounded-xl border border-blue-200 bg-blue-50/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <div className="w-12 h-12 rounded-xl bg-slate-900 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
                     <FileText className="w-6 h-6" />
                   </div>
                   <div>
@@ -900,14 +900,14 @@ const StudentProfile = () => {
                     type="button"
                     onClick={() => resumeInputRef.current?.click()}
                     disabled={uploadingResume}
-                    className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium transition-colors"
                   >
                     {uploadingResume ? 'Replacing...' : 'Replace PDF'}
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-blue-400 transition-colors bg-slate-50/50">
+              <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-slate-400 transition-colors bg-slate-50/50">
                 <FileText className="w-10 h-10 text-slate-400 mx-auto mb-3" />
                 <h4 className="text-sm font-semibold text-slate-800">
                   No resume document uploaded yet

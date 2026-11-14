@@ -11,24 +11,24 @@ const Alert = ({
 }) => {
   const types = {
     info: {
-      bg: 'bg-blue-50/80 border-blue-200 text-blue-900',
+      bg: 'bg-slate-50 border-slate-200 text-slate-800',
       icon: Info,
-      iconColor: 'text-blue-600',
+      iconColor: 'text-slate-600',
     },
     success: {
-      bg: 'bg-emerald-50/80 border-emerald-200 text-emerald-900',
+      bg: 'bg-slate-50 border-slate-200 text-slate-800',
       icon: CheckCircle2,
-      iconColor: 'text-emerald-600',
+      iconColor: 'text-slate-700',
     },
     warning: {
-      bg: 'bg-amber-50/80 border-amber-200 text-amber-900',
+      bg: 'bg-stone-50 border-stone-200 text-stone-800',
       icon: AlertCircle,
-      iconColor: 'text-amber-600',
+      iconColor: 'text-stone-600',
     },
     error: {
-      bg: 'bg-rose-50/80 border-rose-200 text-rose-900',
+      bg: 'bg-stone-50 border-stone-200 text-stone-800',
       icon: XCircle,
-      iconColor: 'text-rose-600',
+      iconColor: 'text-stone-700',
     },
   };
 

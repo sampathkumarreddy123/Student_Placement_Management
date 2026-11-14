@@ -162,17 +162,17 @@ const NotificationsPage = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'DRIVE_PUBLISHED':
-        return { icon: Briefcase, color: 'text-blue-600 bg-blue-50 border-blue-200' };
+        return { icon: Briefcase, color: 'text-slate-700 bg-slate-100 border-slate-200' };
       case 'APPLICATION_SELECTED':
-        return { icon: Award, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' };
+        return { icon: Award, color: 'text-slate-800 bg-slate-100 border-slate-200' };
       case 'APPLICATION_SHORTLISTED':
-        return { icon: UserCheck, color: 'text-indigo-600 bg-indigo-50 border-indigo-200' };
+        return { icon: UserCheck, color: 'text-slate-800 bg-slate-100 border-slate-200' };
       case 'APPLICATION_REJECTED':
-        return { icon: XCircle, color: 'text-rose-600 bg-rose-50 border-rose-200' };
+        return { icon: XCircle, color: 'text-slate-700 bg-slate-100 border-slate-200' };
       case 'APPLICATION_SUBMITTED':
-        return { icon: FileText, color: 'text-purple-600 bg-purple-50 border-purple-200' };
+        return { icon: FileText, color: 'text-slate-700 bg-slate-100 border-slate-200' };
       default:
-        return { icon: Bell, color: 'text-cyan-600 bg-cyan-50 border-cyan-200' };
+        return { icon: Bell, color: 'text-slate-700 bg-slate-100 border-slate-200' };
     }
   };
 
@@ -213,12 +213,12 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('all')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'all'
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-slate-900 text-white shadow-sm'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
           <span>All Notifications</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/10">
+          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-white/20">
             {totalCount}
           </span>
         </button>
@@ -227,13 +227,15 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('unread')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'unread'
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-slate-900 text-white shadow-sm'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
           <span>Unread Only</span>
           {unreadCount > 0 && (
-            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-rose-500 text-white font-bold">
+            <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ${
+              activeTab === 'unread' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800'
+            }`}>
               {unreadCount}
             </span>
           )}
@@ -243,7 +245,7 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('drives')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'drives'
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-slate-900 text-white shadow-sm'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -255,7 +257,7 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('applications')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'applications'
-              ? 'bg-blue-600 text-white shadow-sm'
+              ? 'bg-slate-900 text-white shadow-sm'
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
@@ -291,8 +293,8 @@ const NotificationsPage = () => {
                 onClick={() => handleMarkAsRead(item._id, item.link)}
                 className={`bg-white rounded-xl border p-4 shadow-sm transition-all cursor-pointer hover:shadow-md relative group ${
                   item.isRead
-                    ? 'border-slate-200/90 hover:border-slate-300'
-                    : 'border-blue-300 bg-blue-50/20 hover:border-blue-400'
+                    ? 'border-slate-200 hover:border-slate-300'
+                    : 'border-slate-300 bg-slate-50/60 hover:border-slate-400'
                 }`}
               >
                 <div className="flex items-start gap-3.5">
@@ -310,7 +312,7 @@ const NotificationsPage = () => {
                         {item.title}
                       </h4>
                       {!item.isRead && (
-                        <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0" />
+                        <span className="w-2 h-2 rounded-full bg-slate-800 flex-shrink-0" />
                       )}
                     </div>
 
@@ -328,7 +330,7 @@ const NotificationsPage = () => {
                       {item.link && (
                         <>
                           <span>•</span>
-                          <span className="text-blue-600 font-medium group-hover:underline flex items-center gap-0.5">
+                          <span className="text-slate-800 font-semibold group-hover:underline flex items-center gap-0.5">
                             <span>Open details</span>
                             <ArrowRight className="w-3 h-3" />
                           </span>
@@ -340,7 +342,7 @@ const NotificationsPage = () => {
                   {/* Delete button */}
                   <button
                     onClick={(e) => handleDelete(e, item._id)}
-                    className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-slate-100 transition-colors opacity-0 group-hover:opacity-100"
+                    className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors opacity-0 group-hover:opacity-100"
                     title="Delete notification"
                   >
                     <Trash2 className="w-4 h-4" />

@@ -18,17 +18,17 @@ const Button = ({
 
   const variants = {
     primary:
-      'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm',
+      'bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-900 shadow-sm',
     secondary:
       'bg-slate-100 text-slate-800 hover:bg-slate-200 focus:ring-slate-400 border border-slate-200',
     outline:
-      'bg-transparent border border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-blue-500',
+      'bg-transparent border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:ring-slate-400',
     danger:
-      'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500 shadow-sm',
+      'bg-slate-800 text-white hover:bg-slate-700 focus:ring-slate-600 shadow-sm',
     ghost:
       'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-400',
     success:
-      'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm',
+      'bg-slate-800 text-white hover:bg-slate-700 focus:ring-slate-600 shadow-sm',
   };
 
   const sizes = {
