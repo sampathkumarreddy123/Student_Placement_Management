@@ -16,6 +16,9 @@ import StudentLogin from '../pages/auth/StudentLogin';
 import OfficerLogin from '../pages/auth/OfficerLogin';
 import OfficerRegister from '../pages/auth/OfficerRegister';
 import Register from '../pages/auth/Register';
+import ForgotPassword from '../pages/auth/ForgotPassword';
+import ResetPassword from '../pages/auth/ResetPassword';
+import VerifyEmail from '../pages/auth/VerifyEmail';
 import NotFound from '../pages/NotFound';
 
 // Student Pages
@@ -52,6 +55,9 @@ const AppRoutes = () => {
         <Route path="/officer/login" element={<OfficerLogin />} />
         <Route path="/officer/register" element={<OfficerRegister />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/verify-email/:token" element={<VerifyEmail />} />
       </Route>
 
       {/* Student Routes */}

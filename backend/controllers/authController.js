@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User from '../models/User.js';
 import StudentProfile from '../models/StudentProfile.js';
 import { generateTokenAndSetCookie, clearTokenCookie } from '../utils/generateToken.js';
+import { sendEmail } from '../utils/sendEmail.js';
 
 // @desc    Register a new student account
 // @route   POST /api/auth/register
@@ -115,12 +117,17 @@ export const register = async (req, res, next) => {
     }
 
     // Create User (strictly student role)
-    const user = await User.create({
+    const user = new User({
       name: name.trim(),
       email: normalizedEmail,
       password, // Pre-save hook hashes with bcryptjs
       role: 'student',
+      isEmailVerified: false,
     });
+
+    // Generate time-limited email verification token
+    const verificationToken = user.getEmailVerificationToken();
+    await user.save();
 
     // Create Associated Student Profile (no fake default scores or numbers)
     const profile = await StudentProfile.create({
@@ -133,12 +140,44 @@ export const register = async (req, res, next) => {
       backlogs: req.body.backlogs !== undefined ? Number(req.body.backlogs) : 0,
     });
 
+    // Send verification email
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const verifyUrl = `${clientUrl}/verify-email/${verificationToken}`;
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Verify Your College Email - Campus Placement Portal',
+        text: `Hello ${user.name},\n\nThank you for registering on the Campus Placement Portal.\nPlease verify your college email address by visiting the link below:\n${verifyUrl}\n\nThis verification link expires in 24 hours.\nNote: You will not be able to apply for placement drives until your email is verified.\n\nBest regards,\nCampus Placement Cell`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+              <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #0f172a;">Campus Placement Portal</h2>
+              <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Official Student Verification Service</p>
+            </div>
+            <p style="font-size: 15px; color: #334155; line-height: 1.6;">Hello <strong>${user.name}</strong>,</p>
+            <p style="font-size: 15px; color: #334155; line-height: 1.6;">Thank you for registering. Please confirm your college email address to activate all portal privileges, including applying for placement drives and tracking interview schedules.</p>
+            <div style="margin: 28px 0; text-align: center;">
+              <a href="${verifyUrl}" style="background-color: #334155; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; display: inline-block;">Verify College Email</a>
+            </div>
+            <p style="font-size: 13px; color: #64748b; line-height: 1.6;">This verification link will expire in <strong>24 hours</strong>. If the button above does not work, copy and paste this URL into your browser:</p>
+            <p style="font-size: 12px; color: #64748b; word-break: break-all; background: #f8fafc; padding: 10px; border-radius: 4px;">${verifyUrl}</p>
+            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8;">
+              If you did not create this account, you can safely ignore this message.
+            </div>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.error('[Email] Failed to send registration verification email:', emailErr.message);
+    }
+
     // Generate JWT and set HTTP-only cookie
     const token = generateTokenAndSetCookie(res, user._id, user.role);
 
     res.status(201).json({
       success: true,
-      message: 'Student account registered successfully!',
+      message: 'Student account registered successfully! A verification email has been sent to your email address.',
       token,
       user: {
         _id: user._id,
@@ -146,6 +185,7 @@ export const register = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        isEmailVerified: false,
         profile,
       },
     });
@@ -248,6 +288,7 @@ const authenticateUser = async ({ email, password, requiredRole, rememberMe = fa
         name: user.name,
         email: user.email,
         role: user.role,
+        isEmailVerified: Boolean(user.isEmailVerified),
         profile: profile || null,
       },
     },
@@ -383,6 +424,7 @@ export const createOfficerAccount = async (req, res, next) => {
       password, // Hashes via User pre-save hook
       role: 'officer',
       isActive: true,
+      isEmailVerified: true, // Officer accounts are administratively verified
     });
 
     return res.status(201).json({
@@ -394,6 +436,7 @@ export const createOfficerAccount = async (req, res, next) => {
         name: officer.name,
         email: officer.email,
         role: officer.role,
+        isEmailVerified: true,
       },
     });
   } catch (error) {
@@ -440,9 +483,359 @@ export const getMe = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        isEmailVerified: Boolean(user.isEmailVerified),
         createdAt: user.createdAt,
         profile: profile || null,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify student email using time-limited token
+// @route   GET /api/auth/verify-email/:token
+// @access  Public
+export const verifyEmail = async (req, res, next) => {
+  try {
+    const rawToken = req.params.token;
+    if (!rawToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid verification link: missing token.',
+      });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    const user = await User.findOne({
+      emailVerificationToken: hashedToken,
+      emailVerificationExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired email verification link. Please request a new verification link.',
+      });
+    }
+
+    user.isEmailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Your email address has been successfully verified! You can now apply for placement drives.',
+      user: {
+        id: user._id,
+        email: user.email,
+        isEmailVerified: true,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Resend email verification link
+// @route   POST /api/auth/resend-verification
+// @access  Public / Private
+export const resendVerificationEmail = async (req, res, next) => {
+  try {
+    const email = req.body?.email || req.user?.email;
+    if (!email || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your registered college email address.',
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    // Protect against email enumeration
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: 'If an account with this email exists and is unverified, a new verification link has been sent.',
+      });
+    }
+
+    if (user.isEmailVerified) {
+      return res.status(400).json({
+        success: false,
+        message: 'This email address is already verified.',
+      });
+    }
+
+    const verificationToken = user.getEmailVerificationToken();
+    await user.save({ validateBeforeSave: false });
+
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const verifyUrl = `${clientUrl}/verify-email/${verificationToken}`;
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Verify Your College Email - Campus Placement Portal',
+        text: `Hello ${user.name},\n\nPlease verify your email by clicking the link:\n${verifyUrl}\n\nThis verification link is valid for 24 hours.\n\nCampus Placement Team`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+              <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #0f172a;">Campus Placement Portal</h2>
+              <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Official Student Verification Service</p>
+            </div>
+            <p style="font-size: 15px; color: #334155; line-height: 1.6;">Hello <strong>${user.name}</strong>,</p>
+            <p style="font-size: 15px; color: #334155; line-height: 1.6;">You requested a new verification link. Please click below to verify your college email address:</p>
+            <div style="margin: 28px 0; text-align: center;">
+              <a href="${verifyUrl}" style="background-color: #334155; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; display: inline-block;">Verify College Email</a>
+            </div>
+            <p style="font-size: 13px; color: #64748b; line-height: 1.6;">This verification link will expire in <strong>24 hours</strong>. If the button above does not work, copy and paste this URL into your browser:</p>
+            <p style="font-size: 12px; color: #64748b; word-break: break-all; background: #f8fafc; padding: 10px; border-radius: 4px;">${verifyUrl}</p>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.error('[Email] Failed to resend verification email:', emailErr.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send verification email. Please check server email settings.',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'A fresh verification link has been sent to your email address.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Initiate password reset request
+// @route   POST /api/auth/forgot-password
+// @access  Public
+export const forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    if (!email || !email.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your registered email address.',
+      });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    // Protect against user enumeration by returning standard message even if user not found
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: 'If an account with this email exists, a password reset link has been dispatched to it.',
+      });
+    }
+
+    const resetToken = user.getResetPasswordToken();
+    await user.save({ validateBeforeSave: false });
+
+    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+    const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
+
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: 'Password Reset Request - Campus Placement Portal',
+        text: `Hello ${user.name},\n\nYou requested a password reset for your Campus Placement Portal account.\nPlease click the link below to set a new password:\n${resetUrl}\n\nThis reset link is valid for 1 hour.\nIf you did not make this request, you can safely ignore this email.\n\nCampus Placement Team`,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
+            <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
+              <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #0f172a;">Campus Placement Portal</h2>
+              <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Security & Password Management</p>
+            </div>
+            <p style="font-size: 15px; color: #334155; line-height: 1.6;">Hello <strong>${user.name}</strong>,</p>
+            <p style="font-size: 15px; color: #334155; line-height: 1.6;">We received a request to reset the password for your account. Click the button below to choose a new password:</p>
+            <div style="margin: 28px 0; text-align: center;">
+              <a href="${resetUrl}" style="background-color: #334155; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; display: inline-block;">Reset Password</a>
+            </div>
+            <p style="font-size: 13px; color: #64748b; line-height: 1.6;">This link is single-use and will expire in <strong>1 hour</strong>. If the button does not work, copy and paste this link into your browser:</p>
+            <p style="font-size: 12px; color: #64748b; word-break: break-all; background: #f8fafc; padding: 10px; border-radius: 4px;">${resetUrl}</p>
+            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8;">
+              If you did not request a password reset, no further action is required. Your password will remain unchanged.
+            </div>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.error('[Email] Failed to send password reset email:', emailErr.message);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpire = undefined;
+      await user.save({ validateBeforeSave: false });
+
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send password reset email. Please try again later or contact the administrator.',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'If an account with this email exists, a password reset link has been dispatched to it.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Reset password using reset token
+// @route   POST /api/auth/reset-password/:token
+// @access  Public
+export const resetPassword = async (req, res, next) => {
+  try {
+    const rawToken = req.params.token;
+    const { password, confirmPassword } = req.body;
+
+    if (!rawToken) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid password reset request: missing token.',
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a new password.',
+      });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters in length.',
+      });
+    }
+
+    if (confirmPassword !== undefined && password !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password and confirm password do not match.',
+      });
+    }
+
+    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired password reset link. Please request a new password reset.',
+      });
+    }
+
+    // Officers must have at least 8 characters
+    if (user.role === 'officer' && password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Placement Officer passwords must be at least 8 characters in length.',
+      });
+    }
+
+    // Set new password (pre-save hook will hash via bcryptjs)
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password has been reset successfully. You can now log in with your new credentials.',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Change password for authenticated user (Student or Officer)
+// @route   PUT /api/auth/change-password
+// @access  Private (Both roles)
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your current password.',
+      });
+    }
+
+    if (!newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a new password.',
+      });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be at least 6 characters long.',
+      });
+    }
+
+    if (req.user.role === 'officer' && newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Placement Officer password must be at least 8 characters long.',
+      });
+    }
+
+    if (confirmPassword !== undefined && newPassword !== confirmPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password and confirmation do not match.',
+      });
+    }
+
+    if (currentPassword === newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'New password must be different from your current password.',
+      });
+    }
+
+    // Retrieve user with password hash
+    const user = await User.findById(req.user.id).select('+password');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User account not found.',
+      });
+    }
+
+    // Verify current password via bcrypt
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: 'Incorrect current password. Please try again.',
+      });
+    }
+
+    // Save new password (pre-save hook will hash it with bcryptjs)
+    user.password = newPassword;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Your password has been changed successfully.',
     });
   } catch (error) {
     next(error);

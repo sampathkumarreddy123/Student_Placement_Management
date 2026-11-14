@@ -132,6 +132,7 @@ export const getMyProfile = async (req, res, next) => {
         ...profile.toObject(),
         name: req.user.name,
         email: req.user.email,
+        isEmailVerified: Boolean(req.user.isEmailVerified),
         profilePhoto: req.user.profilePhoto || profile.profilePhoto || '',
       },
       completion,

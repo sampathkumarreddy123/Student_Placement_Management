@@ -21,9 +21,11 @@ import Alert from '../common/Alert';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { studentService } from '../../services/studentService';
 import { applicationService } from '../../services/applicationService';
+import { useAuth } from '../../hooks/useAuth';
 import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters';
 
 const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [confirmed, setConfirmed] = useState(false);
@@ -89,11 +91,19 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
   const hasDepartment = Boolean(department);
   const hasCgpa = cgpa !== undefined && cgpa !== null && Number(cgpa) > 0;
   const isProfileComplete = hasResume && hasRollNumber && hasDepartment && hasCgpa;
+  const isEmailVerified = Boolean(
+    profile?.isEmailVerified !== undefined
+      ? profile.isEmailVerified
+      : user?.isEmailVerified !== undefined
+      ? user.isEmailVerified
+      : true
+  );
 
   const canSubmit =
     !loadingProfile &&
     profile &&
     isProfileComplete &&
+    isEmailVerified &&
     drive.isEligible !== false &&
     !deadline.isClosed &&
     !isClosedStatus &&
@@ -130,6 +140,25 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
       <div className="space-y-5">
         {errorMsg && (
           <Alert type="error" message={errorMsg} onClose={() => setErrorMsg('')} />
+        )}
+
+        {/* Email Verification Required Banner */}
+        {!isEmailVerified && (
+          <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/90 text-xs text-amber-900 flex items-start gap-2.5 shadow-sm">
+            <AlertTriangle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-semibold text-amber-950">Email Verification Required</p>
+              <p className="mt-0.5 text-amber-800 leading-relaxed">
+                Your college email is not verified yet. Verification is required before you can apply for placement drives.
+              </p>
+              <Link
+                to="/student/profile"
+                className="inline-flex items-center gap-1 font-semibold text-slate-900 underline mt-1.5"
+              >
+                Go to Profile to Verify Email &rarr;
+              </Link>
+            </div>
+          </div>
         )}
 
         {/* Drive Overview Summary Box */}

@@ -26,9 +26,12 @@ import {
   Layers,
   Sparkles,
   RotateCcw,
+  KeyRound,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/studentService';
+import { authService } from '../../services/authService';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
@@ -36,6 +39,7 @@ import Alert from '../../components/common/Alert';
 import Badge from '../../components/common/Badge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import PageHeader from '../../components/common/PageHeader';
+import ChangePasswordModal from '../../components/common/ChangePasswordModal';
 import { useToast } from '../../context/ToastContext';
 
 const DEPARTMENTS = [
@@ -101,8 +105,26 @@ const StudentProfile = () => {
   });
 
   const [newSkill, setNewSkill] = useState('');
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
   const resumeInputRef = useRef(null);
   const photoInputRef = useRef(null);
+
+  const handleResendVerification = async () => {
+    try {
+      setResendingVerification(true);
+      const res = await authService.resendVerification(profile?.email || user?.email);
+      toast.success(res.message || 'Verification link sent to your college email.');
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message ||
+          err.message ||
+          'Failed to dispatch verification link.'
+      );
+    } finally {
+      setResendingVerification(false);
+    }
+  };
 
   const fetchProfileData = async () => {
     try {
@@ -425,6 +447,32 @@ const StudentProfile = () => {
         />
       )}
 
+      {/* Unverified Email Warning Banner */}
+      {!(profile?.isEmailVerified || user?.isEmailVerified) && (
+        <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/70 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="text-xs font-bold text-amber-900">Email Verification Required</h4>
+              <p className="text-xs text-amber-800 mt-0.5 leading-relaxed">
+                Your college email (<strong>{profile?.email || user?.email}</strong>) is not yet verified. Unverified accounts cannot apply for placement drives.
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-xs border-amber-300 text-amber-900 hover:bg-amber-100 flex-shrink-0"
+            isLoading={resendingVerification}
+            onClick={handleResendVerification}
+            icon={Mail}
+          >
+            {resendingVerification ? 'Sending...' : 'Resend Verification Link'}
+          </Button>
+        </div>
+      )}
+
       {/* Profile Header & Identity Card */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 relative overflow-hidden">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
@@ -500,6 +548,28 @@ const StudentProfile = () => {
                     <Phone className="w-3.5 h-3.5 text-slate-400" />
                     {profile.phone}
                   </span>
+                )}
+                {/* Email Verification Status Badge */}
+                {profile?.isEmailVerified || user?.isEmailVerified ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                    Verified
+                  </span>
+                ) : (
+                  <div className="inline-flex items-center gap-1.5">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200">
+                      <AlertTriangle className="w-3 h-3 text-amber-600" />
+                      Unverified
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleResendVerification}
+                      disabled={resendingVerification}
+                      className="text-[11px] font-semibold text-slate-800 underline hover:text-slate-900 disabled:opacity-50"
+                    >
+                      {resendingVerification ? 'Sending...' : 'Resend'}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
@@ -975,6 +1045,40 @@ const StudentProfile = () => {
             />
           </div>
         </Card>
+
+        {/* SECTION 6: Account Security & Credentials */}
+        <Card
+          title="Account Security & Password"
+          subtitle="Manage authentication credentials, password security, and college email verification"
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50/70">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-sm">
+                <Lock className="w-5 h-5" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-slate-900">Account Password</h4>
+                <p className="text-[11px] text-slate-500">
+                  Update your password regularly to keep your student placement account secure.
+                </p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              icon={KeyRound}
+              onClick={() => setPasswordModalOpen(true)}
+            >
+              Change Password
+            </Button>
+          </div>
+        </Card>
+
+        <ChangePasswordModal
+          isOpen={passwordModalOpen}
+          onClose={() => setPasswordModalOpen(false)}
+        />
 
         {/* Save Changes Floating Action Bar in Edit Mode */}
         {isEditing && (

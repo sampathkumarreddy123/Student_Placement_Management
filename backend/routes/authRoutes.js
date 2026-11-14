@@ -7,18 +7,37 @@ import {
   createOfficerAccount,
   logout,
   getMe,
+  verifyEmail,
+  resendVerificationEmail,
+  forgotPassword,
+  resetPassword,
+  changePassword,
 } from '../controllers/authController.js';
 import { protect } from '../middleware/authMiddleware.js';
+import {
+  authLimiter,
+  passwordResetLimiter,
+  resendVerificationLimiter,
+} from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
-// Public auth routes
-router.post('/register', register);
-router.post('/login', login);
-router.post('/officer/login', officerLogin);
-router.post('/student/login', studentLogin);
+// Public auth routes with rate limiting
+router.post('/register', authLimiter, register);
+router.post('/login', authLimiter, login);
+router.post('/officer/login', authLimiter, officerLogin);
+router.post('/student/login', authLimiter, studentLogin);
 router.post('/officer/create', createOfficerAccount);
 router.post('/logout', logout);
+
+// Email verification routes
+router.get('/verify-email/:token', verifyEmail);
+router.post('/resend-verification', resendVerificationLimiter, resendVerificationEmail);
+
+// Password recovery & management
+router.post('/forgot-password', passwordResetLimiter, forgotPassword);
+router.post('/reset-password/:token', passwordResetLimiter, resetPassword);
+router.put('/change-password', protect, changePassword);
 
 // Session verification
 router.get('/me', protect, getMe);

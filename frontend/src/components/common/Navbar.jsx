@@ -17,10 +17,12 @@ import {
   FileText,
   Clock,
   ArrowRight,
+  KeyRound,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { notificationService } from '../../services/notificationService';
 import Badge from './Badge';
+import ChangePasswordModal from './ChangePasswordModal';
 
 const formatRelativeTime = (dateString) => {
   if (!dateString) return '';
@@ -40,6 +42,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
@@ -339,6 +342,18 @@ const Navbar = ({ onToggleSidebar }) => {
                     </Link>
 
                     <button
+                      type="button"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        setChangePasswordOpen(true);
+                      }}
+                      className="w-full text-left flex items-center gap-2 px-4 py-2 text-slate-700 hover:bg-slate-50"
+                    >
+                      <KeyRound className="w-4 h-4 text-slate-400" />
+                      <span>Change Password</span>
+                    </button>
+
+                    <button
                       onClick={() => {
                         setDropdownOpen(false);
                         handleLogout();
@@ -352,6 +367,11 @@ const Navbar = ({ onToggleSidebar }) => {
                 </>
               )}
             </div>
+
+            <ChangePasswordModal
+              isOpen={changePasswordOpen}
+              onClose={() => setChangePasswordOpen(false)}
+            />
           </div>
         ) : (
           <div className="flex items-center gap-2">

@@ -205,6 +205,15 @@ const StudentLogin = () => {
           autoComplete="new-password"
         />
 
+        <div className="flex justify-end">
+          <Link
+            to="/forgot-password"
+            className="text-xs text-[#64748B] hover:text-slate-900 transition-colors"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
         <Button
           type="submit"
           className="w-full mt-2"
