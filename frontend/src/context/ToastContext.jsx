@@ -56,26 +56,26 @@ export const ToastProvider = ({ children }) => {
   const getToastIcon = (type) => {
     switch (type) {
       case 'success':
-        return <CheckCircle2 className="w-5 h-5 text-[#27845B] flex-shrink-0" />;
+        return <CheckCircle2 className="w-5 h-5 text-[#0D9488] flex-shrink-0" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-[#C94C4C] flex-shrink-0" />;
+        return <AlertCircle className="w-5 h-5 text-[#DC2626] flex-shrink-0" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-[#C58A32] flex-shrink-0" />;
+        return <AlertTriangle className="w-5 h-5 text-[#D97706] flex-shrink-0" />;
       default:
-        return <Info className="w-5 h-5 text-[#76543D] flex-shrink-0" />;
+        return <Info className="w-5 h-5 text-[#2563EB] flex-shrink-0" />;
     }
   };
 
   const getToastBorder = (type) => {
     switch (type) {
       case 'success':
-        return 'border-[#27845B]/30 bg-white/95';
+        return 'border-[#0D9488]/30 bg-white/95';
       case 'error':
-        return 'border-[#C94C4C]/30 bg-white/95';
+        return 'border-[#DC2626]/30 bg-white/95';
       case 'warning':
-        return 'border-[#C58A32]/30 bg-white/95';
+        return 'border-[#D97706]/30 bg-white/95';
       default:
-        return 'border-[#E8DED2] bg-white/95';
+        return 'border-[#DBEAFE] bg-white/95';
     }
   };
 
@@ -98,17 +98,17 @@ export const ToastProvider = ({ children }) => {
             {getToastIcon(t.type)}
             <div className="flex-1 min-w-0 pr-1">
               {t.title && (
-                <h5 className="text-xs font-bold text-[#44352D] leading-tight">
+                <h5 className="text-xs font-bold text-[#172554] leading-tight">
                   {t.title}
                 </h5>
               )}
-              <p className="text-xs text-[#82776C] mt-0.5 leading-relaxed">
+              <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed">
                 {t.message}
               </p>
             </div>
             <button
               onClick={() => removeToast(t.id)}
-              className="p-1 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
+              className="p-1 rounded-lg text-[#64748B] hover:text-[#172554] hover:bg-[#F0F7FF] transition-colors"
               title="Dismiss"
             >
               <X className="w-3.5 h-3.5" />
@@ -127,4 +127,3 @@ export const useToast = () => {
   }
   return context;
 };
-

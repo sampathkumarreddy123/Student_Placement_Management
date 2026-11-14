@@ -144,16 +144,16 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
 
         {/* Email Verification Required Banner */}
         {!isEmailVerified && (
-          <div className="p-3.5 rounded-xl border border-[#E8DED2] bg-[#FAF8F4] text-xs text-[#44352D] flex items-start gap-2.5 shadow-sm">
-            <AlertTriangle className="w-4 h-4 text-[#C58A32] flex-shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl border border-[#DBEAFE] bg-[#EFF6FF] text-xs text-[#172554] flex items-start gap-2.5 shadow-sm">
+            <AlertTriangle className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <p className="font-semibold text-[#44352D]">Email Verification Required</p>
-              <p className="mt-0.5 text-[#82776C] leading-relaxed">
+              <p className="font-semibold text-[#172554]">Email Verification Required</p>
+              <p className="mt-0.5 text-[#64748B] leading-relaxed">
                 Your college email is not verified yet. Verification is required before you can apply for placement drives.
               </p>
               <Link
                 to="/student/profile"
-                className="inline-flex items-center gap-1 font-semibold text-[#76543D] hover:text-[#44352D] underline mt-1.5"
+                className="inline-flex items-center gap-1 font-semibold text-[#2563EB] hover:text-[#163A5F] underline mt-1.5"
               >
                 Go to Profile to Verify Email &rarr;
               </Link>
@@ -162,39 +162,39 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
         )}
 
         {/* Drive Overview Summary Box */}
-        <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#E8DED2] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="p-4 rounded-xl bg-[#F0F7FF] border border-[#DBEAFE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             {drive.company?.logoUrl ? (
               <img
                 src={drive.company.logoUrl}
                 alt={drive.company?.name}
-                className="w-12 h-12 rounded-xl object-contain p-1 border border-[#E8DED2] bg-white flex-shrink-0"
+                className="w-12 h-12 rounded-xl object-contain p-1 border border-[#DBEAFE] bg-white flex-shrink-0"
               />
             ) : (
-              <div className="w-12 h-12 rounded-xl bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-lg flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-lg flex-shrink-0">
                 {drive.company?.name ? drive.company.name.charAt(0) : 'C'}
               </div>
             )}
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="font-bold text-[#44352D] text-sm">{drive.company?.name}</h4>
+                <h4 className="font-bold text-[#172554] text-sm">{drive.company?.name}</h4>
                 <Badge status={drive.status} size="sm" />
               </div>
-              <p className="text-xs text-[#76543D] mt-0.5 font-medium">{drive.jobRole}</p>
-              <p className="text-[11px] text-[#82776C] mt-0.5">
+              <p className="text-xs text-[#2563EB] mt-0.5 font-medium">{drive.jobRole}</p>
+              <p className="text-[11px] text-[#64748B] mt-0.5">
                 {drive.location || 'Multiple Locations'} • {drive.employmentType || 'Full-Time'}
               </p>
             </div>
           </div>
 
           <div className="text-left sm:text-right flex-shrink-0">
-            <span className="text-[11px] text-[#82776C] block">Package / CTC</span>
-            <span className="text-base font-bold text-[#44352D] block">
+            <span className="text-[11px] text-[#64748B] block">Package / CTC</span>
+            <span className="text-base font-bold text-[#172554] block">
               {formatLPA(drive.packageLPA)}
             </span>
             <span
               className={`text-[11px] font-medium block mt-0.5 ${
-                deadline.isClosed || isClosedStatus ? 'text-[#C94C4C]' : 'text-[#82776C]'
+                deadline.isClosed || isClosedStatus ? 'text-[#DC2626]' : 'text-[#64748B]'
               }`}
             >
               {isClosedStatus ? 'Applications Closed' : deadline.text}
@@ -208,23 +208,23 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
             <LoadingSpinner text="Verifying your student profile and eligibility..." />
           </div>
         ) : !profile ? (
-          <div className="p-4 rounded-xl bg-[#C94C4C]/10 border border-[#C94C4C]/25 text-xs text-[#C94C4C]">
+          <div className="p-4 rounded-xl bg-[#DC2626]/10 border border-[#DC2626]/25 text-xs text-[#DC2626]">
             <p className="font-semibold">Student profile could not be loaded.</p>
             <p className="mt-1">Please ensure your profile is initialized before applying.</p>
           </div>
         ) : (
           <>
             {/* Student Candidate Snapshot Section */}
-            <div className="bg-white rounded-xl border border-[#E8DED2] p-4 space-y-3">
-              <div className="flex items-center justify-between pb-2 border-b border-[#E8DED2]">
-                <span className="text-xs font-bold text-[#44352D] flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-[#76543D]" />
+            <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 space-y-3">
+              <div className="flex items-center justify-between pb-2 border-b border-[#DBEAFE]">
+                <span className="text-xs font-bold text-[#172554] flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
                   Your Profile Snapshot to be Submitted
                 </span>
                 <Link
                   to="/student/profile"
                   target="_blank"
-                  className="text-xs text-[#76543D] hover:text-[#44352D] inline-flex items-center gap-1 font-medium hover:underline"
+                  className="text-xs text-[#2563EB] hover:text-[#163A5F] inline-flex items-center gap-1 font-medium hover:underline"
                 >
                   Edit Profile <ExternalLink className="w-3 h-3" />
                 </Link>
@@ -232,44 +232,44 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                 <div>
-                  <span className="text-[11px] text-[#82776C] block">Roll Number</span>
-                  <span className="font-semibold text-[#44352D] mt-0.5 block">
-                    {rollNumber || <span className="text-[#C94C4C]">Missing</span>}
+                  <span className="text-[11px] text-[#64748B] block">Roll Number</span>
+                  <span className="font-semibold text-[#172554] mt-0.5 block">
+                    {rollNumber || <span className="text-[#DC2626]">Missing</span>}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[#82776C] block">Department</span>
-                  <span className="font-semibold text-[#44352D] mt-0.5 block truncate">
-                    {department || <span className="text-[#C94C4C]">Missing</span>}
+                  <span className="text-[11px] text-[#64748B] block">Department</span>
+                  <span className="font-semibold text-[#172554] mt-0.5 block truncate">
+                    {department || <span className="text-[#DC2626]">Missing</span>}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[#82776C] block">Current CGPA</span>
-                  <span className="font-semibold text-[#44352D] mt-0.5 block">
+                  <span className="text-[11px] text-[#64748B] block">Current CGPA</span>
+                  <span className="font-semibold text-[#172554] mt-0.5 block">
                     {cgpa !== undefined && cgpa !== null
                       ? `${Number(cgpa).toFixed(2)} / 10`
-                      : <span className="text-[#C94C4C]">Missing</span>}
+                      : <span className="text-[#DC2626]">Missing</span>}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[11px] text-[#82776C] block">Backlogs</span>
-                  <span className="font-semibold text-[#44352D] mt-0.5 block">
+                  <span className="text-[11px] text-[#64748B] block">Backlogs</span>
+                  <span className="font-semibold text-[#172554] mt-0.5 block">
                     {activeBacklogs} Active / {totalBacklogs} Total
                   </span>
                 </div>
               </div>
 
               {/* Resume Status Card */}
-              <div className="mt-3 pt-3 border-t border-[#E8DED2] flex items-center justify-between p-2.5 rounded-lg bg-[#FAF8F4] border border-[#E8DED2]">
+              <div className="mt-3 pt-3 border-t border-[#DBEAFE] flex items-center justify-between p-2.5 rounded-lg bg-[#F0F7FF] border border-[#DBEAFE]">
                 <div className="flex items-center gap-2.5">
-                  <div className={`p-2 rounded-lg ${hasResume ? 'bg-[#F1E7D9] text-[#44352D]' : 'bg-[#C94C4C]/15 text-[#C94C4C]'}`}>
+                  <div className={`p-2 rounded-lg ${hasResume ? 'bg-[#EFF6FF] text-[#2563EB]' : 'bg-[#DC2626]/15 text-[#DC2626]'}`}>
                     <FileText className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-semibold text-[#44352D] block">
+                    <span className="text-xs font-semibold text-[#172554] block">
                       {hasResume ? resumeOriginalName : 'No Resume Uploaded'}
                     </span>
-                    <span className="text-[11px] text-[#82776C] block">
+                    <span className="text-[11px] text-[#64748B] block">
                       {hasResume
                         ? `${resumeSize ? (resumeSize / 1024).toFixed(1) + ' KB' : 'PDF Document'} • Snapshot will be shared with recruiter`
                         : 'A resume is required before submitting applications'}
@@ -278,7 +278,7 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
                 </div>
 
                 {hasResume ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#27845B] bg-[#27845B]/10 px-2 py-0.5 rounded-full border border-[#27845B]/25">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#0D9488] bg-[#0D9488]/10 px-2 py-0.5 rounded-full border border-[#0D9488]/25">
                     <CheckCircle2 className="w-3 h-3" /> Attached
                   </span>
                 ) : (
@@ -293,11 +293,11 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
 
             {/* Profile Completion Warning */}
             {!isProfileComplete && (
-              <div className="p-3.5 rounded-xl bg-[#C58A32]/10 border border-[#C58A32]/25 text-xs text-[#44352D] flex items-start gap-2.5">
-                <AlertTriangle className="w-4 h-4 text-[#C58A32] flex-shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-[#D97706]/10 border border-[#D97706]/25 text-xs text-[#172554] flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="font-semibold text-[#44352D]">Incomplete Profile Information</p>
-                  <p className="text-[11px] text-[#82776C] mt-0.5">
+                  <p className="font-semibold text-[#172554]">Incomplete Profile Information</p>
+                  <p className="text-[11px] text-[#64748B] mt-0.5">
                     Your profile is missing required information (such as your resume, roll number, or department).
                     Please update your profile to proceed with this application.
                   </p>
@@ -307,11 +307,11 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
 
             {/* Eligibility Status Alert */}
             {drive.isEligible === false && (
-              <div className="p-3.5 rounded-xl bg-[#C94C4C]/10 border border-[#C94C4C]/25 text-xs text-[#C94C4C] flex items-start gap-2.5">
-                <XCircle className="w-4 h-4 text-[#C94C4C] flex-shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-[#DC2626]/10 border border-[#DC2626]/25 text-xs text-[#DC2626] flex items-start gap-2.5">
+                <XCircle className="w-4 h-4 text-[#DC2626] flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
                   <p className="font-semibold">Not Eligible for this Drive</p>
-                  <p className="text-[11px] text-[#C94C4C]/90 mt-0.5">
+                  <p className="text-[11px] text-[#DC2626]/90 mt-0.5">
                     Your academic profile does not meet the eligibility criteria defined by the placement officer for this company.
                   </p>
                   {drive.eligibilityReasons && drive.eligibilityReasons.length > 0 && (
@@ -327,11 +327,11 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
 
             {/* Deadline / Closed Alert */}
             {(deadline.isClosed || isClosedStatus) && (
-              <div className="p-3.5 rounded-xl bg-[#C94C4C]/10 border border-[#C94C4C]/25 text-xs text-[#C94C4C] flex items-start gap-2.5">
-                <Clock className="w-4 h-4 text-[#C94C4C] flex-shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-[#DC2626]/10 border border-[#DC2626]/25 text-xs text-[#DC2626] flex items-start gap-2.5">
+                <Clock className="w-4 h-4 text-[#DC2626] flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold">Applications Closed</p>
-                  <p className="text-[11px] text-[#C94C4C]/90 mt-0.5">
+                  <p className="text-[11px] text-[#DC2626]/90 mt-0.5">
                     The registration window for this placement drive has ended. New submissions are no longer accepted.
                   </p>
                 </div>
@@ -340,15 +340,15 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
 
             {/* Declaration Checkbox */}
             {isProfileComplete && drive.isEligible !== false && !deadline.isClosed && !isClosedStatus && (
-              <div className="p-3 bg-[#FAF8F4] rounded-xl border border-[#E8DED2]">
+              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
                 <label className="flex items-start gap-2.5 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={confirmed}
                     onChange={(e) => setConfirmed(e.target.checked)}
-                    className="mt-0.5 w-4 h-4 rounded text-[#44352D] border-[#E8DED2] focus:ring-[#76543D] accent-[#44352D]"
+                    className="mt-0.5 w-4 h-4 rounded text-[#2563EB] border-[#DBEAFE] focus:ring-[#2563EB] accent-[#2563EB]"
                   />
-                  <span className="text-xs text-[#44352D] leading-snug">
+                  <span className="text-xs text-[#172554] leading-snug">
                     I confirm that the academic details and resume in my profile are accurate and complete.
                     I understand that once submitted, my application cannot be withdrawn or resubmitted.
                   </span>
@@ -359,7 +359,7 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
         )}
 
         {/* Modal Action Buttons */}
-        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E8DED2]">
+        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#DBEAFE]">
           <Button
             type="button"
             variant="outline"

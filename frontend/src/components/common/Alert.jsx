@@ -11,24 +11,24 @@ const Alert = ({
 }) => {
   const types = {
     info: {
-      bg: 'bg-[#F6F0E8] border-[#E8DED2] text-[#44352D]',
+      bg: 'bg-[#EFF6FF] border-[#DBEAFE] text-[#163A5F]',
       icon: Info,
-      iconColor: 'text-[#76543D]',
+      iconColor: 'text-[#2563EB]',
     },
     success: {
-      bg: 'bg-[#27845B]/10 border-[#27845B]/20 text-[#27845B]',
+      bg: 'bg-[#0D9488]/10 border-[#0D9488]/20 text-[#0D9488]',
       icon: CheckCircle2,
-      iconColor: 'text-[#27845B]',
+      iconColor: 'text-[#0D9488]',
     },
     warning: {
-      bg: 'bg-[#C58A32]/10 border-[#C58A32]/20 text-[#C58A32]',
+      bg: 'bg-[#D97706]/10 border-[#D97706]/20 text-[#D97706]',
       icon: AlertCircle,
-      iconColor: 'text-[#C58A32]',
+      iconColor: 'text-[#D97706]',
     },
     error: {
-      bg: 'bg-[#C94C4C]/10 border-[#C94C4C]/20 text-[#C94C4C]',
+      bg: 'bg-[#DC2626]/10 border-[#DC2626]/20 text-[#DC2626]',
       icon: XCircle,
-      iconColor: 'text-[#C94C4C]',
+      iconColor: 'text-[#DC2626]',
     },
   };
 
@@ -48,7 +48,7 @@ const Alert = ({
       {onClose && (
         <button
           onClick={onClose}
-          className="text-slate-400 hover:text-slate-600 p-0.5 rounded transition-colors"
+          className="text-[#64748B] hover:text-[#172554] p-0.5 rounded transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
@@ -58,4 +58,3 @@ const Alert = ({
 };
 
 export default Alert;
-

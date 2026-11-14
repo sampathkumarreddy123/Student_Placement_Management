@@ -449,12 +449,12 @@ const StudentProfile = () => {
 
       {/* Unverified Email Warning Banner */}
       {!(profile?.isEmailVerified || user?.isEmailVerified) && (
-        <div className="p-4 rounded-xl border border-[#C58A32]/30 bg-[#FAF8F4] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+        <div className="p-4 rounded-xl border border-[#D97706]/30 bg-[#F0F7FF] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-[#C58A32] flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-5 h-5 text-[#D97706] flex-shrink-0 mt-0.5" />
             <div>
-              <h4 className="text-xs font-bold text-[#44352D]">Email Verification Required</h4>
-              <p className="text-xs text-[#82776C] mt-0.5 leading-relaxed">
+              <h4 className="text-xs font-bold text-[#172554]">Email Verification Required</h4>
+              <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed">
                 Your college email (<strong>{profile?.email || user?.email}</strong>) is not yet verified. Unverified accounts cannot apply for placement drives.
               </p>
             </div>
@@ -463,7 +463,7 @@ const StudentProfile = () => {
             type="button"
             variant="outline"
             size="sm"
-            className="text-xs border-[#E8DED2] text-[#44352D] hover:bg-[#F1E7D9] flex-shrink-0"
+            className="text-xs border-[#DBEAFE] text-[#172554] hover:bg-[#EFF6FF] flex-shrink-0"
             isLoading={resendingVerification}
             onClick={handleResendVerification}
             icon={Mail}
@@ -474,12 +474,12 @@ const StudentProfile = () => {
       )}
 
       {/* Profile Header & Identity Card */}
-      <div className="bg-white rounded-2xl border border-[#E8DED2] shadow-sm p-6 relative overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm p-6 relative overflow-hidden">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           {/* Avatar & Core Identity */}
           <div className="flex items-center gap-5">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-2xl bg-[#F1E7D9] border-2 border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-3xl shadow-sm overflow-hidden">
+              <div className="w-20 h-20 rounded-2xl bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden">
                 {profile?.profilePhoto ? (
                   <img
                     src={profile.profilePhoto}
@@ -496,7 +496,7 @@ const StudentProfile = () => {
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="absolute -bottom-1 -right-1 p-1.5 bg-[#44352D] hover:bg-[#534239] text-[#F1E7D9] rounded-lg shadow-sm border-2 border-white transition-colors"
+                className="absolute -bottom-1 -right-1 p-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg shadow-sm border-2 border-white transition-colors"
                 title="Update Profile Photo"
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -512,7 +512,7 @@ const StudentProfile = () => {
 
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold text-[#44352D]">
+                <h1 className="text-xl sm:text-2xl font-bold text-[#172554]">
                   {profile?.name || user?.name}
                 </h1>
                 <Badge variant={isPlaced ? 'success' : 'secondary'} size="sm">
@@ -520,8 +520,8 @@ const StudentProfile = () => {
                 </Badge>
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-[#82776C]">
-                <span className="font-mono font-semibold text-[#44352D] bg-[#F1E7D9] px-2 py-0.5 rounded border border-[#E8DED2]">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-[#64748B]">
+                <span className="font-mono font-semibold text-[#163A5F] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#DBEAFE]">
                   {profile?.rollNumber}
                 </span>
                 {profile?.department && (
@@ -538,34 +538,34 @@ const StudentProfile = () => {
                 ) : null}
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-[#82776C]">
+              <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-[#64748B]">
                 <span className="flex items-center gap-1">
-                  <Mail className="w-3.5 h-3.5 text-[#A17C5B]" />
+                  <Mail className="w-3.5 h-3.5 text-[#2563EB]" />
                   {profile?.email || user?.email}
                 </span>
                 {profile?.phone && (
                   <span className="flex items-center gap-1">
-                    <Phone className="w-3.5 h-3.5 text-[#A17C5B]" />
+                    <Phone className="w-3.5 h-3.5 text-[#2563EB]" />
                     {profile.phone}
                   </span>
                 )}
                 {/* Email Verification Status Badge */}
                 {profile?.isEmailVerified || user?.isEmailVerified ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#27845B]/10 text-[#27845B] border border-[#27845B]/25">
-                    <CheckCircle2 className="w-3 h-3 text-[#27845B]" />
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/25">
+                    <CheckCircle2 className="w-3 h-3 text-[#0D9488]" />
                     Verified
                   </span>
                 ) : (
                   <div className="inline-flex items-center gap-1.5">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#C58A32]/10 text-[#C58A32] border border-[#C58A32]/25">
-                      <AlertTriangle className="w-3 h-3 text-[#C58A32]" />
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#D97706]/10 text-[#D97706] border border-[#D97706]/25">
+                      <AlertTriangle className="w-3 h-3 text-[#D97706]" />
                       Unverified
                     </span>
                     <button
                       type="button"
                       onClick={handleResendVerification}
                       disabled={resendingVerification}
-                      className="text-[11px] font-semibold text-[#76543D] underline hover:text-[#44352D] disabled:opacity-50"
+                      className="text-[11px] font-semibold text-[#2563EB] underline hover:text-[#163A5F] disabled:opacity-50"
                     >
                       {resendingVerification ? 'Sending...' : 'Resend'}
                     </button>
@@ -604,32 +604,32 @@ const StudentProfile = () => {
         </div>
 
         {/* Profile Completion Bar */}
-        <div className="mt-6 pt-5 border-t border-[#E8DED2]">
+        <div className="mt-6 pt-5 border-t border-[#DBEAFE]">
           <div className="flex items-center justify-between text-xs mb-2">
-            <span className="font-semibold text-[#44352D] flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-[#76543D]" />
+            <span className="font-semibold text-[#172554] flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-[#2563EB]" />
               Profile Completion Status
             </span>
-            <span className="font-bold text-[#44352D]">
+            <span className="font-bold text-[#172554]">
               {completion.percentage}% Complete
             </span>
           </div>
 
-          <div className="w-full bg-[#E8DED2] rounded-full h-2.5 overflow-hidden">
+          <div className="w-full bg-[#DBEAFE] rounded-full h-2.5 overflow-hidden">
             <div
               className={`h-full rounded-full transition-all duration-500 ${
                 completion.percentage === 100
-                  ? 'bg-[#27845B]'
+                  ? 'bg-[#0D9488]'
                   : completion.percentage >= 70
-                  ? 'bg-[#76543D]'
-                  : 'bg-[#A17C5B]'
+                  ? 'bg-[#2563EB]'
+                  : 'bg-[#163A5F]'
               }`}
               style={{ width: `${completion.percentage}%` }}
             />
           </div>
 
           {completion.percentage < 100 && (
-            <p className="text-[11px] text-[#82776C] mt-2">
+            <p className="text-[11px] text-[#64748B] mt-2">
               Tip: Upload your verified PDF resume and complete your phone number & technical skills to unlock full drive eligibility.
             </p>
           )}
@@ -657,50 +657,50 @@ const StudentProfile = () => {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-[#44352D]">
+                <label className="block text-xs font-medium text-[#172554]">
                   College Email Address
                 </label>
-                <span className="text-[10px] text-[#82776C] flex items-center gap-1">
-                  <Lock className="w-3 h-3 text-[#A17C5B]" /> Locked
+                <span className="text-[10px] text-[#64748B] flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-[#2563EB]" /> Locked
                 </span>
               </div>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Mail className="h-4 w-4 text-[#A17C5B]" />
+                  <Mail className="h-4 w-4 text-[#2563EB]" />
                 </div>
                 <input
                   type="email"
                   value={profile?.email || user?.email || ''}
                   disabled
-                  className="block w-full rounded-lg border border-[#E8DED2] bg-[#FAF8F4] text-[#82776C] text-sm pl-9 pr-3 py-2 cursor-not-allowed"
+                  className="block w-full rounded-lg border border-[#DBEAFE] bg-[#F0F7FF] text-[#64748B] text-sm pl-9 pr-3 py-2 cursor-not-allowed"
                 />
               </div>
-              <p className="text-[11px] text-[#82776C] mt-1">
+              <p className="text-[11px] text-[#64748B] mt-1">
                 College email cannot be modified after registration.
               </p>
             </div>
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-[#44352D]">
+                <label className="block text-xs font-medium text-[#172554]">
                   University Roll Number
                 </label>
-                <span className="text-[10px] text-[#82776C] flex items-center gap-1">
-                  <Lock className="w-3 h-3 text-[#A17C5B]" /> Locked
+                <span className="text-[10px] text-[#64748B] flex items-center gap-1">
+                  <Lock className="w-3 h-3 text-[#2563EB]" /> Locked
                 </span>
               </div>
               <div className="relative">
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Hash className="h-4 w-4 text-[#A17C5B]" />
+                  <Hash className="h-4 w-4 text-[#2563EB]" />
                 </div>
                 <input
                   type="text"
                   value={profile?.rollNumber || ''}
                   disabled
-                  className="block w-full rounded-lg border border-[#E8DED2] bg-[#FAF8F4] text-[#82776C] text-sm pl-9 pr-3 py-2 cursor-not-allowed font-mono"
+                  className="block w-full rounded-lg border border-[#DBEAFE] bg-[#F0F7FF] text-[#64748B] text-sm pl-9 pr-3 py-2 cursor-not-allowed font-mono"
                 />
               </div>
-              <p className="text-[11px] text-[#82776C] mt-1">
+              <p className="text-[11px] text-[#64748B] mt-1">
                 Roll number is permanent for academic tracking.
               </p>
             </div>
@@ -727,15 +727,15 @@ const StudentProfile = () => {
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              <label className="block text-xs font-medium text-[#44352D] mb-1.5">
-                Department / Discipline <span className="text-[#C94C4C]">*</span>
+              <label className="block text-xs font-medium text-[#172554] mb-1.5">
+                Department / Discipline <span className="text-[#DC2626]">*</span>
               </label>
               <select
                 name="department"
                 value={formData.department}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full rounded-lg border border-[#E8DED2] text-xs py-2 px-3 focus:outline-none focus:border-[#76543D] bg-white text-[#44352D] disabled:bg-[#FAF8F4] disabled:text-[#82776C]"
+                className="w-full rounded-lg border border-[#DBEAFE] text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] bg-white text-[#172554] disabled:bg-[#F0F7FF] disabled:text-[#64748B]"
               >
                 <option value="">Select Department</option>
                 {DEPARTMENTS.map((dept) => (
@@ -747,15 +747,15 @@ const StudentProfile = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-[#44352D] mb-1.5">
-                Graduation Year (Batch) <span className="text-[#C94C4C]">*</span>
+              <label className="block text-xs font-medium text-[#172554] mb-1.5">
+                Graduation Year (Batch) <span className="text-[#DC2626]">*</span>
               </label>
               <select
                 name="batch"
                 value={formData.batch}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full rounded-lg border border-[#E8DED2] text-xs py-2 px-3 focus:outline-none focus:border-[#76543D] bg-white text-[#44352D] disabled:bg-[#FAF8F4] disabled:text-[#82776C]"
+                className="w-full rounded-lg border border-[#DBEAFE] text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] bg-white text-[#172554] disabled:bg-[#F0F7FF] disabled:text-[#64748B]"
               >
                 <option value="">Select Graduation Year</option>
                 {GRADUATION_YEARS.map((yr) => (
@@ -796,7 +796,7 @@ const StudentProfile = () => {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-slate-100">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-[#DBEAFE]">
             <Input
               label="Total Historical Backlogs"
               name="totalBacklogs"
@@ -874,8 +874,8 @@ const StudentProfile = () => {
               </div>
 
               {/* Quick suggestions */}
-              <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs text-[#82776C]">
-                <span className="text-[11px] text-[#82776C]">Suggestions:</span>
+              <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs text-[#64748B]">
+                <span className="text-[11px] text-[#64748B]">Suggestions:</span>
                 {COMMON_SKILLS.filter(
                   (s) => !formData.skills.some((sk) => sk.toLowerCase() === s.toLowerCase())
                 )
@@ -885,7 +885,7 @@ const StudentProfile = () => {
                       key={skill}
                       type="button"
                       onClick={() => handleAddSkill(skill)}
-                      className="px-2 py-0.5 rounded text-[11px] bg-[#FAF8F4] border border-[#E8DED2] hover:bg-[#F1E7D9] hover:text-[#44352D] text-[#76543D] transition-colors"
+                      className="px-2 py-0.5 rounded text-[11px] bg-[#F0F7FF] border border-[#DBEAFE] hover:bg-[#EFF6FF] hover:text-[#163A5F] text-[#2563EB] transition-colors"
                     >
                       + {skill}
                     </button>
@@ -895,7 +895,7 @@ const StudentProfile = () => {
           )}
 
           {formData.skills.length === 0 ? (
-            <div className="text-center py-6 border border-dashed border-[#E8DED2] rounded-lg text-xs text-[#82776C]">
+            <div className="text-center py-6 border border-dashed border-[#DBEAFE] rounded-lg text-xs text-[#64748B]">
               No technical skills listed yet. Click "Edit Profile" to add your programming languages and tools.
             </div>
           ) : (
@@ -903,14 +903,14 @@ const StudentProfile = () => {
               {formData.skills.map((skill) => (
                 <span
                   key={skill}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#F1E7D9] text-[#44352D] border border-[#E8DED2]"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#EFF6FF] text-[#163A5F] border border-[#DBEAFE]"
                 >
                   {skill}
                   {isEditing && (
                     <button
                       type="button"
                       onClick={() => handleRemoveSkill(skill)}
-                      className="text-[#82776C] hover:text-[#44352D] focus:outline-none"
+                      className="text-[#64748B] hover:text-[#172554] focus:outline-none"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -928,16 +928,16 @@ const StudentProfile = () => {
         >
           <div className="space-y-4">
             {profile?.resumeUrl ? (
-              <div className="p-4 rounded-xl border border-[#E8DED2] bg-[#FAF8F4] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="p-4 rounded-xl border border-[#DBEAFE] bg-[#F0F7FF] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-[#44352D] text-[#F1E7D9] flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <div className="w-12 h-12 rounded-xl bg-[#163A5F] text-[#EFF6FF] flex items-center justify-center flex-shrink-0 shadow-sm">
                     <FileText className="w-6 h-6" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-semibold text-[#44352D] truncate max-w-xs sm:max-w-md">
+                    <h4 className="text-sm font-semibold text-[#172554] truncate max-w-xs sm:max-w-md">
                       {profile.resumeOriginalName || 'Student_Verified_Resume.pdf'}
                     </h4>
-                    <p className="text-xs text-[#82776C] mt-0.5">
+                    <p className="text-xs text-[#64748B] mt-0.5">
                       PDF Document • {formatFileSize(profile.resumeSize)}
                       {profile.resumeUpdatedAt && (
                         <span> • Uploaded {new Date(profile.resumeUpdatedAt).toLocaleDateString()}</span>
@@ -961,7 +961,7 @@ const StudentProfile = () => {
                     href={profile.resumeUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-[#E8DED2] text-xs font-medium text-[#44352D] hover:bg-[#FAF8F4] gap-1"
+                    className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-[#DBEAFE] text-xs font-medium text-[#172554] hover:bg-[#F0F7FF] gap-1"
                   >
                     Preview <ExternalLink className="w-3.5 h-3.5" />
                   </a>
@@ -970,19 +970,19 @@ const StudentProfile = () => {
                     type="button"
                     onClick={() => resumeInputRef.current?.click()}
                     disabled={uploadingResume}
-                    className="px-3 py-1.5 rounded-lg bg-[#44352D] hover:bg-[#534239] text-[#F1E7D9] text-xs font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-medium transition-colors"
                   >
                     {uploadingResume ? 'Replacing...' : 'Replace PDF'}
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="border-2 border-dashed border-[#E8DED2] rounded-xl p-8 text-center hover:border-[#A17C5B] transition-colors bg-[#FAF8F4]">
-                <FileText className="w-10 h-10 text-[#A17C5B] mx-auto mb-3" />
-                <h4 className="text-sm font-semibold text-[#44352D]">
+              <div className="border-2 border-dashed border-[#DBEAFE] rounded-xl p-8 text-center hover:border-[#2563EB] transition-colors bg-[#F0F7FF]">
+                <FileText className="w-10 h-10 text-[#2563EB] mx-auto mb-3" />
+                <h4 className="text-sm font-semibold text-[#172554]">
                   No resume document uploaded yet
                 </h4>
-                <p className="text-xs text-[#82776C] mt-1 max-w-md mx-auto">
+                <p className="text-xs text-[#64748B] mt-1 max-w-md mx-auto">
                   Upload your professional PDF resume (max 5 MB). This file is automatically shared with companies when you apply for drives.
                 </p>
 
@@ -1051,14 +1051,14 @@ const StudentProfile = () => {
           title="Account Security & Password"
           subtitle="Manage authentication credentials, password security, and college email verification"
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-[#E8DED2] bg-[#FAF8F4]">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl border border-[#DBEAFE] bg-[#F0F7FF]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white border border-[#E8DED2] flex items-center justify-center text-[#76543D] shadow-sm">
+              <div className="w-10 h-10 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] shadow-sm">
                 <Lock className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-[#44352D]">Account Password</h4>
-                <p className="text-[11px] text-[#82776C]">
+                <h4 className="text-xs font-bold text-[#172554]">Account Password</h4>
+                <p className="text-[11px] text-[#64748B]">
                   Update your password regularly to keep your student placement account secure.
                 </p>
               </div>
@@ -1082,8 +1082,8 @@ const StudentProfile = () => {
 
         {/* Save Changes Floating Action Bar in Edit Mode */}
         {isEditing && (
-          <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-sm border border-[#E8DED2] rounded-xl shadow-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 mt-6">
-            <span className="text-xs text-[#44352D] font-medium text-center sm:text-left">
+          <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-sm border border-[#DBEAFE] rounded-xl shadow-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 mt-6">
+            <span className="text-xs text-[#172554] font-medium text-center sm:text-left">
               You have unsaved edits in your academic profile.
             </span>
             <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">

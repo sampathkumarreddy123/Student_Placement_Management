@@ -25,12 +25,12 @@ const StatusHistoryModal = ({ isOpen, onClose, application }) => {
     >
       <div className="space-y-4 text-xs">
         {history.length === 0 ? (
-          <div className="text-center py-8 text-[#82776C]">
-            <History className="w-8 h-8 mx-auto mb-2 opacity-50 text-[#A17C5B]" />
+          <div className="text-center py-8 text-[#64748B]">
+            <History className="w-8 h-8 mx-auto mb-2 opacity-50 text-[#2563EB]" />
             <p>No status history recorded yet.</p>
           </div>
         ) : (
-          <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#E8DED2]">
+          <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#DBEAFE]">
             {history
               .slice()
               .reverse()
@@ -41,18 +41,18 @@ const StatusHistoryModal = ({ isOpen, onClose, application }) => {
                 return (
                   <div key={index} className="relative">
                     {/* Timeline Node */}
-                    <div className="absolute -left-6 top-0.5 w-3 h-3 rounded-full bg-[#76543D] border-2 border-white shadow-sm" />
+                    <div className="absolute -left-6 top-0.5 w-3 h-3 rounded-full bg-[#163A5F] border-2 border-white shadow-sm" />
 
-                    <div className="p-3.5 bg-white rounded-xl border border-[#E8DED2] shadow-sm space-y-2">
+                    <div className="p-3.5 bg-white rounded-xl border border-[#DBEAFE] shadow-sm space-y-2">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 font-medium">
                           <Badge status={item.previousStatus} size="sm" />
-                          <ArrowRight className="w-3.5 h-3.5 text-[#A17C5B]" />
+                          <ArrowRight className="w-3.5 h-3.5 text-[#2563EB]" />
                           <Badge status={item.newStatus} size="sm" />
                         </div>
 
-                        <span className="text-[11px] text-[#82776C] flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-[#A17C5B]" />
+                        <span className="text-[11px] text-[#64748B] flex items-center gap-1">
+                          <Clock className="w-3 h-3 text-[#2563EB]" />
                           {item.updatedDate
                             ? new Date(item.updatedDate).toLocaleString('en-US', {
                                 month: 'short',
@@ -65,14 +65,14 @@ const StatusHistoryModal = ({ isOpen, onClose, application }) => {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-[11px] text-[#82776C]">
-                        <User className="w-3.5 h-3.5 text-[#A17C5B]" />
-                        <span>Updated by: <strong className="text-[#44352D]">{updatedByName}</strong></span>
+                      <div className="flex items-center gap-1.5 text-[11px] text-[#64748B]">
+                        <User className="w-3.5 h-3.5 text-[#2563EB]" />
+                        <span>Updated by: <strong className="text-[#172554]">{updatedByName}</strong></span>
                       </div>
 
                       {item.remarks && (
-                        <div className="p-2.5 rounded-lg bg-[#FAF8F4] border border-[#E8DED2] text-[#44352D] text-[11px] leading-relaxed">
-                          <strong className="block text-[10px] uppercase tracking-wider text-[#82776C] mb-0.5">
+                        <div className="p-2.5 rounded-lg bg-[#F0F7FF] border border-[#DBEAFE] text-[#172554] text-[11px] leading-relaxed">
+                          <strong className="block text-[10px] uppercase tracking-wider text-[#64748B] mb-0.5">
                             Remarks:
                           </strong>
                           {item.remarks}
@@ -85,7 +85,7 @@ const StatusHistoryModal = ({ isOpen, onClose, application }) => {
           </div>
         )}
 
-        <div className="flex justify-end pt-3 border-t border-[#E8DED2]">
+        <div className="flex justify-end pt-3 border-t border-[#DBEAFE]">
           <Button variant="outline" size="sm" onClick={onClose}>
             Close History
           </Button>

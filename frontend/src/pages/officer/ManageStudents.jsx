@@ -112,7 +112,7 @@ const ManageStudents = () => {
       />
 
       {/* 2. Filters Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-[#E8DED2] shadow-sm">
+      <div className="bg-white p-4 rounded-2xl border border-[#DBEAFE] shadow-sm">
         <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
             <Input
@@ -127,7 +127,7 @@ const ManageStudents = () => {
             <select
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
-              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
+              className="w-full h-[38px] rounded-lg border border-[#DBEAFE] text-xs px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white text-[#172554]"
             >
               {DEPARTMENTS.map((dept) => (
                 <option key={dept} value={dept}>
@@ -141,7 +141,7 @@ const ManageStudents = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
+              className="w-full h-[38px] rounded-lg border border-[#DBEAFE] text-xs px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white text-[#172554]"
             >
               <option value="">All Placement Statuses</option>
               <option value="Placed">Placed</option>
@@ -153,7 +153,7 @@ const ManageStudents = () => {
             <select
               value={minCgpa}
               onChange={(e) => setMinCgpa(e.target.value)}
-              className="flex-1 h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
+              className="flex-1 h-[38px] rounded-lg border border-[#DBEAFE] text-xs px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white text-[#172554]"
             >
               <option value="">Any CGPA Cutoff</option>
               <option value="6">CGPA &gt;= 6.0</option>
@@ -189,10 +189,10 @@ const ManageStudents = () => {
           onAction={hasActiveFilters ? handleReset : undefined}
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E8DED2] shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
-              <thead className="bg-[#F6F0E8] border-b border-[#E8DED2] text-[#44352D] font-semibold uppercase tracking-wider text-[11px]">
+              <thead className="bg-[#F0F7FF] border-b border-[#DBEAFE] text-[#172554] font-semibold uppercase tracking-wider text-[11px]">
                 <tr>
                   <th className="py-3 px-4 min-w-[200px]">Student & Roll No</th>
                   <th className="py-3 px-4 min-w-[170px]">Department & Batch</th>
@@ -203,15 +203,15 @@ const ManageStudents = () => {
                   <th className="py-3 px-4 text-right whitespace-nowrap min-w-[130px]">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E8DED2]/60">
+              <tbody className="divide-y divide-[#DBEAFE]/60">
                 {paginatedStudents.map((profile) => (
-                  <tr key={profile._id} className="hover:bg-[#FAF8F4] transition-colors">
+                  <tr key={profile._id} className="hover:bg-[#F0F7FF] transition-colors">
                     <td className="py-3.5 px-4 min-w-[200px]">
-                      <div className="font-semibold text-[#44352D] leading-tight">
+                      <div className="font-semibold text-[#172554] leading-tight">
                         {profile.user?.name || 'Student Name'}
                       </div>
-                      <div className="text-[11px] text-[#82776C] mt-0.5 flex items-center gap-1.5">
-                        <span className="font-mono text-[#44352D] bg-[#F1E7D9] border border-[#E8DED2] px-1.5 py-0.2 rounded font-semibold">
+                      <div className="text-[11px] text-[#64748B] mt-0.5 flex items-center gap-1.5">
+                        <span className="font-mono text-[#163A5F] bg-[#EFF6FF] border border-[#DBEAFE] px-1.5 py-0.2 rounded font-semibold">
                           {profile.rollNumber}
                         </span>
                         <span>•</span>
@@ -219,13 +219,13 @@ const ManageStudents = () => {
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4 text-[#82776C] min-w-[170px]">
-                      <div className="font-medium text-[#44352D]">{profile.department}</div>
-                      <div className="text-[11px] text-[#82776C]/80">Class of {profile.batch}</div>
+                    <td className="py-3.5 px-4 text-[#64748B] min-w-[170px]">
+                      <div className="font-medium text-[#172554]">{profile.department}</div>
+                      <div className="text-[11px] text-[#64748B]/80">Class of {profile.batch}</div>
                     </td>
 
                     <td className="py-3.5 px-4 text-center min-w-[80px]">
-                      <span className="font-bold text-[#44352D] text-sm">
+                      <span className="font-bold text-[#172554] text-sm">
                         {profile.cgpa ? profile.cgpa.toFixed(2) : '0.00'}
                       </span>
                     </td>
@@ -234,8 +234,8 @@ const ManageStudents = () => {
                       <span
                         className={`inline-block px-2 py-0.5 rounded font-medium ${
                           (profile.activeBacklogs || profile.backlogs || 0) > 0
-                            ? 'bg-[#C94C4C]/10 text-[#C94C4C] font-semibold border border-[#C94C4C]/30'
-                            : 'bg-[#F6F0E8] border border-[#E8DED2] text-[#44352D]'
+                            ? 'bg-[#DC2626]/10 text-[#DC2626] font-semibold border border-[#DC2626]/30'
+                            : 'bg-[#F0F7FF] border border-[#DBEAFE] text-[#172554]'
                         }`}
                       >
                         {profile.activeBacklogs || profile.backlogs || 0}
@@ -247,13 +247,13 @@ const ManageStudents = () => {
                         {profile.skills?.slice(0, 3).map((skill, i) => (
                           <span
                             key={i}
-                            className="px-1.5 py-0.5 rounded text-[10px] bg-[#F6F0E8] border border-[#E8DED2] text-[#44352D]"
+                            className="px-1.5 py-0.5 rounded text-[10px] bg-[#EFF6FF] border border-[#DBEAFE] text-[#163A5F]"
                           >
                             {skill}
                           </span>
                         ))}
                         {profile.skills?.length > 3 && (
-                          <span className="text-[10px] text-[#82776C] font-medium">
+                          <span className="text-[10px] text-[#64748B] font-medium">
                             +{profile.skills.length - 3} more
                           </span>
                         )}
@@ -287,10 +287,10 @@ const ManageStudents = () => {
                             href={profile.resumeUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#F1E7D9] text-[#44352D] font-semibold hover:bg-[#E8DED2] border border-[#E8DED2] transition-colors text-xs"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#EFF6FF] text-[#163A5F] font-semibold hover:bg-[#DBEAFE] border border-[#DBEAFE] transition-colors text-xs"
                             title="Download Resume"
                           >
-                            CV <ExternalLink className="w-3 h-3 text-[#76543D]" />
+                            CV <ExternalLink className="w-3 h-3 text-[#2563EB]" />
                           </a>
                         )}
                       </div>

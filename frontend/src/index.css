@@ -4,27 +4,26 @@
 
 @layer base {
   body {
-    @apply bg-[#FAF8F4] text-[#44352D] antialiased;
+    @apply bg-[#EFF6FF] text-[#172554] antialiased;
     font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
 }
 
-/* Custom scrollbars with Cocoa & Champagne theme */
+/* Custom scrollbars with Navy & Blue theme */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F6F0E8;
+  background: #EFF6FF;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #E8DED2;
+  background: #DBEAFE;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #A17C5B;
+  background: #2563EB;
 }
-

@@ -18,19 +18,21 @@ const Button = ({
 
   const variants = {
     primary:
-      'bg-[#44352D] text-white hover:bg-[#342822] focus:ring-[#76543D] shadow-sm',
+      'bg-[#2563EB] text-white hover:bg-[#1D4ED8] focus:ring-[#2563EB] shadow-sm',
     secondary:
-      'bg-[#F1E7D9] text-[#44352D] hover:bg-[#E5D6C3] focus:ring-[#A17C5B] border border-[#E8DED2]',
+      'bg-[#DBEAFE] text-[#163A5F] hover:bg-[#BFDBFE] focus:ring-[#2563EB] border border-[#DBEAFE]',
+    navy:
+      'bg-[#163A5F] text-white hover:bg-[#0F2843] focus:ring-[#163A5F] shadow-sm',
     warm:
-      'bg-[#76543D] text-white hover:bg-[#644632] focus:ring-[#76543D] shadow-sm',
+      'bg-[#163A5F] text-white hover:bg-[#0F2843] focus:ring-[#163A5F] shadow-sm',
     outline:
-      'bg-transparent border border-[#E8DED2] text-[#44352D] hover:bg-[#FAF8F4] hover:text-[#44352D] focus:ring-[#A17C5B]',
+      'bg-white border border-[#DBEAFE] text-[#163A5F] hover:bg-[#F0F7FF] hover:border-[#2563EB]/40 focus:ring-[#2563EB]',
     danger:
-      'bg-[#C94C4C] text-white hover:bg-[#B33E3E] focus:ring-[#C94C4C] shadow-sm',
+      'bg-[#DC2626] text-white hover:bg-[#B91C1C] focus:ring-[#DC2626] shadow-sm',
     ghost:
-      'bg-transparent text-[#76543D] hover:bg-[#F6F0E8] hover:text-[#44352D] focus:ring-[#A17C5B]',
+      'bg-transparent text-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#163A5F] focus:ring-[#2563EB]',
     success:
-      'bg-[#27845B] text-white hover:bg-[#206F4C] focus:ring-[#27845B] shadow-sm',
+      'bg-[#0D9488] text-white hover:bg-[#0F766E] focus:ring-[#0D9488] shadow-sm',
   };
 
   const sizes = {
@@ -58,4 +60,3 @@ const Button = ({
 };
 
 export default Button;
-

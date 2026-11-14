@@ -347,7 +347,7 @@ const ManageCompanies = () => {
       )}
 
       {/* 2. Filter & Search Toolbar */}
-      <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-[#DBEAFE] shadow-sm space-y-3">
         <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
           {/* Search Box */}
           <div className="sm:col-span-5">
@@ -367,7 +367,7 @@ const ManageCompanies = () => {
                 setSelectedIndustry(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
+              className="w-full h-[38px] rounded-lg border border-[#DBEAFE] text-xs px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white text-[#172554]"
             >
               <option value="All">All Industries</option>
               {INDUSTRIES.map((ind) => (
@@ -386,7 +386,7 @@ const ManageCompanies = () => {
                 setStatusFilter(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
+              className="w-full h-[38px] rounded-lg border border-[#DBEAFE] text-xs px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white text-[#172554]"
             >
               <option value="active">Active Only</option>
               <option value="archived">Archived</option>
@@ -400,11 +400,11 @@ const ManageCompanies = () => {
               Search
             </Button>
 
-            <div className="hidden sm:flex border border-[#E8DED2] rounded-lg p-0.5 bg-[#FAF8F4]">
+            <div className="hidden sm:flex border border-[#DBEAFE] rounded-lg p-0.5 bg-[#F0F7FF]">
               <button
                 type="button"
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded ${viewMode === 'table' ? 'bg-[#F1E7D9] shadow-sm text-[#44352D]' : 'text-[#82776C]'}`}
+                className={`p-1.5 rounded ${viewMode === 'table' ? 'bg-[#EFF6FF] shadow-sm text-[#163A5F]' : 'text-[#64748B]'}`}
                 title="Table View"
               >
                 <List className="w-4 h-4" />
@@ -412,7 +412,7 @@ const ManageCompanies = () => {
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-[#F1E7D9] shadow-sm text-[#44352D]' : 'text-[#82776C]'}`}
+                className={`p-1.5 rounded ${viewMode === 'grid' ? 'bg-[#EFF6FF] shadow-sm text-[#163A5F]' : 'text-[#64748B]'}`}
                 title="Grid Cards View"
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -446,7 +446,7 @@ const ManageCompanies = () => {
         <Card noPadding>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#F6F0E8] border-b border-[#E8DED2] text-[#44352D] font-semibold uppercase tracking-wider">
+              <thead className="bg-[#F0F7FF] border-b border-[#DBEAFE] text-[#172554] font-semibold uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4">Company Details</th>
                   <th className="py-3 px-4">Industry & Domain</th>
@@ -458,71 +458,71 @@ const ManageCompanies = () => {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E8DED2]/60">
+              <tbody className="divide-y divide-[#DBEAFE]/60">
                 {companies.map((comp) => (
-                  <tr key={comp._id} className="hover:bg-[#FAF8F4] transition-colors">
+                  <tr key={comp._id} className="hover:bg-[#F0F7FF] transition-colors">
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-3">
                         {comp.logoUrl ? (
                           <img
                             src={comp.logoUrl}
                             alt={comp.name}
-                            className="w-10 h-10 rounded-xl object-contain p-1 border border-[#E8DED2] bg-white flex-shrink-0"
+                            className="w-10 h-10 rounded-xl object-contain p-1 border border-[#DBEAFE] bg-white flex-shrink-0"
                             onError={(e) => {
                               e.target.style.display = 'none';
                             }}
                           />
                         ) : null}
                         {(!comp.logoUrl || undefined) && (
-                          <div className="w-10 h-10 rounded-xl bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-sm flex-shrink-0">
+                          <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-sm flex-shrink-0">
                             {comp.name.charAt(0).toUpperCase()}
                           </div>
                         )}
                         <div>
-                          <span className="font-semibold text-[#44352D] block leading-tight text-sm">
+                          <span className="font-semibold text-[#172554] block leading-tight text-sm">
                             {comp.name}
                           </span>
-                          <span className="text-[11px] text-[#82776C] line-clamp-1 max-w-xs mt-0.5">
+                          <span className="text-[11px] text-[#64748B] line-clamp-1 max-w-xs mt-0.5">
                             {comp.description || 'Corporate recruiter'}
                           </span>
                         </div>
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4 font-medium text-[#44352D]">
-                      <span className="px-2 py-0.5 rounded-full bg-[#F6F0E8] border border-[#E8DED2] text-[#44352D] text-[11px]">
+                    <td className="py-3.5 px-4 font-medium text-[#172554]">
+                      <span className="px-2 py-0.5 rounded-full bg-[#F0F7FF] border border-[#DBEAFE] text-[#172554] text-[11px]">
                         {comp.industry}
                       </span>
                     </td>
 
-                    <td className="py-3.5 px-4 text-[#82776C]">
+                    <td className="py-3.5 px-4 text-[#64748B]">
                       <div className="flex items-center gap-1 truncate max-w-xs">
-                        <MapPin className="w-3.5 h-3.5 text-[#A17C5B] flex-shrink-0" />
+                        <MapPin className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
                         <span>{comp.location || 'Multiple'}</span>
                       </div>
                     </td>
 
-                    <td className="py-3.5 px-4 text-[#82776C]">
+                    <td className="py-3.5 px-4 text-[#64748B]">
                       {comp.website ? (
                         <a
                           href={comp.website}
                           target="_blank"
                           rel="noreferrer"
-                          className="inline-flex items-center gap-1 text-[#76543D] hover:underline font-semibold"
+                          className="inline-flex items-center gap-1 text-[#2563EB] hover:underline font-semibold"
                         >
                           Visit <ExternalLink className="w-3 h-3" />
                         </a>
                       ) : (
-                        <span className="text-[#82776C]/60">—</span>
+                        <span className="text-[#64748B]/60">—</span>
                       )}
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-[#44352D]">
+                      <div className="font-semibold text-[#172554]">
                         {comp.contactPerson || 'HR Team'}
                       </div>
                       {comp.contactEmail && (
-                        <div className="text-[11px] text-[#82776C] truncate max-w-xs">
+                        <div className="text-[11px] text-[#64748B] truncate max-w-xs">
                           {comp.contactEmail}
                         </div>
                       )}
@@ -531,10 +531,10 @@ const ManageCompanies = () => {
                     <td className="py-3.5 px-4 text-center">
                       <Link
                         to={`/officer/drives`}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#F1E7D9] text-[#44352D] font-semibold hover:bg-[#E8DED2] transition-colors border border-[#E8DED2]"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#EFF6FF] text-[#163A5F] font-semibold hover:bg-[#DBEAFE] transition-colors border border-[#DBEAFE]"
                         title="View Associated Drives"
                       >
-                        <Briefcase className="w-3 h-3 text-[#76543D]" />
+                        <Briefcase className="w-3 h-3 text-[#2563EB]" />
                         {comp.drivesCount || 0}
                       </Link>
                     </td>
@@ -552,7 +552,7 @@ const ManageCompanies = () => {
                       <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => openEditModal(comp)}
-                          className="p-1.5 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
+                          className="p-1.5 rounded-lg text-[#64748B] hover:text-[#172554] hover:bg-[#F0F7FF] transition-colors"
                           title="Edit Company"
                         >
                           <Edit2 className="w-4 h-4" />
@@ -560,7 +560,7 @@ const ManageCompanies = () => {
 
                         <button
                           onClick={() => handleToggleArchive(comp)}
-                          className="p-1.5 rounded-lg text-[#82776C] hover:text-[#C58A32] hover:bg-[#F6F0E8] transition-colors"
+                          className="p-1.5 rounded-lg text-[#64748B] hover:text-[#D97706] hover:bg-[#F0F7FF] transition-colors"
                           title={comp.isArchived ? 'Restore to Active' : 'Archive Company'}
                         >
                           {comp.isArchived ? (
@@ -572,7 +572,7 @@ const ManageCompanies = () => {
 
                         <button
                           onClick={() => initiateDelete(comp)}
-                          className="p-1.5 rounded-lg text-[#82776C] hover:text-[#C94C4C] hover:bg-[#F6F0E8] transition-colors"
+                          className="p-1.5 rounded-lg text-[#64748B] hover:text-[#DC2626] hover:bg-[#F0F7FF] transition-colors"
                           title="Delete Company"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -591,7 +591,7 @@ const ManageCompanies = () => {
           {companies.map((comp) => (
             <div
               key={comp._id}
-              className="bg-white rounded-xl border border-[#E8DED2] p-5 shadow-sm hover:border-[#A17C5B]/60 transition-all flex flex-col justify-between"
+              className="bg-white rounded-xl border border-[#DBEAFE] p-5 shadow-sm hover:border-[#2563EB]/60 transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-start justify-between gap-3 mb-3">
@@ -600,22 +600,22 @@ const ManageCompanies = () => {
                       <img
                         src={comp.logoUrl}
                         alt={comp.name}
-                        className="w-12 h-12 rounded-xl object-contain p-1 border border-[#E8DED2] bg-white"
+                        className="w-12 h-12 rounded-xl object-contain p-1 border border-[#DBEAFE] bg-white"
                         onError={(e) => {
                           e.target.style.display = 'none';
                         }}
                       />
                     ) : null}
                     {(!comp.logoUrl || undefined) && (
-                      <div className="w-12 h-12 rounded-xl bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-lg flex-shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-lg flex-shrink-0">
                         {comp.name.charAt(0).toUpperCase()}
                       </div>
                     )}
                     <div>
-                      <h3 className="font-semibold text-[#44352D] text-sm leading-tight">
+                      <h3 className="font-semibold text-[#172554] text-sm leading-tight">
                         {comp.name}
                       </h3>
-                      <span className="text-[11px] text-[#82776C]">{comp.industry}</span>
+                      <span className="text-[11px] text-[#64748B]">{comp.industry}</span>
                     </div>
                   </div>
 
@@ -627,51 +627,51 @@ const ManageCompanies = () => {
                   </Badge>
                 </div>
 
-                <p className="text-xs text-[#82776C] line-clamp-2 mb-4 leading-relaxed">
+                <p className="text-xs text-[#64748B] line-clamp-2 mb-4 leading-relaxed">
                   {comp.description || 'Corporate recruitment partner.'}
                 </p>
 
-                <div className="space-y-1.5 text-xs text-[#82776C] pt-3 border-t border-[#E8DED2]">
+                <div className="space-y-1.5 text-xs text-[#64748B] pt-3 border-t border-[#DBEAFE]">
                   {comp.location && (
                     <div className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-[#A17C5B]" />
+                      <MapPin className="w-3.5 h-3.5 text-[#2563EB]" />
                       <span className="truncate">{comp.location}</span>
                     </div>
                   )}
 
                   {comp.contactPerson && (
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[#82776C] font-medium">POC:</span>
-                      <span className="text-[#44352D] font-medium">{comp.contactPerson}</span>
+                      <span className="text-[#64748B] font-medium">POC:</span>
+                      <span className="text-[#172554] font-medium">{comp.contactPerson}</span>
                       {comp.contactEmail && (
-                        <span className="text-[#82776C] text-[11px]">({comp.contactEmail})</span>
+                        <span className="text-[#64748B] text-[11px]">({comp.contactEmail})</span>
                       )}
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[#E8DED2] flex items-center justify-between">
-                <span className="text-xs font-semibold text-[#44352D] bg-[#F1E7D9] px-2 py-0.5 rounded border border-[#E8DED2]">
+              <div className="mt-4 pt-3 border-t border-[#DBEAFE] flex items-center justify-between">
+                <span className="text-xs font-semibold text-[#163A5F] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#DBEAFE]">
                   {comp.drivesCount || 0} Drives
                 </span>
 
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => openEditModal(comp)}
-                    className="p-1.5 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
+                    className="p-1.5 rounded-lg text-[#64748B] hover:text-[#172554] hover:bg-[#F0F7FF] transition-colors"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleToggleArchive(comp)}
-                    className="p-1.5 rounded-lg text-[#82776C] hover:text-[#C58A32] hover:bg-[#F6F0E8] transition-colors"
+                    className="p-1.5 rounded-lg text-[#64748B] hover:text-[#D97706] hover:bg-[#F0F7FF] transition-colors"
                   >
                     <Archive className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => initiateDelete(comp)}
-                    className="p-1.5 rounded-lg text-[#82776C] hover:text-[#C94C4C] hover:bg-[#F6F0E8] transition-colors"
+                    className="p-1.5 rounded-lg text-[#64748B] hover:text-[#DC2626] hover:bg-[#DC2626]/10 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -701,18 +701,18 @@ const ManageCompanies = () => {
       >
         <form onSubmit={handleSaveCompany} className="space-y-4 text-xs">
           {/* Logo Picker & Preview */}
-          <div className="p-3.5 bg-[#FAF8F4] rounded-xl border border-[#E8DED2] flex items-center gap-4">
-            <div className="w-16 h-16 rounded-xl bg-white border border-[#E8DED2] flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
+          <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center gap-4">
+            <div className="w-16 h-16 rounded-xl bg-white border border-[#DBEAFE] flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
               {logoPreview ? (
                 <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-contain p-1" />
               ) : (
-                <Building2 className="w-7 h-7 text-[#A17C5B]/40" />
+                <Building2 className="w-7 h-7 text-[#2563EB]/40" />
               )}
             </div>
 
             <div className="space-y-1.5 flex-1">
-              <span className="font-semibold text-[#44352D] block text-xs">Company Logo</span>
-              <p className="text-[11px] text-[#82776C]">
+              <span className="font-semibold text-[#172554] block text-xs">Company Logo</span>
+              <p className="text-[11px] text-[#64748B]">
                 Upload image (JPG, PNG, SVG, WebP max 2MB)
               </p>
               <div className="flex items-center gap-2">
@@ -733,7 +733,7 @@ const ManageCompanies = () => {
                       setLogoPreview('');
                       setForm((prev) => ({ ...prev, logoUrl: '' }));
                     }}
-                    className="text-[11px] text-[#C94C4C] hover:underline"
+                    className="text-[11px] text-[#DC2626] hover:underline"
                   >
                     Remove
                   </button>
@@ -760,13 +760,13 @@ const ManageCompanies = () => {
             />
 
             <div>
-              <label className="block text-xs font-semibold text-[#44352D] mb-1.5">
+              <label className="block text-xs font-semibold text-[#172554] mb-1.5">
                 Industry / Business Vertical *
               </label>
               <select
                 value={form.industry}
                 onChange={(e) => setForm({ ...form, industry: e.target.value })}
-                className="w-full h-[38px] rounded-lg border border-[#E8DED2] px-3 bg-white text-[#44352D] focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D]"
+                className="w-full h-[38px] rounded-lg border border-[#DBEAFE] px-3 bg-white text-[#172554] focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]"
               >
                 {INDUSTRIES.map((ind) => (
                   <option key={ind} value={ind}>
@@ -818,19 +818,19 @@ const ManageCompanies = () => {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-[#44352D] mb-1.5">
+            <label className="block text-xs font-semibold text-[#172554] mb-1.5">
               Company Overview & Hiring Profile
             </label>
             <textarea
               rows={3}
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
-              className="w-full rounded-lg border border-[#E8DED2] p-2.5 text-xs text-[#44352D] focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white placeholder-[#82776C]/60"
+              className="w-full rounded-lg border border-[#DBEAFE] p-2.5 text-xs text-[#172554] focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white placeholder-[#64748B]/60"
               placeholder="Provide a brief background on product verticals, technology stack, and hiring tiers..."
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-[#E8DED2]">
+          <div className="flex justify-end gap-2 pt-3 border-t border-[#DBEAFE]">
             <Button variant="outline" size="sm" onClick={() => setIsModalOpen(false)}>
               Cancel
             </Button>
@@ -851,8 +851,8 @@ const ManageCompanies = () => {
       >
         <div className="space-y-4 text-xs">
           {deleteModalState.hasRecords ? (
-            <div className="p-3.5 bg-[#F6F0E8] border border-[#E8DED2] rounded-xl space-y-2 text-[#44352D]">
-              <div className="flex items-center gap-2 font-bold text-sm text-[#C58A32]">
+            <div className="p-3.5 bg-[#F0F7FF] border border-[#DBEAFE] rounded-xl space-y-2 text-[#172554]">
+              <div className="flex items-center gap-2 font-bold text-sm text-[#D97706]">
                 <AlertTriangle className="w-5 h-5 flex-shrink-0" />
                 Active Placement Records Detected
               </div>
@@ -863,18 +863,18 @@ const ManageCompanies = () => {
                   <span> and <strong>{deleteModalState.placedCount} placed student record(s)</strong></span>
                 )}.
               </p>
-              <p className="text-[11px] text-[#82776C]">
+              <p className="text-[11px] text-[#64748B]">
                 To preserve academic accreditation and student placement history, permanent deletion is prevented. You can safely archive this company instead, which hides it from active recruitment while keeping student history intact.
               </p>
             </div>
           ) : (
-            <p className="text-[#82776C] leading-relaxed">
+            <p className="text-[#64748B] leading-relaxed">
               Are you sure you want to permanently delete{' '}
-              <strong className="text-[#44352D]">"{deleteModalState.company?.name}"</strong>? This company has no associated drives and will be completely removed from the database.
+              <strong className="text-[#172554]">"{deleteModalState.company?.name}"</strong>? This company has no associated drives and will be completely removed from the database.
             </p>
           )}
 
-          <div className="flex justify-end gap-2 pt-3 border-t border-[#E8DED2]">
+          <div className="flex justify-end gap-2 pt-3 border-t border-[#DBEAFE]">
             <Button
               variant="outline"
               size="sm"

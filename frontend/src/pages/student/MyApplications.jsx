@@ -123,44 +123,44 @@ const MyApplications = () => {
 
       {/* 2. Mini KPI Highlights */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-        <div className="bg-white rounded-xl border border-[#E8DED2] p-4 shadow-sm">
-          <span className="text-[11px] font-semibold text-[#82776C] block uppercase tracking-wider">
+        <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 shadow-sm">
+          <span className="text-[11px] font-semibold text-[#64748B] block uppercase tracking-wider">
             Total Submissions
           </span>
-          <span className="text-2xl font-bold text-[#44352D] mt-1 block">
+          <span className="text-2xl font-bold text-[#172554] mt-1 block">
             {overallCount}
           </span>
         </div>
-        <div className="bg-white rounded-xl border border-[#E8DED2] p-4 shadow-sm">
-          <span className="text-[11px] font-semibold text-[#76543D] block uppercase tracking-wider">
+        <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 shadow-sm">
+          <span className="text-[11px] font-semibold text-[#163A5F] block uppercase tracking-wider">
             Review / Pending
           </span>
-          <span className="text-2xl font-bold text-[#76543D] mt-1 block">
+          <span className="text-2xl font-bold text-[#163A5F] mt-1 block">
             {underReviewCount}
           </span>
         </div>
-        <div className="bg-white rounded-xl border border-[#E8DED2] p-4 shadow-sm">
-          <span className="text-[11px] font-semibold text-[#C58A32] block uppercase tracking-wider">
+        <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 shadow-sm">
+          <span className="text-[11px] font-semibold text-[#D97706] block uppercase tracking-wider">
             Shortlisted
           </span>
-          <span className="text-2xl font-bold text-[#C58A32] mt-1 block">
+          <span className="text-2xl font-bold text-[#D97706] mt-1 block">
             {shortlistedCount}
           </span>
         </div>
-        <div className="bg-white rounded-xl border border-[#E8DED2] p-4 shadow-sm">
-          <span className="text-[11px] font-semibold text-[#27845B] block uppercase tracking-wider">
+        <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 shadow-sm">
+          <span className="text-[11px] font-semibold text-[#0D9488] block uppercase tracking-wider">
             Selected Offers
           </span>
-          <span className="text-2xl font-bold text-[#27845B] mt-1 block">
+          <span className="text-2xl font-bold text-[#0D9488] mt-1 block">
             {selectedCount}
           </span>
         </div>
       </div>
 
       {/* 3. Filters & Search Bar */}
-      <div className="bg-white rounded-2xl border border-[#E8DED2] p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl border border-[#DBEAFE] p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Status Filter Tabs */}
-        <div className="flex flex-wrap gap-1.5 p-1 bg-[#FAF8F4] border border-[#E8DED2] rounded-xl text-xs w-full sm:w-auto">
+        <div className="flex flex-wrap gap-1.5 p-1 bg-[#F0F7FF] border border-[#DBEAFE] rounded-xl text-xs w-full sm:w-auto">
           {STATUS_FILTERS.map((tab) => {
             const count =
               tab.id === 'All'
@@ -175,8 +175,8 @@ const MyApplications = () => {
                 }}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
                   activeFilter === tab.id
-                    ? 'bg-[#44352D] text-[#F1E7D9] shadow-sm font-semibold'
-                    : 'text-[#76543D] hover:text-[#44352D] hover:bg-[#F1E7D9]/50'
+                    ? 'bg-[#2563EB] text-white shadow-sm font-semibold'
+                    : 'text-[#163A5F] hover:text-[#172554] hover:bg-[#DBEAFE]/50'
                 }`}
               >
                 {tab.label} ({count})
@@ -188,7 +188,7 @@ const MyApplications = () => {
         {/* Search input */}
         <div className="w-full sm:w-72">
           <div className="relative">
-            <Search className="w-4 h-4 text-[#A17C5B] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#2563EB] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search company or role..."
@@ -197,7 +197,7 @@ const MyApplications = () => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full h-9 pl-9 pr-3 rounded-lg border border-[#E8DED2] text-xs focus:outline-none focus:border-[#76543D] bg-white text-[#44352D] placeholder-[#82776C]/60"
+              className="w-full h-9 pl-9 pr-3 rounded-lg border border-[#DBEAFE] text-xs focus:outline-none focus:border-[#2563EB] bg-white text-[#172554] placeholder-[#64748B]/60"
             />
           </div>
         </div>
@@ -230,11 +230,11 @@ const MyApplications = () => {
           }
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-[#E8DED2] shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-[#F6F0E8] border-b border-[#E8DED2] text-[11px] font-semibold text-[#44352D] uppercase tracking-wider">
+                <tr className="bg-[#F0F7FF] border-b border-[#DBEAFE] text-[11px] font-semibold text-[#172554] uppercase tracking-wider">
                   <th className="py-3 px-4">Company Name</th>
                   <th className="py-3 px-4">Job Role</th>
                   <th className="py-3 px-4">Package (CTC)</th>
@@ -243,7 +243,7 @@ const MyApplications = () => {
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E8DED2]">
+              <tbody className="divide-y divide-[#DBEAFE]">
                 {paginatedApplications.map((app) => {
                   const company = app.company || app.drive?.company;
                   const drive = app.drive;
@@ -251,7 +251,7 @@ const MyApplications = () => {
                   return (
                     <tr
                       key={app._id}
-                      className="hover:bg-[#FAF8F4] transition-colors"
+                      className="hover:bg-[#F0F7FF] transition-colors"
                     >
                       {/* Company Name */}
                       <td className="py-3.5 px-4">
@@ -260,18 +260,18 @@ const MyApplications = () => {
                             <img
                               src={company.logoUrl}
                               alt={company?.name}
-                              className="w-9 h-9 rounded-lg object-contain p-0.5 border border-[#E8DED2] bg-white flex-shrink-0"
+                              className="w-9 h-9 rounded-lg object-contain p-0.5 border border-[#DBEAFE] bg-white flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-9 h-9 rounded-lg bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-sm flex-shrink-0">
+                            <div className="w-9 h-9 rounded-lg bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-sm flex-shrink-0">
                               {company?.name ? company.name.charAt(0) : 'C'}
                             </div>
                           )}
                           <div className="min-w-0">
-                            <span className="font-semibold text-[#44352D] block truncate leading-tight">
+                            <span className="font-semibold text-[#172554] block truncate leading-tight">
                               {company?.name || 'Company'}
                             </span>
-                            <span className="text-[11px] text-[#82776C] block truncate mt-0.5">
+                            <span className="text-[11px] text-[#64748B] block truncate mt-0.5">
                               {company?.location || drive?.location || 'Campus'}
                             </span>
                           </div>
@@ -279,24 +279,24 @@ const MyApplications = () => {
                       </td>
 
                       {/* Job Role */}
-                      <td className="py-3.5 px-4 font-medium text-[#44352D]">
+                      <td className="py-3.5 px-4 font-medium text-[#172554]">
                         <div className="flex flex-col">
-                          <span className="font-semibold text-[#44352D]">
+                          <span className="font-semibold text-[#172554]">
                             {drive?.jobRole || 'Candidate'}
                           </span>
-                          <span className="text-[11px] text-[#82776C] truncate max-w-xs">
+                          <span className="text-[11px] text-[#64748B] truncate max-w-xs">
                             {drive?.title}
                           </span>
                         </div>
                       </td>
 
                       {/* Package */}
-                      <td className="py-3.5 px-4 font-bold text-[#44352D] whitespace-nowrap">
+                      <td className="py-3.5 px-4 font-bold text-[#172554] whitespace-nowrap">
                         {formatLPA(drive?.packageLPA)}
                       </td>
 
                       {/* Applied Date */}
-                      <td className="py-3.5 px-4 text-[#82776C] whitespace-nowrap">
+                      <td className="py-3.5 px-4 text-[#64748B] whitespace-nowrap">
                         {formatDate(app.appliedAt)}
                       </td>
 
@@ -304,7 +304,7 @@ const MyApplications = () => {
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <Badge status={app.status} size="sm" />
                         {app.currentRound > 1 && (
-                          <span className="text-[11px] text-[#76543D] block mt-0.5 font-medium">
+                          <span className="text-[11px] text-[#163A5F] block mt-0.5 font-medium">
                             Round {app.currentRound}
                           </span>
                         )}

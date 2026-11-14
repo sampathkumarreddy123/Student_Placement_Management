@@ -287,17 +287,17 @@ const ManageApplications = () => {
       )}
 
       {/* Drive Selection Box */}
-      <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-[#DBEAFE] shadow-sm space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2 flex-1">
-            <Briefcase className="w-4 h-4 text-[#76543D] flex-shrink-0" />
-            <label className="text-xs font-bold text-[#44352D] whitespace-nowrap">
+            <Briefcase className="w-4 h-4 text-[#2563EB] flex-shrink-0" />
+            <label className="text-xs font-bold text-[#172554] whitespace-nowrap">
               Select Placement Drive:
             </label>
             <select
               value={selectedDriveId}
               onChange={(e) => setSelectedDriveId(e.target.value)}
-              className="flex-1 max-w-xl h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white font-medium text-[#44352D]"
+              className="flex-1 max-w-xl h-[38px] rounded-lg border border-[#DBEAFE] text-xs px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white font-medium text-[#172554]"
             >
               <option value="">All Placement Drives ({drives.length})</option>
               {drives.map((d) => (
@@ -312,7 +312,7 @@ const ManageApplications = () => {
             <button
               type="button"
               onClick={() => setSelectedDriveId('')}
-              className="text-xs text-[#76543D] hover:underline font-semibold whitespace-nowrap"
+              className="text-xs text-[#2563EB] hover:underline font-semibold whitespace-nowrap"
             >
               Show All Drives
             </button>
@@ -321,34 +321,34 @@ const ManageApplications = () => {
 
         {/* Selected Drive Summary Card */}
         {driveInfo && (
-          <div className="mt-3 pt-3 border-t border-[#E8DED2] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#FAF8F4] p-3.5 rounded-lg border border-[#E8DED2]">
+          <div className="mt-3 pt-3 border-t border-[#DBEAFE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#F0F7FF] p-3.5 rounded-lg border border-[#DBEAFE]">
             <div className="flex items-center gap-3">
               {driveInfo.company?.logoUrl ? (
                 <img
                   src={driveInfo.company.logoUrl}
                   alt={driveInfo.company?.name}
-                  className="w-10 h-10 rounded-lg object-contain p-0.5 border border-[#E8DED2] bg-white flex-shrink-0"
+                  className="w-10 h-10 rounded-lg object-contain p-0.5 border border-[#DBEAFE] bg-white flex-shrink-0"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-lg bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-base flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-base flex-shrink-0">
                   {driveInfo.company?.name ? driveInfo.company.name.charAt(0) : 'C'}
                 </div>
               )}
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-[#44352D] text-sm">{driveInfo.title}</span>
+                  <span className="font-bold text-[#172554] text-sm">{driveInfo.title}</span>
                   <Badge status={driveInfo.status} size="sm" />
                 </div>
-                <p className="text-[11px] text-[#82776C] mt-0.5">
-                  <strong className="text-[#44352D]">{driveInfo.company?.name}</strong> • Role: {driveInfo.jobRole} • Package: <span className="font-bold text-[#76543D]">{formatLPA(driveInfo.packageLPA)}</span>
+                <p className="text-[11px] text-[#64748B] mt-0.5">
+                  <strong className="text-[#172554]">{driveInfo.company?.name}</strong> • Role: {driveInfo.jobRole} • Package: <span className="font-bold text-[#163A5F]">{formatLPA(driveInfo.packageLPA)}</span>
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 text-xs flex-shrink-0">
               <div className="text-right">
-                <span className="text-[11px] text-[#82776C] block">Cutoff Requirement</span>
-                <span className="font-semibold text-[#44352D] block">
+                <span className="text-[11px] text-[#64748B] block">Cutoff Requirement</span>
+                <span className="font-semibold text-[#172554] block">
                   {driveInfo.eligibilityCriteria?.minCgpa ? `${driveInfo.eligibilityCriteria.minCgpa}+ CGPA` : 'No CGPA cutoff'}
                 </span>
               </div>
@@ -363,7 +363,7 @@ const ManageApplications = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-[#DBEAFE] shadow-sm space-y-3">
         <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
           {/* Search box */}
           <div className="sm:col-span-4">
@@ -380,7 +380,7 @@ const ManageApplications = () => {
             <select
               value={selectedDepartment}
               onChange={(e) => setSelectedDepartment(e.target.value)}
-              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
+              className="w-full h-[38px] rounded-lg border border-[#DBEAFE] text-xs px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white text-[#172554]"
             >
               {DEPARTMENTS.map((dept) => (
                 <option key={dept} value={dept}>
@@ -395,7 +395,7 @@ const ManageApplications = () => {
             <select
               value={selectedCgpa}
               onChange={(e) => setSelectedCgpa(e.target.value)}
-              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
+              className="w-full h-[38px] rounded-lg border border-[#DBEAFE] text-xs px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white text-[#172554]"
             >
               {CGPA_FILTERS.map((item) => (
                 <option key={item.value} value={item.value}>
@@ -410,7 +410,7 @@ const ManageApplications = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="flex-1 h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
+              className="flex-1 h-[38px] rounded-lg border border-[#DBEAFE] text-xs px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB] bg-white text-[#172554]"
             >
               {STATUS_OPTIONS.map((st) => (
                 <option key={st} value={st}>
@@ -426,14 +426,14 @@ const ManageApplications = () => {
         </form>
 
         {/* Secondary Toolbar: Sorting & Reset */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E8DED2] text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#DBEAFE] text-xs">
           <div className="flex items-center gap-2">
-            <ArrowUpDown className="w-3.5 h-3.5 text-[#A17C5B]" />
-            <span className="text-[#82776C] text-[11px] font-medium">Sort By:</span>
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#2563EB]" />
+            <span className="text-[#64748B] text-[11px] font-medium">Sort By:</span>
             <select
               value={sortIndex}
               onChange={(e) => setSortIndex(Number(e.target.value))}
-              className="h-[30px] rounded-md border border-[#E8DED2] text-xs px-2.5 focus:outline-none focus:border-[#76543D] bg-white font-medium text-[#44352D]"
+              className="h-[30px] rounded-md border border-[#DBEAFE] text-xs px-2.5 focus:outline-none focus:border-[#2563EB] bg-white font-medium text-[#172554]"
             >
               {SORT_OPTIONS.map((opt, i) => (
                 <option key={i} value={i}>
@@ -447,7 +447,7 @@ const ManageApplications = () => {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#82776C] hover:text-[#C94C4C] transition-colors"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#64748B] hover:text-[#DC2626] transition-colors"
             >
               <RotateCcw className="w-3 h-3" /> Reset All Filters
             </button>
@@ -473,11 +473,11 @@ const ManageApplications = () => {
           onAction={hasActiveFilters ? handleResetFilters : undefined}
         />
       ) : (
-        <div className="bg-white rounded-xl border border-[#E8DED2] shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#DBEAFE] shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-[#F6F0E8] border-b border-[#E8DED2] text-[11px] font-semibold text-[#44352D] uppercase tracking-wider">
+                <tr className="bg-[#F0F7FF] border-b border-[#DBEAFE] text-[11px] font-semibold text-[#172554] uppercase tracking-wider">
                   <th className="py-3 px-4 min-w-[190px]">Student Name</th>
                   <th className="py-3 px-3 min-w-[110px]">Roll Number</th>
                   <th className="py-3 px-3 min-w-[150px]">Department</th>
@@ -490,7 +490,7 @@ const ManageApplications = () => {
                   <th className="py-3 px-4 text-right min-w-[170px]">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E8DED2]/60 text-xs">
+              <tbody className="divide-y divide-[#DBEAFE]/60 text-xs">
                 {applications.map((app) => {
                   const student = app.student || {};
                   const profile = app.studentProfile || {};
@@ -512,7 +512,7 @@ const ManageApplications = () => {
                   return (
                     <tr
                       key={app._id}
-                      className="hover:bg-[#FAF8F4] transition-colors"
+                      className="hover:bg-[#F0F7FF] transition-colors"
                     >
                       {/* 1. Student Name */}
                       <td className="py-3 px-4 min-w-[190px]">
@@ -521,18 +521,18 @@ const ManageApplications = () => {
                             <img
                               src={student.profilePhoto}
                               alt={student.name}
-                              className="w-8 h-8 rounded-full object-cover border border-[#E8DED2] flex-shrink-0"
+                              className="w-8 h-8 rounded-full object-cover border border-[#DBEAFE] flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-xs flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-xs flex-shrink-0">
                               {student.name ? student.name.charAt(0).toUpperCase() : 'S'}
                             </div>
                           )}
                           <div className="min-w-0">
-                            <span className="font-bold text-[#44352D] block truncate leading-tight">
+                            <span className="font-bold text-[#172554] block truncate leading-tight">
                               {student.name || 'Candidate'}
                             </span>
-                            <span className="text-[11px] text-[#82776C] block truncate mt-0.5">
+                            <span className="text-[11px] text-[#64748B] block truncate mt-0.5">
                               {student.email || 'No email'}
                             </span>
                           </div>
@@ -540,14 +540,14 @@ const ManageApplications = () => {
                       </td>
 
                       {/* 2. Roll Number */}
-                      <td className="py-3 px-3 font-mono font-medium text-[#44352D] whitespace-nowrap min-w-[110px]">
-                        <span className="bg-[#F1E7D9] px-2 py-0.5 rounded text-[11px] border border-[#E8DED2] font-semibold text-[#44352D]">
+                      <td className="py-3 px-3 font-mono font-medium text-[#172554] whitespace-nowrap min-w-[110px]">
+                        <span className="bg-[#EFF6FF] px-2 py-0.5 rounded text-[11px] border border-[#DBEAFE] font-semibold text-[#163A5F]">
                           {rollNo}
                         </span>
                       </td>
 
                       {/* 3. Department */}
-                      <td className="py-3 px-3 font-medium text-[#44352D] min-w-[150px]">
+                      <td className="py-3 px-3 font-medium text-[#172554] min-w-[150px]">
                         <span className="block truncate max-w-[140px]" title={dept}>
                           {dept}
                         </span>
@@ -555,18 +555,18 @@ const ManageApplications = () => {
 
                       {/* 4. CGPA */}
                       <td className="py-3 px-3 text-center whitespace-nowrap min-w-[80px]">
-                        <span className="font-bold text-[#44352D]">
+                        <span className="font-bold text-[#172554]">
                           {cgpa !== null ? Number(cgpa).toFixed(2) : 'N/A'}
                         </span>
                       </td>
 
                       {/* 5. 10th percentage */}
-                      <td className="py-3 px-3 text-center font-medium text-[#44352D] whitespace-nowrap min-w-[80px]">
+                      <td className="py-3 px-3 text-center font-medium text-[#172554] whitespace-nowrap min-w-[80px]">
                         {tenth !== '—' ? `${tenth}%` : '—'}
                       </td>
 
                       {/* 6. Intermediate percentage */}
-                      <td className="py-3 px-3 text-center font-medium text-[#44352D] whitespace-nowrap min-w-[90px]">
+                      <td className="py-3 px-3 text-center font-medium text-[#172554] whitespace-nowrap min-w-[90px]">
                         {twelfth !== '—' ? `${twelfth}%` : '—'}
                       </td>
 
@@ -575,8 +575,8 @@ const ManageApplications = () => {
                         <span
                           className={`inline-block px-2 py-0.5 rounded-full font-medium text-[11px] ${
                             activeBacklogs > 0
-                              ? 'bg-[#C94C4C]/10 text-[#C94C4C] border border-[#C94C4C]/30'
-                              : 'bg-[#27845B]/10 text-[#27845B] border border-[#27845B]/30'
+                              ? 'bg-[#DC2626]/10 text-[#DC2626] border border-[#DC2626]/30'
+                              : 'bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/30'
                           }`}
                         >
                           {activeBacklogs} Act / {totalBacklogs} Tot
@@ -584,7 +584,7 @@ const ManageApplications = () => {
                       </td>
 
                       {/* 8. Application date */}
-                      <td className="py-3 px-3 text-[#82776C] whitespace-nowrap min-w-[110px]">
+                      <td className="py-3 px-3 text-[#64748B] whitespace-nowrap min-w-[110px]">
                         {formatDate(app.appliedAt)}
                       </td>
 
@@ -592,7 +592,7 @@ const ManageApplications = () => {
                       <td className="py-3 px-3 whitespace-nowrap min-w-[120px]">
                         <Badge status={app.status} size="sm" />
                         {app.currentRound > 1 && (
-                          <span className="text-[11px] text-[#82776C] block mt-0.5">
+                          <span className="text-[11px] text-[#64748B] block mt-0.5">
                             Round {app.currentRound}
                           </span>
                         )}
@@ -605,7 +605,7 @@ const ManageApplications = () => {
                           <button
                             type="button"
                             onClick={() => setAppForStatusUpdate(app)}
-                            className="p-1.5 rounded-lg text-[#76543D] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
+                            className="p-1.5 rounded-lg text-[#2563EB] hover:text-[#163A5F] hover:bg-[#EFF6FF] transition-colors"
                             title="Update Selection Status & Remarks"
                           >
                             <Edit3 className="w-4 h-4" />
@@ -620,7 +620,7 @@ const ManageApplications = () => {
                                 applicationId: app._id,
                               })
                             }
-                            className="p-1.5 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
+                            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#172554] hover:bg-[#EFF6FF] transition-colors"
                             title="View Complete Academic Profile"
                           >
                             <Eye className="w-4 h-4" />
@@ -631,7 +631,7 @@ const ManageApplications = () => {
                             type="button"
                             onClick={() => handleDownloadResume(app)}
                             disabled={downloadingAppId === app._id}
-                            className="p-1.5 rounded-lg text-[#27845B] hover:text-[#27845B] hover:bg-[#27845B]/10 transition-colors disabled:opacity-50"
+                            className="p-1.5 rounded-lg text-[#0D9488] hover:text-[#0D9488] hover:bg-[#0D9488]/10 transition-colors disabled:opacity-50"
                             title="Download Candidate Resume"
                           >
                             <Download className="w-4 h-4" />
@@ -641,7 +641,7 @@ const ManageApplications = () => {
                           <button
                             type="button"
                             onClick={() => setAppForHistory(app)}
-                            className="p-1.5 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
+                            className="p-1.5 rounded-lg text-[#64748B] hover:text-[#172554] hover:bg-[#EFF6FF] transition-colors"
                             title="View Status History Audit Trail"
                           >
                             <History className="w-4 h-4" />

@@ -11,16 +11,16 @@ const Card = ({
 }) => {
   return (
     <div
-      className={`bg-white rounded-xl border border-[#E8DED2] shadow-sm overflow-hidden ${className}`}
+      className={`bg-white rounded-xl border border-[#DBEAFE] shadow-sm overflow-hidden ${className}`}
     >
       {(title || subtitle || action) && (
-        <div className="px-6 py-4 border-b border-[#E8DED2]/60 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-[#DBEAFE]/80 flex items-center justify-between">
           <div>
             {title && (
-              <h3 className="text-base font-bold text-[#44352D]">{title}</h3>
+              <h3 className="text-base font-bold text-[#172554]">{title}</h3>
             )}
             {subtitle && (
-              <p className="text-xs text-[#82776C] mt-0.5">{subtitle}</p>
+              <p className="text-xs text-[#64748B] mt-0.5">{subtitle}</p>
             )}
           </div>
           {action && <div>{action}</div>}
@@ -30,7 +30,7 @@ const Card = ({
       <div className={noPadding ? '' : 'p-6'}>{children}</div>
 
       {footer && (
-        <div className="px-6 py-3 bg-[#FAF8F4] border-t border-[#E8DED2]/60 text-sm text-[#82776C]">
+        <div className="px-6 py-3 bg-[#F0F7FF] border-t border-[#DBEAFE]/80 text-sm text-[#64748B]">
           {footer}
         </div>
       )}
@@ -39,4 +39,3 @@ const Card = ({
 };
 
 export default Card;
-

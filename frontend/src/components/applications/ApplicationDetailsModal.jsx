@@ -37,58 +37,58 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
     >
       <div className="space-y-5">
         {/* Company & Role Summary Header */}
-        <div className="p-4 rounded-xl bg-[#FAF8F4] border border-[#E8DED2] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="p-4 rounded-xl bg-[#F0F7FF] border border-[#DBEAFE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3.5">
             {company?.logoUrl ? (
               <img
                 src={company.logoUrl}
                 alt={company?.name}
-                className="w-12 h-12 rounded-xl object-contain p-1 border border-[#E8DED2] bg-white flex-shrink-0"
+                className="w-12 h-12 rounded-xl object-contain p-1 border border-[#DBEAFE] bg-white flex-shrink-0"
               />
             ) : (
-              <div className="w-12 h-12 rounded-xl bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-lg flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-lg flex-shrink-0">
                 {company?.name ? company.name.charAt(0) : 'C'}
               </div>
             )}
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="font-bold text-[#44352D] text-sm">{company?.name || 'Company'}</h4>
+                <h4 className="font-bold text-[#172554] text-sm">{company?.name || 'Company'}</h4>
                 <Badge status={application.status} size="sm" />
               </div>
-              <p className="text-xs text-[#76543D] mt-0.5 font-medium">{drive?.jobRole || 'Candidate'}</p>
-              <p className="text-[11px] text-[#82776C] mt-0.5">
+              <p className="text-xs text-[#163A5F] mt-0.5 font-medium">{drive?.jobRole || 'Candidate'}</p>
+              <p className="text-[11px] text-[#64748B] mt-0.5">
                 {drive?.location || company?.location || 'Campus'} • {drive?.employmentType || 'Full-Time'}
               </p>
             </div>
           </div>
 
           <div className="text-left sm:text-right flex-shrink-0">
-            <span className="text-[11px] text-[#82776C] block">Package / CTC</span>
-            <span className="text-base font-bold text-[#44352D] block">
+            <span className="text-[11px] text-[#64748B] block">Package / CTC</span>
+            <span className="text-base font-bold text-[#172554] block">
               {formatLPA(drive?.packageLPA)}
             </span>
-            <span className="text-[11px] text-[#82776C] block mt-0.5">
+            <span className="text-[11px] text-[#64748B] block mt-0.5">
               Applied on {formatDate(application.appliedAt)}
             </span>
           </div>
         </div>
 
         {/* Current Round & Selection Remarks */}
-        <div className="bg-white rounded-xl border border-[#E8DED2] p-4 space-y-3">
-          <h5 className="text-xs font-bold text-[#44352D] flex items-center gap-1.5 pb-2 border-b border-[#E8DED2]">
-            <Award className="w-4 h-4 text-[#76543D]" /> Current Application Status & Remarks
+        <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 space-y-3">
+          <h5 className="text-xs font-bold text-[#172554] flex items-center gap-1.5 pb-2 border-b border-[#DBEAFE]">
+            <Award className="w-4 h-4 text-[#2563EB]" /> Current Application Status & Remarks
           </h5>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div>
-              <span className="text-[11px] text-[#82776C] block">Current Stage</span>
-              <span className="font-semibold text-[#44352D] mt-0.5 block">
+              <span className="text-[11px] text-[#64748B] block">Current Stage</span>
+              <span className="font-semibold text-[#172554] mt-0.5 block">
                 Round {application.currentRound || 1} • {application.status}
               </span>
             </div>
             <div>
-              <span className="text-[11px] text-[#82776C] block">Submission Timestamp</span>
-              <span className="font-medium text-[#76543D] mt-0.5 block">
+              <span className="text-[11px] text-[#64748B] block">Submission Timestamp</span>
+              <span className="font-medium text-[#163A5F] mt-0.5 block">
                 {formatDate(application.appliedAt)}
               </span>
             </div>
@@ -96,19 +96,19 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
 
           {/* Officer remarks / notes */}
           {application.selectionRemarks ? (
-            <div className="p-3 bg-[#27845B]/10 border border-[#27845B]/25 rounded-lg text-xs text-[#27845B] mt-2">
-              <span className="font-semibold block text-[11px] text-[#27845B]">
+            <div className="p-3 bg-[#0D9488]/10 border border-[#0D9488]/25 rounded-lg text-xs text-[#0D9488] mt-2">
+              <span className="font-semibold block text-[11px] text-[#0D9488]">
                 Placement Cell Remarks
               </span>
-              <p className="mt-0.5 text-[#27845B]/90">{application.selectionRemarks}</p>
+              <p className="mt-0.5 text-[#0D9488]/90">{application.selectionRemarks}</p>
             </div>
           ) : application.officerNotes ? (
-            <div className="p-3 bg-[#FAF8F4] border border-[#E8DED2] rounded-lg text-xs text-[#44352D] mt-2">
-              <span className="font-semibold block text-[11px] text-[#76543D]">Officer Notes</span>
-              <p className="mt-0.5 text-[#44352D]">{application.officerNotes}</p>
+            <div className="p-3 bg-[#F0F7FF] border border-[#DBEAFE] rounded-lg text-xs text-[#172554] mt-2">
+              <span className="font-semibold block text-[11px] text-[#163A5F]">Officer Notes</span>
+              <p className="mt-0.5 text-[#172554]">{application.officerNotes}</p>
             </div>
           ) : (
-            <div className="p-2.5 bg-[#FAF8F4] rounded-lg border border-[#E8DED2] text-xs text-[#82776C]">
+            <div className="p-2.5 bg-[#F0F7FF] rounded-lg border border-[#DBEAFE] text-xs text-[#64748B]">
               Your application is under evaluation by the recruitment committee. Updates will appear here.
             </div>
           )}
@@ -116,27 +116,27 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
 
         {/* Status History Timeline for Students */}
         {application.statusHistory && application.statusHistory.length > 0 && (
-          <div className="bg-white rounded-xl border border-[#E8DED2] p-4 space-y-3">
-            <h5 className="text-xs font-bold text-[#44352D] flex items-center gap-1.5 pb-2 border-b border-[#E8DED2]">
-              <History className="w-4 h-4 text-[#76543D]" /> Selection Progression History
+          <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 space-y-3">
+            <h5 className="text-xs font-bold text-[#172554] flex items-center gap-1.5 pb-2 border-b border-[#DBEAFE]">
+              <History className="w-4 h-4 text-[#2563EB]" /> Selection Progression History
             </h5>
             <div className="space-y-2 max-h-48 overflow-y-auto">
               {application.statusHistory.slice().reverse().map((hist, i) => (
                 <div
                   key={i}
-                  className="p-2.5 rounded-lg bg-[#FAF8F4] border border-[#E8DED2] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px]"
+                  className="p-2.5 rounded-lg bg-[#F0F7FF] border border-[#DBEAFE] flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[11px]"
                 >
                   <div>
                     <div className="flex items-center gap-1.5 font-medium">
                       <Badge status={hist.previousStatus} size="sm" />
-                      <span className="text-[#A17C5B]">→</span>
+                      <span className="text-[#2563EB]">→</span>
                       <Badge status={hist.newStatus} size="sm" />
                     </div>
                     {hist.remarks && (
-                      <p className="text-[#82776C] mt-1 italic">"{hist.remarks}"</p>
+                      <p className="text-[#64748B] mt-1 italic">"{hist.remarks}"</p>
                     )}
                   </div>
-                  <span className="text-[#82776C] whitespace-nowrap text-[10px]">
+                  <span className="text-[#64748B] whitespace-nowrap text-[10px]">
                     {formatDate(hist.updatedDate)}
                   </span>
                 </div>
@@ -146,43 +146,43 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
         )}
 
         {/* Submitted Profile Snapshot */}
-        <div className="bg-white rounded-xl border border-[#E8DED2] p-4 space-y-3">
-          <h5 className="text-xs font-bold text-[#44352D] flex items-center gap-1.5 pb-2 border-b border-[#E8DED2]">
-            <ShieldCheck className="w-4 h-4 text-[#76543D]" /> Academic & Resume Snapshot
+        <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 space-y-3">
+          <h5 className="text-xs font-bold text-[#172554] flex items-center gap-1.5 pb-2 border-b border-[#DBEAFE]">
+            <ShieldCheck className="w-4 h-4 text-[#2563EB]" /> Academic & Resume Snapshot
           </h5>
 
           <div className="grid grid-cols-3 gap-3 text-xs">
             <div>
-              <span className="text-[11px] text-[#82776C] block">Roll Number</span>
-              <span className="font-semibold text-[#44352D] mt-0.5 block">
+              <span className="text-[11px] text-[#64748B] block">Roll Number</span>
+              <span className="font-semibold text-[#172554] mt-0.5 block">
                 {resume.studentRollNumber || 'N/A'}
               </span>
             </div>
             <div>
-              <span className="text-[11px] text-[#82776C] block">Department</span>
-              <span className="font-semibold text-[#44352D] mt-0.5 block truncate">
+              <span className="text-[11px] text-[#64748B] block">Department</span>
+              <span className="font-semibold text-[#172554] mt-0.5 block truncate">
                 {resume.studentDepartment || 'N/A'}
               </span>
             </div>
             <div>
-              <span className="text-[11px] text-[#82776C] block">CGPA at Apply</span>
-              <span className="font-bold text-[#44352D] mt-0.5 block">
+              <span className="text-[11px] text-[#64748B] block">CGPA at Apply</span>
+              <span className="font-bold text-[#172554] mt-0.5 block">
                 {resume.studentCgpa !== undefined ? `${resume.studentCgpa} / 10` : 'N/A'}
               </span>
             </div>
           </div>
 
           {/* Resume Snapshot Link */}
-          <div className="mt-2 pt-2 border-t border-[#E8DED2] flex items-center justify-between p-2.5 rounded-lg bg-[#FAF8F4] border border-[#E8DED2]">
+          <div className="mt-2 pt-2 border-t border-[#DBEAFE] flex items-center justify-between p-2.5 rounded-lg bg-[#F0F7FF] border border-[#DBEAFE]">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="p-2 rounded-lg bg-[#F1E7D9] text-[#44352D] flex-shrink-0">
+              <div className="p-2 rounded-lg bg-[#DBEAFE] text-[#163A5F] flex-shrink-0">
                 <FileText className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <span className="text-xs font-semibold text-[#44352D] block truncate">
+                <span className="text-xs font-semibold text-[#172554] block truncate">
                   {resume.resumeOriginalName || 'Submitted Resume (PDF)'}
                 </span>
-                <span className="text-[11px] text-[#82776C] block">
+                <span className="text-[11px] text-[#64748B] block">
                   {resume.resumeSize
                     ? `${(resume.resumeSize / 1024).toFixed(1)} KB • Submitted with this application`
                     : 'PDF Snapshot archived with application'}
@@ -206,7 +206,7 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
         </div>
 
         {/* Modal Actions */}
-        <div className="flex items-center justify-between pt-4 border-t border-[#E8DED2]">
+        <div className="flex items-center justify-between pt-4 border-t border-[#DBEAFE]">
           {drive?._id && (
             <Link to={`/drives/${drive._id}`}>
               <Button variant="ghost" size="sm" icon={ExternalLink}>

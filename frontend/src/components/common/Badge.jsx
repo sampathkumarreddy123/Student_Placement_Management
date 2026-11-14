@@ -9,13 +9,15 @@ const Badge = ({
   className = '',
 }) => {
   const variantStyles = {
-    primary: 'bg-[#F1E7D9] text-[#44352D] border-[#E8DED2]',
-    secondary: 'bg-[#F6F0E8] text-[#76543D] border-[#E8DED2]',
-    success: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20',
-    warning: 'bg-[#C58A32]/10 text-[#C58A32] border-[#C58A32]/20',
-    danger: 'bg-[#C94C4C]/10 text-[#C94C4C] border-[#C94C4C]/20',
-    champagne: 'bg-[#F1E7D9] text-[#44352D] border-[#E8DED2]',
-    cocoa: 'bg-[#44352D] text-white border-[#44352D]',
+    primary: 'bg-[#DBEAFE] text-[#163A5F] border-[#DBEAFE]',
+    secondary: 'bg-[#F0F7FF] text-[#64748B] border-[#DBEAFE]',
+    success: 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/20',
+    warning: 'bg-[#D97706]/10 text-[#D97706] border-[#D97706]/20',
+    danger: 'bg-[#DC2626]/10 text-[#DC2626] border-[#DC2626]/20',
+    accent: 'bg-[#DBEAFE] text-[#2563EB] border-[#DBEAFE] font-medium',
+    navy: 'bg-[#163A5F] text-white border-[#163A5F]',
+    cocoa: 'bg-[#163A5F] text-white border-[#163A5F]',
+    champagne: 'bg-[#DBEAFE] text-[#163A5F] border-[#DBEAFE]',
   };
 
   const sizes = {
@@ -28,7 +30,7 @@ const Badge = ({
     ? getStatusColor(status)
     : variant
     ? variantStyles[variant]
-    : 'bg-slate-100 text-slate-700 border-slate-200';
+    : 'bg-[#F0F7FF] text-[#64748B] border-[#DBEAFE]';
 
   return (
     <span
@@ -40,4 +42,3 @@ const Badge = ({
 };
 
 export default Badge;
-

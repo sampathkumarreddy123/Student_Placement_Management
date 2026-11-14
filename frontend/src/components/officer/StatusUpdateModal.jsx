@@ -99,19 +99,19 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
         )}
 
         {/* Current Status Banner */}
-        <div className="p-3 bg-[#FAF8F4] rounded-xl border border-[#E8DED2] flex items-center justify-between">
+        <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between">
           <div>
-            <span className="text-[11px] text-[#82776C] block">Current Status</span>
+            <span className="text-[11px] text-[#64748B] block">Current Status</span>
             <div className="flex items-center gap-2 mt-0.5">
               <Badge status={previousStatus} size="sm" />
-              <span className="text-[#76543D] font-medium">Round {application.currentRound || 1}</span>
+              <span className="text-[#163A5F] font-medium">Round {application.currentRound || 1}</span>
             </div>
           </div>
 
-          <ArrowRight className="w-4 h-4 text-[#A17C5B]" />
+          <ArrowRight className="w-4 h-4 text-[#2563EB]" />
 
           <div className="text-right">
-            <span className="text-[11px] text-[#82776C] block">Proposed New Status</span>
+            <span className="text-[11px] text-[#64748B] block">Proposed New Status</span>
             <div className="mt-0.5">
               <Badge status={status} size="sm" />
             </div>
@@ -120,7 +120,7 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
 
         {/* Status Dropdown */}
         <div>
-          <label className="block text-xs font-semibold text-[#44352D] mb-1.5">
+          <label className="block text-xs font-semibold text-[#172554] mb-1.5">
             Select New Status *
           </label>
           <select
@@ -129,7 +129,7 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
               setStatus(e.target.value);
               setConfirmed(false);
             }}
-            className="w-full h-[38px] rounded-lg border border-[#E8DED2] px-3 bg-white text-xs font-medium text-[#44352D] focus:outline-none focus:border-[#76543D]"
+            className="w-full h-[38px] rounded-lg border border-[#DBEAFE] px-3 bg-white text-xs font-medium text-[#172554] focus:outline-none focus:border-[#2563EB]"
           >
             {STATUS_CHOICES.map((choice) => (
               <option key={choice.value} value={choice.value}>
@@ -152,7 +152,7 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
 
         {/* Selection Remarks (Visible to student on portal) */}
         <div>
-          <label className="block text-xs font-semibold text-[#44352D] mb-1.5">
+          <label className="block text-xs font-semibold text-[#172554] mb-1.5">
             Selection Remarks (Visible to Student on Portal)
           </label>
           <textarea
@@ -160,16 +160,16 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
             value={selectionRemarks}
             onChange={(e) => setSelectionRemarks(e.target.value)}
             placeholder="e.g. Cleared Technical Round 1; scheduled for HR round on Monday at 10:00 AM."
-            className="w-full rounded-lg border border-[#E8DED2] p-2.5 text-xs focus:outline-none focus:border-[#76543D] bg-white text-[#44352D]"
+            className="w-full rounded-lg border border-[#DBEAFE] p-2.5 text-xs focus:outline-none focus:border-[#2563EB] bg-white text-[#172554]"
           />
-          <p className="text-[11px] text-[#82776C] mt-0.5">
+          <p className="text-[11px] text-[#64748B] mt-0.5">
             This comment will be displayed to the student in their My Applications portal.
           </p>
         </div>
 
         {/* Internal Officer Notes */}
         <div>
-          <label className="block text-xs font-semibold text-[#44352D] mb-1.5">
+          <label className="block text-xs font-semibold text-[#172554] mb-1.5">
             Internal Officer Notes (Interview feedback / placement records)
           </label>
           <textarea
@@ -177,32 +177,32 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
             value={officerNotes}
             onChange={(e) => setOfficerNotes(e.target.value)}
             placeholder="e.g. Recruiter rated candidate strong in data structures, recommended for senior tier."
-            className="w-full rounded-lg border border-[#E8DED2] p-2.5 text-xs focus:outline-none focus:border-[#76543D] bg-white text-[#44352D]"
+            className="w-full rounded-lg border border-[#DBEAFE] p-2.5 text-xs focus:outline-none focus:border-[#2563EB] bg-white text-[#172554]"
           />
         </div>
 
         {/* Critical Status Confirmation Warning */}
         {status === 'Selected' && !isSameStatus && (
-          <div className="p-3.5 rounded-xl bg-[#27845B]/10 border border-[#27845B]/25 text-[#27845B] space-y-2">
+          <div className="p-3.5 rounded-xl bg-[#0D9488]/10 border border-[#0D9488]/25 text-[#0D9488] space-y-2">
             <div className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#27845B] flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-[#0D9488] flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold">Final Selection Confirmation</p>
-                <p className="text-[11px] text-[#27845B]/90 mt-0.5 leading-relaxed">
+                <p className="text-[11px] text-[#0D9488]/90 mt-0.5 leading-relaxed">
                   Marking this candidate as <strong>Selected</strong> will officially record a placement offer
                   from <strong>{companyName}</strong>. The student's institutional placement status will be updated to <strong>Placed</strong>.
                 </p>
               </div>
             </div>
 
-            <label className="flex items-center gap-2 pt-1 border-t border-[#27845B]/20 cursor-pointer select-none">
+            <label className="flex items-center gap-2 pt-1 border-t border-[#0D9488]/20 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={confirmed}
                 onChange={(e) => setConfirmed(e.target.checked)}
-                className="w-3.5 h-3.5 rounded text-[#27845B] border-[#27845B]/30 focus:ring-[#27845B] accent-[#27845B]"
+                className="w-3.5 h-3.5 rounded text-[#0D9488] border-[#0D9488]/30 focus:ring-[#0D9488] accent-[#0D9488]"
               />
-              <span className="text-[11px] font-semibold text-[#27845B]">
+              <span className="text-[11px] font-semibold text-[#0D9488]">
                 I verify that this candidate has received and accepted an official placement offer.
               </span>
             </label>
@@ -210,26 +210,26 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
         )}
 
         {status === 'Rejected' && !isSameStatus && (
-          <div className="p-3.5 rounded-xl bg-[#C94C4C]/10 border border-[#C94C4C]/25 text-[#C94C4C] space-y-2">
+          <div className="p-3.5 rounded-xl bg-[#DC2626]/10 border border-[#DC2626]/25 text-[#DC2626] space-y-2">
             <div className="flex items-start gap-2">
-              <XCircle className="w-4 h-4 text-[#C94C4C] flex-shrink-0 mt-0.5" />
+              <XCircle className="w-4 h-4 text-[#DC2626] flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-bold">Application Rejection Confirmation</p>
-                <p className="text-[11px] text-[#C94C4C]/90 mt-0.5 leading-relaxed">
+                <p className="text-[11px] text-[#DC2626]/90 mt-0.5 leading-relaxed">
                   Marking this candidate as <strong>Rejected</strong> will conclude their consideration
                   for this placement drive. The candidate will see their updated status in their portal.
                 </p>
               </div>
             </div>
 
-            <label className="flex items-center gap-2 pt-1 border-t border-[#C94C4C]/20 cursor-pointer select-none">
+            <label className="flex items-center gap-2 pt-1 border-t border-[#DC2626]/20 cursor-pointer select-none">
               <input
                 type="checkbox"
                 checked={confirmed}
                 onChange={(e) => setConfirmed(e.target.checked)}
-                className="w-3.5 h-3.5 rounded text-[#C94C4C] border-[#C94C4C]/30 focus:ring-[#C94C4C] accent-[#C94C4C]"
+                className="w-3.5 h-3.5 rounded text-[#DC2626] border-[#DC2626]/30 focus:ring-[#DC2626] accent-[#DC2626]"
               />
-              <span className="text-[11px] font-semibold text-[#C94C4C]">
+              <span className="text-[11px] font-semibold text-[#DC2626]">
                 I confirm that this candidate did not meet the criteria to advance further.
               </span>
             </label>
@@ -237,7 +237,7 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E8DED2]">
+        <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#DBEAFE]">
           <Button
             type="button"
             variant="outline"

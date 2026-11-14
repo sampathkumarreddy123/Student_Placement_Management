@@ -46,28 +46,27 @@ export const getDeadlineStatus = (deadlineString) => {
 export const getStatusColor = (status) => {
   const map = {
     // Placement Drive statuses
-    Draft: 'bg-[#F6F0E8] text-[#82776C] border-[#E8DED2]',
-    Published: 'bg-[#F1E7D9] text-[#44352D] border-[#E8DED2] font-medium',
-    Closed: 'bg-[#F6F0E8] text-[#82776C] border-[#E8DED2]',
-    Completed: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20',
-    Upcoming: 'bg-[#F1E7D9] text-[#76543D] border-[#E8DED2]',
-    Ongoing: 'bg-[#C58A32]/10 text-[#C58A32] border-[#C58A32]/20',
-    Cancelled: 'bg-[#C94C4C]/10 text-[#C94C4C] border-[#C94C4C]/20',
-    Active: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20 font-medium',
+    Draft: 'bg-[#F0F7FF] text-[#64748B] border-[#DBEAFE]',
+    Published: 'bg-[#DBEAFE] text-[#163A5F] border-[#DBEAFE] font-medium',
+    Closed: 'bg-[#F0F7FF] text-[#64748B] border-[#DBEAFE]',
+    Completed: 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/30 font-semibold',
+    Upcoming: 'bg-[#DBEAFE] text-[#2563EB] border-[#DBEAFE]',
+    Ongoing: 'bg-[#D97706]/10 text-[#D97706] border-[#D97706]/30',
+    Cancelled: 'bg-[#DC2626]/10 text-[#DC2626] border-[#DC2626]/30',
+    Active: 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/30 font-medium',
 
     // Application statuses
-    Applied: 'bg-[#F6F0E8] text-[#76543D] border-[#E8DED2]',
-    'Under Review': 'bg-[#F1E7D9] text-[#44352D] border-[#E8DED2]',
-    Shortlisted: 'bg-[#C58A32]/10 text-[#C58A32] border-[#C58A32]/20 font-medium',
-    Interviewing: 'bg-[#A17C5B]/15 text-[#76543D] border-[#A17C5B]/30 font-medium',
-    Selected: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20 font-medium',
-    Rejected: 'bg-[#C94C4C]/10 text-[#C94C4C] border-[#C94C4C]/20',
+    Applied: 'bg-[#EFF6FF] text-[#163A5F] border-[#DBEAFE]',
+    'Under Review': 'bg-[#DBEAFE] text-[#163A5F] border-[#DBEAFE]',
+    Shortlisted: 'bg-[#DBEAFE] text-[#2563EB] border-[#DBEAFE] font-medium',
+    Interviewing: 'bg-[#D97706]/10 text-[#D97706] border-[#D97706]/30 font-medium',
+    Selected: 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/30 font-semibold',
+    Rejected: 'bg-[#DC2626]/10 text-[#DC2626] border-[#DC2626]/30',
 
     // Placement status
-    Placed: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20 font-semibold',
-    'Not Placed': 'bg-[#F6F0E8] text-[#82776C] border-[#E8DED2]',
+    Placed: 'bg-[#0D9488]/10 text-[#0D9488] border-[#0D9488]/30 font-semibold',
+    'Not Placed': 'bg-[#F0F7FF] text-[#64748B] border-[#DBEAFE]',
   };
 
-  return map[status] || 'bg-[#F6F0E8] text-[#44352D] border-[#E8DED2]';
+  return map[status] || 'bg-[#EFF6FF] text-[#163A5F] border-[#DBEAFE]';
 };
-

@@ -33,17 +33,17 @@ const Input = forwardRef(
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-xs font-semibold text-[#44352D] mb-1.5"
+            className="block text-xs font-semibold text-[#172554] mb-1.5"
           >
             {label}
-            {required && <span className="text-[#C94C4C] ml-0.5">*</span>}
+            {required && <span className="text-[#DC2626] ml-0.5">*</span>}
           </label>
         )}
 
         <div className="relative rounded-lg shadow-sm">
           {Icon && (
             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-              <Icon className="h-4 w-4 text-[#A17C5B]" />
+              <Icon className="h-4 w-4 text-[#64748B]" />
             </div>
           )}
 
@@ -51,14 +51,14 @@ const Input = forwardRef(
             ref={ref}
             id={inputId}
             type={computedType}
-            className={`block w-full rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:bg-[#F6F0E8] disabled:text-[#82776C] ${
+            className={`block w-full rounded-lg border text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-0 disabled:bg-[#F0F7FF] disabled:text-[#64748B] ${
               Icon ? 'pl-9' : 'pl-3'
             } ${
               isPasswordType || endSlot ? 'pr-10' : 'pr-3'
             } py-2 ${
               error
-                ? 'border-[#C94C4C] text-[#44352D] focus:border-[#C94C4C] focus:ring-[#C94C4C]/20'
-                : 'border-[#E8DED2] bg-white text-[#44352D] placeholder-[#82776C]/60 focus:border-[#76543D] focus:ring-[#F1E7D9]'
+                ? 'border-[#DC2626] text-[#172554] focus:border-[#DC2626] focus:ring-[#DC2626]/20'
+                : 'border-[#DBEAFE] bg-white text-[#172554] placeholder-[#64748B]/60 focus:border-[#2563EB] focus:ring-[#DBEAFE]'
             } ${className}`}
             {...props}
           />
@@ -68,7 +68,7 @@ const Input = forwardRef(
               type="button"
               tabIndex={-1}
               onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#82776C] hover:text-[#44352D] focus:outline-none"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-[#64748B] hover:text-[#172554] focus:outline-none"
               title={isPasswordVisible ? 'Hide password' : 'Show password'}
             >
               {isPasswordVisible ? (
@@ -86,9 +86,9 @@ const Input = forwardRef(
           )}
         </div>
 
-        {error && <p className="mt-1 text-xs text-[#C94C4C] font-medium">{error}</p>}
+        {error && <p className="mt-1 text-xs text-[#DC2626] font-medium">{error}</p>}
         {helperText && !error && (
-          <p className="mt-1 text-xs text-[#82776C]">{helperText}</p>
+          <p className="mt-1 text-xs text-[#64748B]">{helperText}</p>
         )}
       </div>
     );

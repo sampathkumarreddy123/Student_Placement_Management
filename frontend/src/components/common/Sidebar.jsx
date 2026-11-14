@@ -12,7 +12,6 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
-  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -43,14 +42,14 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-[#44352D]/50 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-[#163A5F]/50 backdrop-blur-sm lg:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar aside */}
       <aside
-        className={`fixed top-16 bottom-0 left-0 z-40 bg-[#44352D] text-white border-r border-[#342822] flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed top-16 bottom-0 left-0 z-40 bg-[#163A5F] text-white border-r border-[#0F2843] flex flex-col transition-all duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } ${isCollapsed ? 'w-64 lg:w-20' : 'w-64'}`}
       >
@@ -58,12 +57,12 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
         <div className="p-3 sm:p-4 flex-1 overflow-y-auto">
           {/* Mobile close button */}
           <div className="flex items-center justify-between lg:hidden mb-4 px-1">
-            <span className="text-xs font-semibold text-[#F1E7D9]/60 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-white/70 uppercase tracking-wider">
               Navigation Menu
             </span>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg text-[#F1E7D9]/80 hover:text-white hover:bg-[#534239]"
+              className="p-1 rounded-lg text-white/80 hover:text-white hover:bg-[#1E4976]"
             >
               <X className="w-5 h-5" />
             </button>
@@ -79,19 +78,26 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
                   onClick={onClose}
                   title={isCollapsed ? link.label : undefined}
                   className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    `relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                       isCollapsed ? 'justify-center lg:px-2' : ''
                     } ${
                       isActive
-                        ? 'bg-[#F1E7D9] text-[#44352D] font-bold shadow-sm'
-                        : 'text-[#F1E7D9]/80 hover:bg-[#534239] hover:text-white'
+                        ? 'bg-[#1E4976] text-white font-semibold shadow-sm'
+                        : 'text-white/85 hover:bg-[#1E4976]/60 hover:text-white'
                     }`
                   }
                 >
-                  <Icon className="w-5 h-5 flex-shrink-0" />
-                  <span className={`${isCollapsed ? 'lg:hidden' : 'inline'}`}>
-                    {link.label}
-                  </span>
+                  {({ isActive }) => (
+                    <>
+                      {isActive && (
+                        <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r bg-[#2563EB]" />
+                      )}
+                      <Icon className="w-5 h-5 flex-shrink-0 text-white" />
+                      <span className={`${isCollapsed ? 'lg:hidden' : 'inline'}`}>
+                        {link.label}
+                      </span>
+                    </>
+                  )}
                 </NavLink>
               );
             })}
@@ -99,28 +105,28 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
         </div>
 
         {/* Desktop Collapse Toggle & Footer */}
-        <div className="p-3 border-t border-[#534239] flex items-center justify-between">
+        <div className="p-3 border-t border-[#1E4976]/60 flex items-center justify-between">
           <div className={`min-w-0 ${isCollapsed ? 'lg:hidden' : 'block'}`}>
-            <p className="text-[11px] font-semibold text-[#F1E7D9] truncate">
+            <p className="text-[11px] font-semibold text-white truncate">
               {isOfficer ? 'Placement Head' : 'Student Portal'}
             </p>
-            <p className="text-[10px] text-[#F1E7D9]/60 truncate">Academic Year 2025–26</p>
+            <p className="text-[10px] text-white/60 truncate">Academic Year 2025–26</p>
           </div>
 
           {onToggleCollapse && (
             <button
               type="button"
               onClick={onToggleCollapse}
-              className={`hidden lg:flex p-1.5 rounded-lg border border-[#534239] text-[#F1E7D9]/80 hover:text-white hover:bg-[#534239] transition-colors ${
+              className={`hidden lg:flex p-1.5 rounded-lg border border-[#1E4976] text-white/80 hover:text-white hover:bg-[#1E4976] transition-colors ${
                 isCollapsed ? 'mx-auto' : ''
               }`}
               title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
               aria-label={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
             >
               {isCollapsed ? (
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="w-4 h-4 text-white" />
               ) : (
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 text-white" />
               )}
             </button>
           )}

@@ -18,22 +18,22 @@ const ConfirmModal = ({
   const getIcon = () => {
     switch (variant) {
       case 'danger':
-        return <AlertCircle className="w-5 h-5 text-[#C94C4C]" />;
+        return <AlertCircle className="w-5 h-5 text-[#DC2626]" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-[#C58A32]" />;
+        return <AlertTriangle className="w-5 h-5 text-[#D97706]" />;
       default:
-        return <HelpCircle className="w-5 h-5 text-[#44352D]" />;
+        return <HelpCircle className="w-5 h-5 text-[#163A5F]" />;
     }
   };
 
   const getIconBg = () => {
     switch (variant) {
       case 'danger':
-        return 'bg-[#C94C4C]/10 border-[#C94C4C]/20';
+        return 'bg-[#DC2626]/10 border-[#DC2626]/20';
       case 'warning':
-        return 'bg-[#C58A32]/10 border-[#C58A32]/20';
+        return 'bg-[#D97706]/10 border-[#D97706]/20';
       default:
-        return 'bg-[#F1E7D9] border-[#E8DED2]';
+        return 'bg-[#DBEAFE] border-[#DBEAFE]';
     }
   };
 
@@ -45,16 +45,16 @@ const ConfirmModal = ({
             {getIcon()}
           </div>
           <div>
-            <h4 className="text-sm font-bold text-[#44352D] leading-snug">
+            <h4 className="text-sm font-bold text-[#172554] leading-snug">
               {title}
             </h4>
-            <p className="text-xs text-[#82776C] mt-1 leading-relaxed">
+            <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
               {message}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E8DED2]/60">
+        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#DBEAFE]/80">
           <Button
             type="button"
             variant="outline"
@@ -66,11 +66,11 @@ const ConfirmModal = ({
           </Button>
           <Button
             type="button"
-            variant={variant === 'warning' ? 'primary' : variant}
+            variant={variant === 'danger' ? 'danger' : variant === 'warning' ? 'primary' : 'primary'}
             size="sm"
-            onClick={onConfirm}
             isLoading={isLoading}
             icon={confirmIcon}
+            onClick={onConfirm}
           >
             {confirmText}
           </Button>
@@ -81,4 +81,3 @@ const ConfirmModal = ({
 };
 
 export default ConfirmModal;
-

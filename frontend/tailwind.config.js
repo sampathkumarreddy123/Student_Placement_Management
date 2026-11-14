@@ -7,44 +7,28 @@ export default {
   theme: {
     extend: {
       colors: {
-        cocoa: {
-          DEFAULT: '#44352D',
-          dark: '#342822',
-          light: '#534239',
+        primary: {
+          DEFAULT: '#163A5F',
+          dark: '#0F2843',
+          light: '#1E4976',
         },
-        warmBrown: {
-          DEFAULT: '#76543D',
-          hover: '#644632',
-          light: '#8d654a',
+        accent: {
+          DEFAULT: '#2563EB',
+          hover: '#1D4ED8',
+          light: '#3B82F6',
         },
-        bronze: {
-          DEFAULT: '#A17C5B',
-          light: '#b59272',
-        },
-        champagne: {
-          DEFAULT: '#F1E7D9',
-          light: '#F8F3EC',
-          dark: '#E5D6C3',
-        },
-        ivory: {
-          DEFAULT: '#FAF8F4',
-          light: '#FDFCFB',
-        },
-        softBeige: {
-          DEFAULT: '#F6F0E8',
-          hover: '#EFE6DB',
-        },
-        borderCocoa: '#E8DED2',
-        textCocoa: {
-          main: '#44352D',
-          muted: '#82776C',
-        },
-        statusSuccess: '#27845B',
-        statusWarning: '#C58A32',
-        statusDanger: '#C94C4C',
+        appBg: '#EFF6FF',
+        cardBg: '#FFFFFF',
+        mainText: '#172554',
+        secondaryText: '#64748B',
+        appBorder: '#DBEAFE',
+        appSuccess: '#0D9488',
+        appWarning: '#D97706',
+        appDanger: '#DC2626',
+        lightAccent: '#DBEAFE',
+        hoverBg: '#F0F7FF',
       },
     },
   },
   plugins: [],
 }
-
