@@ -9,8 +9,8 @@ const EligibilityBadge = ({
   if (isEligible) {
     return (
       <div className={`inline-flex items-center gap-1.5 ${className}`}>
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-800 border border-slate-300">
-          <CheckCircle2 className="w-3 h-3 text-slate-700" />
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#27845B]/10 text-[#27845B] border border-[#27845B]/20">
+          <CheckCircle2 className="w-3 h-3 text-[#27845B]" />
           Eligible
         </span>
         {onViewDetails && (
@@ -20,7 +20,7 @@ const EligibilityBadge = ({
               e.stopPropagation();
               onViewDetails();
             }}
-            className="text-[11px] text-slate-700 hover:text-slate-900 font-medium hover:underline inline-flex items-center gap-0.5"
+            className="text-[11px] text-[#76543D] hover:text-[#44352D] font-medium hover:underline inline-flex items-center gap-0.5"
             title="View full criteria evaluation"
           >
             <span>Details</span>
@@ -33,8 +33,8 @@ const EligibilityBadge = ({
 
   return (
     <div className={`inline-flex items-center gap-1.5 ${className}`}>
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-700 border border-stone-200">
-        <AlertTriangle className="w-3 h-3 text-stone-500" />
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#C94C4C]/10 text-[#C94C4C] border border-[#C94C4C]/20">
+        <AlertTriangle className="w-3 h-3 text-[#C94C4C]" />
         Not Eligible
       </span>
       {onViewDetails && (
@@ -44,7 +44,7 @@ const EligibilityBadge = ({
             e.stopPropagation();
             onViewDetails();
           }}
-          className="text-[11px] text-stone-700 hover:text-stone-900 font-medium hover:underline inline-flex items-center gap-0.5"
+          className="text-[11px] text-[#76543D] hover:text-[#44352D] font-medium hover:underline inline-flex items-center gap-0.5"
           title="Click to see which criteria failed"
         >
           <span>View Details</span>

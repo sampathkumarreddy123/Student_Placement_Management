@@ -1,14 +1,14 @@
 import React from 'react';
 
 export const Skeleton = ({ className = '' }) => {
-  return <div className={`animate-pulse bg-slate-200/80 rounded ${className}`} />;
+  return <div className={`animate-pulse bg-[#E8DED2]/50 rounded ${className}`} />;
 };
 
 export const StatsCardSkeleton = () => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <div key={i} className="bg-white p-5 rounded-xl border border-[#E8DED2] shadow-sm">
           <div className="flex items-center justify-between">
             <div className="space-y-2 flex-1">
               <Skeleton className="h-3 w-28" />
@@ -26,7 +26,7 @@ export const DriveCardSkeleton = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {[1, 2, 3].map((i) => (
-        <div key={i} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div key={i} className="bg-white p-5 rounded-xl border border-[#E8DED2] shadow-sm space-y-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3">
               <Skeleton className="w-12 h-12 rounded-xl" />
@@ -38,7 +38,7 @@ export const DriveCardSkeleton = () => {
             <Skeleton className="h-5 w-16 rounded-full" />
           </div>
 
-          <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-lg">
+          <div className="grid grid-cols-2 gap-2 p-3 bg-[#FAF8F4] rounded-lg">
             <Skeleton className="h-8 rounded" />
             <Skeleton className="h-8 rounded" />
           </div>
@@ -48,7 +48,7 @@ export const DriveCardSkeleton = () => {
             <Skeleton className="h-3 w-3/4" />
           </div>
 
-          <div className="pt-2 flex gap-2 border-t border-slate-100">
+          <div className="pt-2 flex gap-2 border-t border-[#E8DED2]/60">
             <Skeleton className="h-8 flex-1 rounded-lg" />
             <Skeleton className="h-8 flex-1 rounded-lg" />
           </div>
@@ -62,7 +62,7 @@ export const TableSkeleton = () => {
   return (
     <div className="space-y-3">
       {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="flex items-center justify-between p-3.5 border border-slate-100 rounded-lg">
+        <div key={i} className="flex items-center justify-between p-3.5 border border-[#E8DED2]/70 rounded-lg bg-white">
           <div className="flex items-center gap-3 flex-1">
             <Skeleton className="w-9 h-9 rounded-lg" />
             <div className="space-y-1.5 flex-1">

@@ -18,17 +18,19 @@ const Button = ({
 
   const variants = {
     primary:
-      'bg-slate-900 text-white hover:bg-slate-800 focus:ring-slate-900 shadow-sm',
+      'bg-[#44352D] text-white hover:bg-[#342822] focus:ring-[#76543D] shadow-sm',
     secondary:
-      'bg-slate-100 text-slate-800 hover:bg-slate-200 focus:ring-slate-400 border border-slate-200',
+      'bg-[#F1E7D9] text-[#44352D] hover:bg-[#E5D6C3] focus:ring-[#A17C5B] border border-[#E8DED2]',
+    warm:
+      'bg-[#76543D] text-white hover:bg-[#644632] focus:ring-[#76543D] shadow-sm',
     outline:
-      'bg-transparent border border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 focus:ring-slate-400',
+      'bg-transparent border border-[#E8DED2] text-[#44352D] hover:bg-[#FAF8F4] hover:text-[#44352D] focus:ring-[#A17C5B]',
     danger:
-      'bg-slate-800 text-white hover:bg-slate-700 focus:ring-slate-600 shadow-sm',
+      'bg-[#C94C4C] text-white hover:bg-[#B33E3E] focus:ring-[#C94C4C] shadow-sm',
     ghost:
-      'bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:ring-slate-400',
+      'bg-transparent text-[#76543D] hover:bg-[#F6F0E8] hover:text-[#44352D] focus:ring-[#A17C5B]',
     success:
-      'bg-slate-800 text-white hover:bg-slate-700 focus:ring-slate-600 shadow-sm',
+      'bg-[#27845B] text-white hover:bg-[#206F4C] focus:ring-[#27845B] shadow-sm',
   };
 
   const sizes = {

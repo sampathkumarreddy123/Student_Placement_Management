@@ -464,49 +464,49 @@ const ManageDrives = () => {
 
       {/* KPI Counters */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">Total Drives</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">{stats.total}</p>
+            <p className="text-[11px] font-medium text-[#82776C] uppercase tracking-wider">Total Drives</p>
+            <p className="text-2xl font-bold text-[#44352D] mt-0.5">{stats.total}</p>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-[#F1E7D9] text-[#76543D] flex items-center justify-center">
             <Briefcase className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-medium text-emerald-600 uppercase tracking-wider">Published / Live</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">{stats.published}</p>
+            <p className="text-[11px] font-medium text-[#27845B] uppercase tracking-wider">Published / Live</p>
+            <p className="text-2xl font-bold text-[#44352D] mt-0.5">{stats.published}</p>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-[#27845B]/10 text-[#27845B] flex items-center justify-center">
             <Send className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Draft Mode</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">{stats.draft}</p>
+            <p className="text-[11px] font-medium text-[#82776C] uppercase tracking-wider">Draft Mode</p>
+            <p className="text-2xl font-bold text-[#44352D] mt-0.5">{stats.draft}</p>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-[#FAF8F4] text-[#76543D] border border-[#E8DED2] flex items-center justify-center">
             <FileText className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-medium text-amber-600 uppercase tracking-wider">Closed / Finished</p>
-            <p className="text-2xl font-bold text-slate-900 mt-0.5">{stats.closed}</p>
+            <p className="text-[11px] font-medium text-[#C58A32] uppercase tracking-wider">Closed / Finished</p>
+            <p className="text-2xl font-bold text-[#44352D] mt-0.5">{stats.closed}</p>
           </div>
-          <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-lg bg-[#C58A32]/10 text-[#C58A32] flex items-center justify-center">
             <Archive className="w-5 h-5" />
           </div>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div className="bg-white p-3.5 rounded-xl border border-[#E8DED2] shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="w-full sm:w-80">
           <Input
             placeholder="Search drives by role, company, skills..."
@@ -525,8 +525,8 @@ const ManageDrives = () => {
               onClick={() => setStatusFilter(st)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
                 statusFilter === st
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
+                  ? 'bg-[#44352D] text-[#F1E7D9] shadow-sm'
+                  : 'bg-[#FAF8F4] text-[#76543D] hover:bg-[#F1E7D9] border border-[#E8DED2]'
               }`}
             >
               {st}
@@ -556,7 +556,7 @@ const ManageDrives = () => {
         <Card noPadding>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider">
+              <thead className="bg-[#F6F0E8] border-b border-[#E8DED2] text-[#44352D] font-semibold uppercase tracking-wider">
                 <tr>
                   <th className="py-3 px-4 min-w-[220px]">Drive & Company</th>
                   <th className="py-3 px-4 min-w-[150px]">Role & Package</th>
@@ -567,11 +567,11 @@ const ManageDrives = () => {
                   <th className="py-3 px-4 text-right whitespace-nowrap min-w-[190px]">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#E8DED2]">
                 {filteredDrives.map((drive) => {
                   const deadlineInfo = getDeadlineStatus(drive.applicationClosingDate || drive.registrationDeadline);
                   return (
-                    <tr key={drive._id} className="hover:bg-slate-50/70 transition-colors">
+                    <tr key={drive._id} className="hover:bg-[#FAF8F4] transition-colors">
                       {/* Drive & Company */}
                       <td className="py-3.5 px-4 min-w-[220px]">
                         <div className="flex items-center gap-2.5">
@@ -579,25 +579,25 @@ const ManageDrives = () => {
                             <img
                               src={drive.company.logoUrl}
                               alt={drive.company.name}
-                              className="w-8 h-8 rounded-lg object-contain p-0.5 border border-slate-200 bg-white flex-shrink-0"
+                              className="w-8 h-8 rounded-lg object-contain p-0.5 border border-[#E8DED2] bg-white flex-shrink-0"
                               onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.style.display = 'none';
                               }}
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold flex-shrink-0">
+                            <div className="w-8 h-8 rounded-lg bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold flex-shrink-0">
                               {drive.company?.name ? drive.company.name.charAt(0) : 'C'}
                             </div>
                           )}
                           <div className="truncate max-w-[170px]">
                             <Link
                               to={`/drives/${drive._id}`}
-                              className="font-semibold text-slate-900 hover:text-blue-600 leading-tight block truncate"
+                              className="font-semibold text-[#44352D] hover:text-[#76543D] leading-tight block truncate"
                             >
                               {drive.title}
                             </Link>
-                            <span className="text-[11px] text-slate-500 block truncate">
+                            <span className="text-[11px] text-[#82776C] block truncate">
                               {drive.company?.name || 'Company'} • {drive.location}
                             </span>
                           </div>
@@ -606,45 +606,45 @@ const ManageDrives = () => {
 
                       {/* Role & Package */}
                       <td className="py-3.5 px-4 min-w-[150px]">
-                        <div className="font-semibold text-blue-700">{formatLPA(drive.packageLPA)}</div>
-                        <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
-                          <span className="font-medium text-slate-700 truncate max-w-[90px]">{drive.jobRole}</span>
+                        <div className="font-semibold text-[#44352D]">{formatLPA(drive.packageLPA)}</div>
+                        <div className="text-[11px] text-[#82776C] flex items-center gap-1.5 mt-0.5">
+                          <span className="font-medium text-[#44352D] truncate max-w-[90px]">{drive.jobRole}</span>
                           <span>•</span>
-                          <span className="text-slate-400">{drive.employmentType || 'Full-Time'}</span>
+                          <span className="text-[#82776C]">{drive.employmentType || 'Full-Time'}</span>
                         </div>
                         {drive.vacancies ? (
-                          <div className="text-[10px] text-slate-400 mt-0.5">
+                          <div className="text-[10px] text-[#82776C] mt-0.5">
                             {drive.vacancies} {drive.vacancies === 1 ? 'vacancy' : 'vacancies'}
                           </div>
                         ) : null}
                       </td>
 
                       {/* Criteria */}
-                      <td className="py-3.5 px-4 min-w-[160px] text-slate-600">
+                      <td className="py-3.5 px-4 min-w-[160px] text-[#44352D]">
                         <div>
-                          Min CGPA: <span className="font-medium text-slate-800">{drive.eligibilityCriteria?.minCgpa ?? 'N/A'}</span>
+                          Min CGPA: <span className="font-medium text-[#44352D]">{drive.eligibilityCriteria?.minCgpa ?? 'N/A'}</span>
                         </div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">
+                        <div className="text-[11px] text-[#82776C] mt-0.5">
                           Max Backlogs: {drive.eligibilityCriteria?.maxActiveBacklogs ?? drive.eligibilityCriteria?.maxBacklogs ?? 0}
                         </div>
-                        <div className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[160px]">
+                        <div className="text-[10px] text-[#82776C] mt-0.5 truncate max-w-[160px]">
                           {drive.eligibilityCriteria?.allowedDepartments?.length || 0} depts allowed
                         </div>
                       </td>
 
                       {/* Timeline */}
-                      <td className="py-3.5 px-4 min-w-[140px] text-slate-600">
+                      <td className="py-3.5 px-4 min-w-[140px] text-[#82776C]">
                         <div className="text-[11px]">
-                          Close: <span className="font-medium text-slate-800">{formatDate(drive.applicationClosingDate || drive.registrationDeadline)}</span>
+                          Close: <span className="font-medium text-[#44352D]">{formatDate(drive.applicationClosingDate || drive.registrationDeadline)}</span>
                         </div>
                         <div className="mt-1">
                           <span
                             className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${
                               deadlineInfo.isUrgent
-                                ? 'bg-amber-50 text-amber-700'
+                                ? 'bg-[#C58A32]/10 text-[#C58A32] border border-[#C58A32]/20'
                                 : deadlineInfo.isClosed
-                                ? 'bg-rose-50 text-rose-700'
-                                : 'bg-slate-100 text-slate-600'
+                                ? 'bg-[#C94C4C]/10 text-[#C94C4C] border border-[#C94C4C]/20'
+                                : 'bg-[#FAF8F4] text-[#82776C] border border-[#E8DED2]'
                             }`}
                           >
                             {deadlineInfo.text}
@@ -656,10 +656,10 @@ const ManageDrives = () => {
                       <td className="py-3.5 px-4 text-center min-w-[90px]">
                         <Link
                           to={`/officer/applications?driveId=${drive._id}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 font-semibold hover:bg-blue-100 transition-colors"
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#F1E7D9] text-[#44352D] font-semibold hover:bg-[#E8DED2] transition-colors border border-[#E8DED2]"
                           title="View enrolled student applications"
                         >
-                          <Users className="w-3.5 h-3.5" />
+                          <Users className="w-3.5 h-3.5 text-[#76543D]" />
                           <span>{drive.applicantCount ?? 0}</span>
                         </Link>
                       </td>
@@ -677,7 +677,7 @@ const ManageDrives = () => {
                             <button
                               type="button"
                               onClick={() => handlePublish(drive)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[11px] font-medium transition-colors border border-emerald-200"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#27845B]/10 text-[#27845B] hover:bg-[#27845B]/20 text-[11px] font-medium transition-colors border border-[#27845B]/25"
                               title="Publish drive and open for applications"
                             >
                               <Send className="w-3 h-3" />
@@ -690,7 +690,7 @@ const ManageDrives = () => {
                             <button
                               type="button"
                               onClick={() => handleClose(drive)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-100 text-[11px] font-medium transition-colors border border-amber-200"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#C58A32]/10 text-[#C58A32] hover:bg-[#C58A32]/20 text-[11px] font-medium transition-colors border border-[#C58A32]/25"
                               title="Close applications"
                             >
                               <XCircle className="w-3 h-3" />
@@ -703,7 +703,7 @@ const ManageDrives = () => {
                             <button
                               type="button"
                               onClick={() => handleArchive(drive)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 hover:bg-purple-100 text-[11px] font-medium transition-colors border border-purple-200"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#F1E7D9] text-[#44352D] hover:bg-[#E8DED2] text-[11px] font-medium transition-colors border border-[#E8DED2]"
                               title="Archive drive as Completed"
                             >
                               <Archive className="w-3 h-3" />
@@ -714,7 +714,7 @@ const ManageDrives = () => {
                           {/* View details */}
                           <Link
                             to={`/drives/${drive._id}`}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            className="p-1.5 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#FAF8F4] transition-colors"
                             title="View Full Specifications"
                           >
                             <Eye className="w-4 h-4" />
@@ -724,7 +724,7 @@ const ManageDrives = () => {
                           <button
                             type="button"
                             onClick={() => openEditModal(drive)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            className="p-1.5 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#FAF8F4] transition-colors"
                             title="Edit Drive"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -734,7 +734,7 @@ const ManageDrives = () => {
                           <button
                             type="button"
                             onClick={() => handleDelete(drive._id, drive.title)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            className="p-1.5 rounded-lg text-[#82776C] hover:text-[#C94C4C] hover:bg-[#C94C4C]/10 transition-colors"
                             title="Delete Drive"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -760,23 +760,23 @@ const ManageDrives = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-5 text-xs">
           {/* SECTION 1: BASIC INFORMATION */}
-          <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/90 space-y-3.5">
-            <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-              <Building2 className="w-4 h-4 text-blue-600" />
-              <h3 className="font-semibold text-slate-800 text-xs uppercase tracking-wide">
+          <div className="p-4 bg-[#FAF8F4] rounded-xl border border-[#E8DED2] space-y-3.5">
+            <div className="flex items-center gap-2 border-b border-[#E8DED2] pb-2">
+              <Building2 className="w-4 h-4 text-[#76543D]" />
+              <h3 className="font-semibold text-[#44352D] text-xs uppercase tracking-wider">
                 Section 1: Basic Information
               </h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-[#44352D] mb-1.5">
                   Recruiting Company *
                 </label>
                 <select
                   value={form.company}
                   onChange={(e) => setForm({ ...form, company: e.target.value })}
-                  className="w-full h-[38px] rounded-lg border border-slate-200 px-3 bg-white text-xs focus:outline-none focus:border-blue-500"
+                  className="w-full h-[38px] rounded-lg border border-[#E8DED2] px-3 bg-white text-xs text-[#44352D] focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D]"
                   required
                 >
                   <option value="">Select Company</option>
@@ -787,7 +787,7 @@ const ManageDrives = () => {
                   ))}
                 </select>
                 {companies.length === 0 && (
-                  <p className="text-[11px] text-amber-600 mt-1">
+                  <p className="text-[11px] text-[#C58A32] mt-1">
                     No companies found. Please add a company in Company Management first.
                   </p>
                 )}
@@ -811,13 +811,13 @@ const ManageDrives = () => {
               />
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-[#44352D] mb-1.5">
                   Employment Type *
                 </label>
                 <select
                   value={form.employmentType}
                   onChange={(e) => setForm({ ...form, employmentType: e.target.value })}
-                  className="w-full h-[38px] rounded-lg border border-slate-200 px-3 bg-white text-xs focus:outline-none focus:border-blue-500"
+                  className="w-full h-[38px] rounded-lg border border-[#E8DED2] px-3 bg-white text-xs text-[#44352D] focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D]"
                 >
                   {EMPLOYMENT_TYPES.map((type) => (
                     <option key={type} value={type}>
@@ -858,24 +858,24 @@ const ManageDrives = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-[#44352D] mb-1.5">
                 Job Description & Overview
               </label>
               <textarea
                 rows={3}
                 value={form.jobDescription}
                 onChange={(e) => setForm({ ...form, jobDescription: e.target.value })}
-                className="w-full rounded-lg border border-slate-200 p-2.5 text-xs focus:outline-none focus:border-blue-500 bg-white"
+                className="w-full rounded-lg border border-[#E8DED2] p-2.5 text-xs text-[#44352D] focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white placeholder-[#82776C]/60"
                 placeholder="Role summary, expected responsibilities, day-to-day work..."
               />
             </div>
           </div>
 
           {/* SECTION 2: ELIGIBILITY CRITERIA */}
-          <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/90 space-y-3.5">
-            <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-              <GraduationCap className="w-4 h-4 text-blue-600" />
-              <h3 className="font-semibold text-slate-800 text-xs uppercase tracking-wide">
+          <div className="p-4 bg-[#FAF8F4] rounded-xl border border-[#E8DED2] space-y-3.5">
+            <div className="flex items-center gap-2 border-b border-[#E8DED2] pb-2">
+              <GraduationCap className="w-4 h-4 text-[#76543D]" />
+              <h3 className="font-semibold text-[#44352D] text-xs uppercase tracking-wider">
                 Section 2: Academic & Eligibility Criteria
               </h3>
             </div>
@@ -937,13 +937,13 @@ const ManageDrives = () => {
 
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-medium text-slate-700">
+                <label className="text-xs font-semibold text-[#44352D]">
                   Allowed Departments:
                 </label>
                 <button
                   type="button"
                   onClick={handleSelectAllDepts}
-                  className="text-[11px] text-blue-600 hover:underline font-medium"
+                  className="text-[11px] text-[#76543D] hover:underline font-semibold"
                 >
                   {form.allowedDepartments.length === ALL_DEPTS.length ? 'Deselect All' : 'Select All'}
                 </button>
@@ -952,15 +952,15 @@ const ManageDrives = () => {
                 {ALL_DEPTS.map((dept) => (
                   <label
                     key={dept}
-                    className="flex items-center gap-2 p-2 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-blue-50/50 transition-colors"
+                    className="flex items-center gap-2 p-2 rounded-lg border border-[#E8DED2] bg-white cursor-pointer hover:bg-[#F6F0E8] transition-colors"
                   >
                     <input
                       type="checkbox"
                       checked={form.allowedDepartments.includes(dept)}
                       onChange={() => handleDeptToggle(dept)}
-                      className="rounded text-blue-600 focus:ring-blue-500"
+                      className="rounded accent-[#44352D] text-[#44352D] focus:ring-[#76543D]"
                     />
-                    <span className="text-[11px] text-slate-700 leading-tight">{dept}</span>
+                    <span className="text-[11px] text-[#44352D] font-medium leading-tight">{dept}</span>
                   </label>
                 ))}
               </div>
@@ -968,10 +968,10 @@ const ManageDrives = () => {
           </div>
 
           {/* SECTION 3: RECRUITMENT DETAILS, TIMELINE & ROUNDS */}
-          <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/90 space-y-3.5">
-            <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-              <Layers className="w-4 h-4 text-blue-600" />
-              <h3 className="font-semibold text-slate-800 text-xs uppercase tracking-wide">
+          <div className="p-4 bg-[#FAF8F4] rounded-xl border border-[#E8DED2] space-y-3.5">
+            <div className="flex items-center gap-2 border-b border-[#E8DED2] pb-2">
+              <Layers className="w-4 h-4 text-[#76543D]" />
+              <h3 className="font-semibold text-[#44352D] text-xs uppercase tracking-wider">
                 Section 3: Recruitment Timeline & Process
               </h3>
             </div>
@@ -1003,20 +1003,20 @@ const ManageDrives = () => {
 
             {/* Required Skills */}
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-[#44352D] mb-1.5">
                 Required Technical Skills (Press Enter or comma to add)
               </label>
-              <div className="flex flex-wrap items-center gap-1.5 p-2 bg-white rounded-lg border border-slate-200 min-h-[42px]">
+              <div className="flex flex-wrap items-center gap-1.5 p-2 bg-white rounded-lg border border-[#E8DED2] min-h-[42px]">
                 {form.requiredSkills.map((sk) => (
                   <span
                     key={sk}
-                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-[11px] font-medium border border-blue-200"
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-[#F1E7D9] text-[#44352D] text-[11px] font-medium border border-[#E8DED2]"
                   >
                     {sk}
                     <button
                       type="button"
                       onClick={() => handleRemoveSkill(sk)}
-                      className="text-blue-500 hover:text-blue-800"
+                      className="text-[#76543D] hover:text-[#44352D]"
                     >
                       <X className="w-3 h-3" />
                     </button>
@@ -1028,7 +1028,7 @@ const ManageDrives = () => {
                   value={skillInput}
                   onChange={(e) => setSkillInput(e.target.value)}
                   onKeyDown={handleAddSkill}
-                  className="flex-1 min-w-[120px] text-xs outline-none bg-transparent py-0.5 px-1"
+                  className="flex-1 min-w-[120px] text-xs outline-none bg-transparent py-0.5 px-1 text-[#44352D] placeholder-[#82776C]/60"
                 />
               </div>
             </div>
@@ -1036,13 +1036,13 @@ const ManageDrives = () => {
             {/* Rounds array */}
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-medium text-slate-700">
+                <label className="text-xs font-semibold text-[#44352D]">
                   Recruitment Process Rounds:
                 </label>
                 <button
                   type="button"
                   onClick={handleAddRound}
-                  className="inline-flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-semibold"
+                  className="inline-flex items-center gap-1 text-[11px] text-[#76543D] hover:text-[#44352D] font-semibold"
                 >
                   <PlusCircle className="w-3.5 h-3.5" />
                   Add Round
@@ -1053,9 +1053,9 @@ const ManageDrives = () => {
                 {form.rounds.map((round, idx) => (
                   <div
                     key={idx}
-                    className="p-2.5 bg-white rounded-lg border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center gap-2"
+                    className="p-2.5 bg-white rounded-lg border border-[#E8DED2] flex flex-col sm:flex-row items-start sm:items-center gap-2"
                   >
-                    <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[11px] flex-shrink-0">
+                    <span className="w-6 h-6 rounded-full bg-[#F6F0E8] text-[#44352D] border border-[#E8DED2] flex items-center justify-center font-bold text-[11px] flex-shrink-0">
                       {idx + 1}
                     </span>
                     <input
@@ -1063,7 +1063,7 @@ const ManageDrives = () => {
                       placeholder="Round Title (e.g. Coding Assessment)"
                       value={round.roundName}
                       onChange={(e) => handleRoundChange(idx, 'roundName', e.target.value)}
-                      className="h-8 px-2.5 rounded-md border border-slate-200 text-xs w-full sm:w-48 focus:outline-none focus:border-blue-500"
+                      className="h-8 px-2.5 rounded-md border border-[#E8DED2] text-xs text-[#44352D] w-full sm:w-48 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D]"
                       required
                     />
                     <input
@@ -1071,13 +1071,13 @@ const ManageDrives = () => {
                       placeholder="Round Description (e.g. 60 mins 2 problems)"
                       value={round.description}
                       onChange={(e) => handleRoundChange(idx, 'description', e.target.value)}
-                      className="h-8 px-2.5 rounded-md border border-slate-200 text-xs flex-1 w-full focus:outline-none focus:border-blue-500"
+                      className="h-8 px-2.5 rounded-md border border-[#E8DED2] text-xs text-[#44352D] flex-1 w-full focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D]"
                     />
                     {form.rounds.length > 1 && (
                       <button
                         type="button"
                         onClick={() => handleRemoveRound(idx)}
-                        className="text-slate-400 hover:text-rose-600 p-1 rounded"
+                        className="text-[#82776C] hover:text-[#C94C4C] p-1 rounded"
                         title="Remove Round"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1090,10 +1090,10 @@ const ManageDrives = () => {
           </div>
 
           {/* SECTION 4: DRIVE STATUS */}
-          <div className="p-4 bg-slate-50/80 rounded-xl border border-slate-200/90 space-y-3">
-            <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-              <CheckCircle className="w-4 h-4 text-blue-600" />
-              <h3 className="font-semibold text-slate-800 text-xs uppercase tracking-wide">
+          <div className="p-4 bg-[#FAF8F4] rounded-xl border border-[#E8DED2] space-y-3">
+            <div className="flex items-center gap-2 border-b border-[#E8DED2] pb-2">
+              <CheckCircle className="w-4 h-4 text-[#76543D]" />
+              <h3 className="font-semibold text-[#44352D] text-xs uppercase tracking-wider">
                 Section 4: Drive Visibility & Status
               </h3>
             </div>
@@ -1125,29 +1125,29 @@ const ManageDrives = () => {
                   key={opt.id}
                   className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between ${
                     form.status === opt.id
-                      ? 'border-blue-500 bg-blue-50/60 shadow-sm'
-                      : 'border-slate-200 bg-white hover:bg-slate-50'
+                      ? 'border-[#76543D] bg-[#F1E7D9]/40 shadow-sm'
+                      : 'border-[#E8DED2] bg-white hover:bg-[#FAF8F4]'
                   }`}
                 >
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-slate-800">{opt.label}</span>
+                    <span className="font-semibold text-[#44352D]">{opt.label}</span>
                     <input
                       type="radio"
                       name="driveStatus"
                       value={opt.id}
                       checked={form.status === opt.id}
                       onChange={() => setForm({ ...form, status: opt.id })}
-                      className="text-blue-600 focus:ring-blue-500"
+                      className="accent-[#44352D] text-[#44352D] focus:ring-[#76543D]"
                     />
                   </div>
-                  <span className="text-[10px] text-slate-500 leading-tight">{opt.desc}</span>
+                  <span className="text-[10px] text-[#82776C] leading-tight">{opt.desc}</span>
                 </label>
               ))}
             </div>
           </div>
 
           {/* Form Action Buttons - Clean bottom bar */}
-          <div className="flex justify-end gap-2.5 pt-4 border-t border-slate-100 bg-white sticky bottom-0 -mx-5 -mb-5 p-5 sm:-mx-6 sm:-mb-6 sm:p-6 shadow-sm">
+          <div className="flex justify-end gap-2.5 pt-4 border-t border-[#E8DED2] bg-white sticky bottom-0 -mx-5 -mb-5 p-5 sm:-mx-6 sm:-mb-6 sm:p-6 shadow-sm">
             <Button
               variant="outline"
               size="sm"

@@ -18,22 +18,22 @@ const ConfirmModal = ({
   const getIcon = () => {
     switch (variant) {
       case 'danger':
-        return <AlertCircle className="w-5 h-5 text-rose-600" />;
+        return <AlertCircle className="w-5 h-5 text-[#C94C4C]" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-amber-600" />;
+        return <AlertTriangle className="w-5 h-5 text-[#C58A32]" />;
       default:
-        return <HelpCircle className="w-5 h-5 text-blue-600" />;
+        return <HelpCircle className="w-5 h-5 text-[#44352D]" />;
     }
   };
 
   const getIconBg = () => {
     switch (variant) {
       case 'danger':
-        return 'bg-rose-50 border-rose-200';
+        return 'bg-[#C94C4C]/10 border-[#C94C4C]/20';
       case 'warning':
-        return 'bg-amber-50 border-amber-200';
+        return 'bg-[#C58A32]/10 border-[#C58A32]/20';
       default:
-        return 'bg-blue-50 border-blue-200';
+        return 'bg-[#F1E7D9] border-[#E8DED2]';
     }
   };
 
@@ -45,16 +45,16 @@ const ConfirmModal = ({
             {getIcon()}
           </div>
           <div>
-            <h4 className="text-sm font-bold text-slate-900 leading-snug">
+            <h4 className="text-sm font-bold text-[#44352D] leading-snug">
               {title}
             </h4>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+            <p className="text-xs text-[#82776C] mt-1 leading-relaxed">
               {message}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100">
+        <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#E8DED2]/60">
           <Button
             type="button"
             variant="outline"

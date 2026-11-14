@@ -287,17 +287,17 @@ const ManageApplications = () => {
       )}
 
       {/* Drive Selection Box */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-sm space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2 flex-1">
-            <Briefcase className="w-4 h-4 text-blue-600 flex-shrink-0" />
-            <label className="text-xs font-bold text-slate-800 whitespace-nowrap">
+            <Briefcase className="w-4 h-4 text-[#76543D] flex-shrink-0" />
+            <label className="text-xs font-bold text-[#44352D] whitespace-nowrap">
               Select Placement Drive:
             </label>
             <select
               value={selectedDriveId}
               onChange={(e) => setSelectedDriveId(e.target.value)}
-              className="flex-1 max-w-xl h-[38px] rounded-lg border border-slate-200 text-xs px-3 focus:outline-none focus:border-blue-500 bg-white font-medium text-slate-800"
+              className="flex-1 max-w-xl h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white font-medium text-[#44352D]"
             >
               <option value="">All Placement Drives ({drives.length})</option>
               {drives.map((d) => (
@@ -312,7 +312,7 @@ const ManageApplications = () => {
             <button
               type="button"
               onClick={() => setSelectedDriveId('')}
-              className="text-xs text-blue-600 hover:underline font-medium whitespace-nowrap"
+              className="text-xs text-[#76543D] hover:underline font-semibold whitespace-nowrap"
             >
               Show All Drives
             </button>
@@ -321,34 +321,34 @@ const ManageApplications = () => {
 
         {/* Selected Drive Summary Card */}
         {driveInfo && (
-          <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50/70 p-3.5 rounded-lg border border-slate-100">
+          <div className="mt-3 pt-3 border-t border-[#E8DED2] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#FAF8F4] p-3.5 rounded-lg border border-[#E8DED2]">
             <div className="flex items-center gap-3">
               {driveInfo.company?.logoUrl ? (
                 <img
                   src={driveInfo.company.logoUrl}
                   alt={driveInfo.company?.name}
-                  className="w-10 h-10 rounded-lg object-contain p-0.5 border border-slate-200 bg-white flex-shrink-0"
+                  className="w-10 h-10 rounded-lg object-contain p-0.5 border border-[#E8DED2] bg-white flex-shrink-0"
                 />
               ) : (
-                <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 font-bold text-base flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-base flex-shrink-0">
                   {driveInfo.company?.name ? driveInfo.company.name.charAt(0) : 'C'}
                 </div>
               )}
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-slate-900 text-sm">{driveInfo.title}</span>
+                  <span className="font-bold text-[#44352D] text-sm">{driveInfo.title}</span>
                   <Badge status={driveInfo.status} size="sm" />
                 </div>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  <strong className="text-slate-700">{driveInfo.company?.name}</strong> • Role: {driveInfo.jobRole} • Package: <span className="font-bold text-blue-700">{formatLPA(driveInfo.packageLPA)}</span>
+                <p className="text-[11px] text-[#82776C] mt-0.5">
+                  <strong className="text-[#44352D]">{driveInfo.company?.name}</strong> • Role: {driveInfo.jobRole} • Package: <span className="font-bold text-[#76543D]">{formatLPA(driveInfo.packageLPA)}</span>
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3 text-xs flex-shrink-0">
               <div className="text-right">
-                <span className="text-[11px] text-slate-400 block">Cutoff Requirement</span>
-                <span className="font-semibold text-slate-700 block">
+                <span className="text-[11px] text-[#82776C] block">Cutoff Requirement</span>
+                <span className="font-semibold text-[#44352D] block">
                   {driveInfo.eligibilityCriteria?.minCgpa ? `${driveInfo.eligibilityCriteria.minCgpa}+ CGPA` : 'No CGPA cutoff'}
                 </span>
               </div>
@@ -363,7 +363,7 @@ const ManageApplications = () => {
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-sm space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm space-y-3">
         <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
           {/* Search box */}
           <div className="sm:col-span-4">
@@ -380,7 +380,7 @@ const ManageApplications = () => {
             <select
               value={selectedDepartment}
               onChange={(e) => setSelectedDepartment(e.target.value)}
-              className="w-full h-[38px] rounded-lg border border-slate-200 text-xs px-3 focus:outline-none focus:border-blue-500 bg-white"
+              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
             >
               {DEPARTMENTS.map((dept) => (
                 <option key={dept} value={dept}>
@@ -395,7 +395,7 @@ const ManageApplications = () => {
             <select
               value={selectedCgpa}
               onChange={(e) => setSelectedCgpa(e.target.value)}
-              className="w-full h-[38px] rounded-lg border border-slate-200 text-xs px-3 focus:outline-none focus:border-blue-500 bg-white"
+              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
             >
               {CGPA_FILTERS.map((item) => (
                 <option key={item.value} value={item.value}>
@@ -410,7 +410,7 @@ const ManageApplications = () => {
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="flex-1 h-[38px] rounded-lg border border-slate-200 text-xs px-3 focus:outline-none focus:border-blue-500 bg-white"
+              className="flex-1 h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#76543D] bg-white text-[#44352D]"
             >
               {STATUS_OPTIONS.map((st) => (
                 <option key={st} value={st}>
@@ -426,14 +426,14 @@ const ManageApplications = () => {
         </form>
 
         {/* Secondary Toolbar: Sorting & Reset */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E8DED2] text-xs">
           <div className="flex items-center gap-2">
-            <ArrowUpDown className="w-3.5 h-3.5 text-slate-400" />
-            <span className="text-slate-400 text-[11px] font-medium">Sort By:</span>
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#A17C5B]" />
+            <span className="text-[#82776C] text-[11px] font-medium">Sort By:</span>
             <select
               value={sortIndex}
               onChange={(e) => setSortIndex(Number(e.target.value))}
-              className="h-[30px] rounded-md border border-slate-200 text-xs px-2.5 focus:outline-none focus:border-blue-500 bg-white font-medium text-slate-700"
+              className="h-[30px] rounded-md border border-[#E8DED2] text-xs px-2.5 focus:outline-none focus:border-[#76543D] bg-white font-medium text-[#44352D]"
             >
               {SORT_OPTIONS.map((opt, i) => (
                 <option key={i} value={i}>
@@ -447,7 +447,7 @@ const ManageApplications = () => {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-rose-600 transition-colors"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#82776C] hover:text-[#C94C4C] transition-colors"
             >
               <RotateCcw className="w-3 h-3" /> Reset All Filters
             </button>
@@ -473,11 +473,11 @@ const ManageApplications = () => {
           onAction={hasActiveFilters ? handleResetFilters : undefined}
         />
       ) : (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl border border-[#E8DED2] shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                <tr className="bg-[#F6F0E8] border-b border-[#E8DED2] text-[11px] font-semibold text-[#44352D] uppercase tracking-wider">
                   <th className="py-3 px-4 min-w-[190px]">Student Name</th>
                   <th className="py-3 px-3 min-w-[110px]">Roll Number</th>
                   <th className="py-3 px-3 min-w-[150px]">Department</th>
@@ -490,7 +490,7 @@ const ManageApplications = () => {
                   <th className="py-3 px-4 text-right min-w-[170px]">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
+              <tbody className="divide-y divide-[#E8DED2]/60 text-xs">
                 {applications.map((app) => {
                   const student = app.student || {};
                   const profile = app.studentProfile || {};
@@ -512,7 +512,7 @@ const ManageApplications = () => {
                   return (
                     <tr
                       key={app._id}
-                      className="hover:bg-slate-50/70 transition-colors"
+                      className="hover:bg-[#FAF8F4] transition-colors"
                     >
                       {/* 1. Student Name */}
                       <td className="py-3 px-4 min-w-[190px]">
@@ -521,18 +521,18 @@ const ManageApplications = () => {
                             <img
                               src={student.profilePhoto}
                               alt={student.name}
-                              className="w-8 h-8 rounded-full object-cover border border-slate-200 flex-shrink-0"
+                              className="w-8 h-8 rounded-full object-cover border border-[#E8DED2] flex-shrink-0"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-blue-700 font-bold text-xs flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D] font-bold text-xs flex-shrink-0">
                               {student.name ? student.name.charAt(0).toUpperCase() : 'S'}
                             </div>
                           )}
                           <div className="min-w-0">
-                            <span className="font-bold text-slate-900 block truncate leading-tight">
+                            <span className="font-bold text-[#44352D] block truncate leading-tight">
                               {student.name || 'Candidate'}
                             </span>
-                            <span className="text-[11px] text-slate-400 block truncate mt-0.5">
+                            <span className="text-[11px] text-[#82776C] block truncate mt-0.5">
                               {student.email || 'No email'}
                             </span>
                           </div>
@@ -540,14 +540,14 @@ const ManageApplications = () => {
                       </td>
 
                       {/* 2. Roll Number */}
-                      <td className="py-3 px-3 font-mono font-medium text-slate-800 whitespace-nowrap min-w-[110px]">
-                        <span className="bg-slate-100 px-2 py-0.5 rounded text-[11px] border border-slate-200/80">
+                      <td className="py-3 px-3 font-mono font-medium text-[#44352D] whitespace-nowrap min-w-[110px]">
+                        <span className="bg-[#F1E7D9] px-2 py-0.5 rounded text-[11px] border border-[#E8DED2] font-semibold text-[#44352D]">
                           {rollNo}
                         </span>
                       </td>
 
                       {/* 3. Department */}
-                      <td className="py-3 px-3 font-medium text-slate-700 min-w-[150px]">
+                      <td className="py-3 px-3 font-medium text-[#44352D] min-w-[150px]">
                         <span className="block truncate max-w-[140px]" title={dept}>
                           {dept}
                         </span>
@@ -555,18 +555,18 @@ const ManageApplications = () => {
 
                       {/* 4. CGPA */}
                       <td className="py-3 px-3 text-center whitespace-nowrap min-w-[80px]">
-                        <span className="font-bold text-blue-700">
+                        <span className="font-bold text-[#44352D]">
                           {cgpa !== null ? Number(cgpa).toFixed(2) : 'N/A'}
                         </span>
                       </td>
 
                       {/* 5. 10th percentage */}
-                      <td className="py-3 px-3 text-center font-medium text-slate-700 whitespace-nowrap min-w-[80px]">
+                      <td className="py-3 px-3 text-center font-medium text-[#44352D] whitespace-nowrap min-w-[80px]">
                         {tenth !== '—' ? `${tenth}%` : '—'}
                       </td>
 
                       {/* 6. Intermediate percentage */}
-                      <td className="py-3 px-3 text-center font-medium text-slate-700 whitespace-nowrap min-w-[90px]">
+                      <td className="py-3 px-3 text-center font-medium text-[#44352D] whitespace-nowrap min-w-[90px]">
                         {twelfth !== '—' ? `${twelfth}%` : '—'}
                       </td>
 
@@ -575,8 +575,8 @@ const ManageApplications = () => {
                         <span
                           className={`inline-block px-2 py-0.5 rounded-full font-medium text-[11px] ${
                             activeBacklogs > 0
-                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                              : 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                              ? 'bg-[#C94C4C]/10 text-[#C94C4C] border border-[#C94C4C]/30'
+                              : 'bg-[#27845B]/10 text-[#27845B] border border-[#27845B]/30'
                           }`}
                         >
                           {activeBacklogs} Act / {totalBacklogs} Tot
@@ -584,7 +584,7 @@ const ManageApplications = () => {
                       </td>
 
                       {/* 8. Application date */}
-                      <td className="py-3 px-3 text-slate-600 whitespace-nowrap min-w-[110px]">
+                      <td className="py-3 px-3 text-[#82776C] whitespace-nowrap min-w-[110px]">
                         {formatDate(app.appliedAt)}
                       </td>
 
@@ -592,7 +592,7 @@ const ManageApplications = () => {
                       <td className="py-3 px-3 whitespace-nowrap min-w-[120px]">
                         <Badge status={app.status} size="sm" />
                         {app.currentRound > 1 && (
-                          <span className="text-[11px] text-slate-400 block mt-0.5">
+                          <span className="text-[11px] text-[#82776C] block mt-0.5">
                             Round {app.currentRound}
                           </span>
                         )}
@@ -605,7 +605,7 @@ const ManageApplications = () => {
                           <button
                             type="button"
                             onClick={() => setAppForStatusUpdate(app)}
-                            className="p-1.5 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-colors"
+                            className="p-1.5 rounded-lg text-[#76543D] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
                             title="Update Selection Status & Remarks"
                           >
                             <Edit3 className="w-4 h-4" />
@@ -620,7 +620,7 @@ const ManageApplications = () => {
                                 applicationId: app._id,
                               })
                             }
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                            className="p-1.5 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
                             title="View Complete Academic Profile"
                           >
                             <Eye className="w-4 h-4" />
@@ -631,7 +631,7 @@ const ManageApplications = () => {
                             type="button"
                             onClick={() => handleDownloadResume(app)}
                             disabled={downloadingAppId === app._id}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition-colors disabled:opacity-50"
+                            className="p-1.5 rounded-lg text-[#27845B] hover:text-[#27845B] hover:bg-[#27845B]/10 transition-colors disabled:opacity-50"
                             title="Download Candidate Resume"
                           >
                             <Download className="w-4 h-4" />
@@ -641,7 +641,7 @@ const ManageApplications = () => {
                           <button
                             type="button"
                             onClick={() => setAppForHistory(app)}
-                            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                            className="p-1.5 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
                             title="View Status History Audit Trail"
                           >
                             <History className="w-4 h-4" />

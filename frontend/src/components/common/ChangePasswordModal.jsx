@@ -89,21 +89,21 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#44352D]/45 backdrop-blur-sm animate-in fade-in duration-200">
       <div
         className="fixed inset-0"
         onClick={handleClose}
       />
-      <div className="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md p-6 z-10">
+      <div className="relative bg-white rounded-2xl shadow-2xl border border-[#E8DED2] w-full max-w-md p-6 z-10">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E8DED2]/60">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-800">
+            <div className="w-8 h-8 rounded-lg bg-[#F1E7D9] border border-[#E8DED2] flex items-center justify-center text-[#44352D]">
               <Lock className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Change Password</h3>
-              <p className="text-[11px] text-slate-500">
+              <h3 className="text-sm font-bold text-[#44352D]">Change Password</h3>
+              <p className="text-[11px] text-[#82776C]">
                 Update credentials for {user?.email}
               </p>
             </div>
@@ -111,7 +111,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
           <button
             type="button"
             onClick={handleClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-1.5 text-[#82776C] hover:text-[#44352D] hover:bg-[#F6F0E8] rounded-lg transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -119,11 +119,11 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
 
         {success ? (
           <div className="py-6 text-center space-y-3">
-            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 text-slate-800 flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-5 h-5 text-slate-700" />
+            <div className="w-10 h-10 rounded-full bg-[#27845B]/10 border border-[#27845B]/20 text-[#27845B] flex items-center justify-center mx-auto">
+              <CheckCircle2 className="w-5 h-5 text-[#27845B]" />
             </div>
-            <h4 className="text-sm font-bold text-slate-900">Password Changed</h4>
-            <p className="text-xs text-slate-500">
+            <h4 className="text-sm font-bold text-[#44352D]">Password Changed</h4>
+            <p className="text-xs text-[#82776C]">
               Your password has been successfully updated.
             </p>
           </div>

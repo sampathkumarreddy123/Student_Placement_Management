@@ -56,26 +56,26 @@ export const ToastProvider = ({ children }) => {
   const getToastIcon = (type) => {
     switch (type) {
       case 'success':
-        return <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />;
+        return <CheckCircle2 className="w-5 h-5 text-[#27845B] flex-shrink-0" />;
       case 'error':
-        return <AlertCircle className="w-5 h-5 text-rose-600 flex-shrink-0" />;
+        return <AlertCircle className="w-5 h-5 text-[#C94C4C] flex-shrink-0" />;
       case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />;
+        return <AlertTriangle className="w-5 h-5 text-[#C58A32] flex-shrink-0" />;
       default:
-        return <Info className="w-5 h-5 text-blue-600 flex-shrink-0" />;
+        return <Info className="w-5 h-5 text-[#76543D] flex-shrink-0" />;
     }
   };
 
   const getToastBorder = (type) => {
     switch (type) {
       case 'success':
-        return 'border-emerald-200 bg-white/95';
+        return 'border-[#27845B]/30 bg-white/95';
       case 'error':
-        return 'border-rose-200 bg-white/95';
+        return 'border-[#C94C4C]/30 bg-white/95';
       case 'warning':
-        return 'border-amber-200 bg-white/95';
+        return 'border-[#C58A32]/30 bg-white/95';
       default:
-        return 'border-blue-200 bg-white/95';
+        return 'border-[#E8DED2] bg-white/95';
     }
   };
 
@@ -98,17 +98,17 @@ export const ToastProvider = ({ children }) => {
             {getToastIcon(t.type)}
             <div className="flex-1 min-w-0 pr-1">
               {t.title && (
-                <h5 className="text-xs font-bold text-slate-900 leading-tight">
+                <h5 className="text-xs font-bold text-[#44352D] leading-tight">
                   {t.title}
                 </h5>
               )}
-              <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+              <p className="text-xs text-[#82776C] mt-0.5 leading-relaxed">
                 {t.message}
               </p>
             </div>
             <button
               onClick={() => removeToast(t.id)}
-              className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              className="p-1 rounded-lg text-[#82776C] hover:text-[#44352D] hover:bg-[#F6F0E8] transition-colors"
               title="Dismiss"
             >
               <X className="w-3.5 h-3.5" />

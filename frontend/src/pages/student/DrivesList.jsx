@@ -136,11 +136,11 @@ const DrivesList = () => {
             onClick={() => setOnlyEligible(!onlyEligible)}
             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
               onlyEligible
-                ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                ? 'bg-[#44352D] text-[#F1E7D9] border-[#44352D] shadow-sm'
+                : 'bg-white text-[#44352D] border-[#E8DED2] hover:bg-[#FAF8F4]'
             }`}
           >
-            <CheckCircle2 className={`w-4 h-4 ${onlyEligible ? 'text-white' : 'text-emerald-600'}`} />
+            <CheckCircle2 className={`w-4 h-4 ${onlyEligible ? 'text-[#F1E7D9]' : 'text-[#27845B]'}`} />
             <span>Eligible Only ({drives.filter((d) => d.isEligible).length})</span>
           </button>
         }
@@ -155,7 +155,7 @@ const DrivesList = () => {
       )}
 
       {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200/90 shadow-sm space-y-3">
+      <div className="bg-white p-4 rounded-xl border border-[#E8DED2] shadow-sm space-y-3">
         <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 sm:grid-cols-12 gap-3">
           {/* Keyword Search */}
           <div className="sm:col-span-5">
@@ -172,7 +172,7 @@ const DrivesList = () => {
             <select
               value={selectedCompany}
               onChange={(e) => setSelectedCompany(e.target.value)}
-              className="w-full h-[38px] rounded-lg border border-slate-200 text-xs px-3 focus:outline-none focus:border-blue-500 bg-white"
+              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] bg-white text-[#44352D]"
             >
               <option value="">All Companies</option>
               {companies.map((c) => (
@@ -188,7 +188,7 @@ const DrivesList = () => {
             <select
               value={selectedDepartment}
               onChange={(e) => setSelectedDepartment(e.target.value)}
-              className="w-full h-[38px] rounded-lg border border-slate-200 text-xs px-3 focus:outline-none focus:border-blue-500 bg-white"
+              className="w-full h-[38px] rounded-lg border border-[#E8DED2] text-xs px-3 focus:outline-none focus:border-[#76543D] bg-white text-[#44352D]"
             >
               <option value="">All Branches</option>
               {DEPARTMENTS.map((dept) => (
@@ -204,7 +204,7 @@ const DrivesList = () => {
             <select
               value={minPackage}
               onChange={(e) => setMinPackage(e.target.value)}
-              className="flex-1 h-[38px] rounded-lg border border-slate-200 text-xs px-2.5 focus:outline-none focus:border-blue-500 bg-white"
+              className="flex-1 h-[38px] rounded-lg border border-[#E8DED2] text-xs px-2.5 focus:outline-none focus:border-[#76543D] bg-white text-[#44352D]"
             >
               <option value="">Any CTC</option>
               <option value="6">Min 6 LPA</option>
@@ -220,16 +220,16 @@ const DrivesList = () => {
         </form>
 
         {/* Secondary Row: Job role input & Clear filters */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E8DED2] text-xs">
           <div className="flex items-center gap-2 flex-1 max-w-sm">
-            <span className="text-slate-400 text-[11px] font-medium whitespace-nowrap">Job Role:</span>
+            <span className="text-[#82776C] text-[11px] font-medium whitespace-nowrap">Job Role:</span>
             <input
               type="text"
               placeholder="Filter by role (e.g. SDE, Analyst)..."
               value={jobRoleFilter}
               onChange={(e) => setJobRoleFilter(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchDrives()}
-              className="h-[30px] rounded-md border border-slate-200 text-xs px-2.5 flex-1 focus:outline-none focus:border-blue-500 bg-white"
+              className="h-[30px] rounded-md border border-[#E8DED2] text-xs px-2.5 flex-1 focus:outline-none focus:border-[#76543D] bg-white text-[#44352D]"
             />
           </div>
 
@@ -237,7 +237,7 @@ const DrivesList = () => {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 hover:text-rose-600 transition-colors"
+              className="inline-flex items-center gap-1 text-[11px] font-medium text-[#82776C] hover:text-[#C94C4C] transition-colors"
             >
               <RotateCcw className="w-3 h-3" /> Reset All Filters
             </button>

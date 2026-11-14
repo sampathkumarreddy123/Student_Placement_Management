@@ -162,17 +162,17 @@ const NotificationsPage = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'DRIVE_PUBLISHED':
-        return { icon: Briefcase, color: 'text-slate-700 bg-slate-100 border-slate-200' };
+        return { icon: Briefcase, color: 'text-[#76543D] bg-[#F1E7D9] border-[#E8DED2]' };
       case 'APPLICATION_SELECTED':
-        return { icon: Award, color: 'text-slate-800 bg-slate-100 border-slate-200' };
+        return { icon: Award, color: 'text-[#27845B] bg-[#27845B]/10 border-[#27845B]/30' };
       case 'APPLICATION_SHORTLISTED':
-        return { icon: UserCheck, color: 'text-slate-800 bg-slate-100 border-slate-200' };
+        return { icon: UserCheck, color: 'text-[#76543D] bg-[#F1E7D9] border-[#E8DED2]' };
       case 'APPLICATION_REJECTED':
-        return { icon: XCircle, color: 'text-slate-700 bg-slate-100 border-slate-200' };
+        return { icon: XCircle, color: 'text-[#C94C4C] bg-[#C94C4C]/10 border-[#C94C4C]/30' };
       case 'APPLICATION_SUBMITTED':
-        return { icon: FileText, color: 'text-slate-700 bg-slate-100 border-slate-200' };
+        return { icon: FileText, color: 'text-[#A17C5B] bg-[#F6F0E8] border-[#E8DED2]' };
       default:
-        return { icon: Bell, color: 'text-slate-700 bg-slate-100 border-slate-200' };
+        return { icon: Bell, color: 'text-[#76543D] bg-[#F1E7D9] border-[#E8DED2]' };
     }
   };
 
@@ -208,13 +208,13 @@ const NotificationsPage = () => {
       />
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-1.5 border-b border-slate-200 pb-2 overflow-x-auto">
+      <div className="flex items-center gap-1.5 border-b border-[#E8DED2] pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTab('all')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'all'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#44352D] text-white shadow-sm'
+              : 'text-[#82776C] hover:bg-[#F6F0E8]'
           }`}
         >
           <span>All Notifications</span>
@@ -227,14 +227,14 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('unread')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'unread'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#44352D] text-white shadow-sm'
+              : 'text-[#82776C] hover:bg-[#F6F0E8]'
           }`}
         >
           <span>Unread Only</span>
           {unreadCount > 0 && (
             <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-medium ${
-              activeTab === 'unread' ? 'bg-white/25 text-white' : 'bg-slate-200 text-slate-800'
+              activeTab === 'unread' ? 'bg-white/25 text-white' : 'bg-[#F1E7D9] text-[#44352D]'
             }`}>
               {unreadCount}
             </span>
@@ -245,8 +245,8 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('drives')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'drives'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#44352D] text-white shadow-sm'
+              : 'text-[#82776C] hover:bg-[#F6F0E8]'
           }`}
         >
           <Briefcase className="w-3.5 h-3.5" />
@@ -257,8 +257,8 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('applications')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'applications'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-slate-100'
+              ? 'bg-[#44352D] text-white shadow-sm'
+              : 'text-[#82776C] hover:bg-[#F6F0E8]'
           }`}
         >
           <FileText className="w-3.5 h-3.5" />
@@ -293,8 +293,8 @@ const NotificationsPage = () => {
                 onClick={() => handleMarkAsRead(item._id, item.link)}
                 className={`bg-white rounded-xl border p-4 shadow-sm transition-all cursor-pointer hover:shadow-md relative group ${
                   item.isRead
-                    ? 'border-slate-200 hover:border-slate-300'
-                    : 'border-slate-300 bg-slate-50/60 hover:border-slate-400'
+                    ? 'border-[#E8DED2] hover:border-[#A17C5B]/60'
+                    : 'border-[#A17C5B]/50 bg-[#FAF8F4] hover:border-[#76543D]'
                 }`}
               >
                 <div className="flex items-start gap-3.5">
@@ -308,21 +308,21 @@ const NotificationsPage = () => {
                   {/* Body */}
                   <div className="flex-1 min-w-0 pr-8">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
-                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
+                      <h4 className="text-xs sm:text-sm font-bold text-[#44352D] leading-snug">
                         {item.title}
                       </h4>
                       {!item.isRead && (
-                        <span className="w-2 h-2 rounded-full bg-slate-800 flex-shrink-0" />
+                        <span className="w-2 h-2 rounded-full bg-[#76543D] flex-shrink-0" />
                       )}
                     </div>
 
-                    <p className="text-xs text-slate-600 leading-relaxed">
+                    <p className="text-xs text-[#82776C] leading-relaxed">
                       {item.message}
                     </p>
 
-                    <div className="flex flex-wrap items-center gap-3 mt-2 text-[11px] text-slate-400">
+                    <div className="flex flex-wrap items-center gap-3 mt-2 text-[11px] text-[#82776C]">
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                        <Clock className="w-3 h-3 text-[#A17C5B]" />
                         {formatDateTime(item.createdAt)}
                       </span>
                       <span>•</span>
@@ -330,7 +330,7 @@ const NotificationsPage = () => {
                       {item.link && (
                         <>
                           <span>•</span>
-                          <span className="text-slate-800 font-semibold group-hover:underline flex items-center gap-0.5">
+                          <span className="text-[#76543D] font-semibold group-hover:underline flex items-center gap-0.5">
                             <span>Open details</span>
                             <ArrowRight className="w-3 h-3" />
                           </span>
@@ -342,7 +342,7 @@ const NotificationsPage = () => {
                   {/* Delete button */}
                   <button
                     onClick={(e) => handleDelete(e, item._id)}
-                    className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors opacity-0 group-hover:opacity-100"
+                    className="absolute top-4 right-4 p-1.5 rounded-lg text-[#82776C] hover:text-[#C94C4C] hover:bg-[#F6F0E8] transition-colors opacity-0 group-hover:opacity-100"
                     title="Delete notification"
                   >
                     <Trash2 className="w-4 h-4" />

@@ -107,25 +107,25 @@ const OfficerRegister = () => {
     <div>
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-            <ShieldCheck className="w-3.5 h-3.5 text-slate-700" />
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F1E7D9] text-[#44352D] border border-[#E8DED2]">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#44352D]" />
             Institutional Administration
           </span>
         </div>
-        <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+        <h2 className="text-xl font-bold text-[#44352D] tracking-tight">
           Placement Officer Registration
         </h2>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-[#82776C] mt-1">
           Authorized campus placement staff, coordinators, and administrators
         </p>
       </div>
 
       {/* Security notice banner */}
-      <div className="p-3 mb-4 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs flex items-start gap-2.5">
-        <KeyRound className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+      <div className="p-3 mb-4 rounded-lg bg-[#FAF8F4] border border-[#E8DED2] text-[#76543D] text-xs flex items-start gap-2.5">
+        <KeyRound className="w-4 h-4 text-[#76543D] shrink-0 mt-0.5" />
         <div>
-          <p className="font-semibold text-slate-900">Protected Administrator Portal</p>
-          <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
+          <p className="font-semibold text-[#44352D]">Protected Administrator Portal</p>
+          <p className="text-[11px] text-[#82776C] mt-0.5 leading-relaxed">
             Officer registration requires the <strong>Institutional Setup Key</strong> configured in your server environment to prevent unauthorized student registrations.
           </p>
         </div>
@@ -234,22 +234,22 @@ const OfficerRegister = () => {
         </Button>
       </form>
 
-      <div className="mt-6 pt-4 border-t border-slate-100 flex flex-col gap-2.5 text-center text-xs">
-        <p className="text-slate-600">
+      <div className="mt-6 pt-4 border-t border-[#E8DED2] flex flex-col gap-2.5 text-center text-xs">
+        <p className="text-[#82776C]">
           Already have an officer account?{' '}
           <Link
             to="/officer/login"
-            className="font-semibold text-slate-900 hover:underline"
+            className="font-semibold text-[#76543D] hover:text-[#44352D] hover:underline"
           >
             Officer Sign In
           </Link>
         </p>
 
-        <p className="text-slate-500 pt-1">
+        <p className="text-[#82776C] pt-1">
           Are you a student?{' '}
           <Link
             to="/student/login"
-            className="font-semibold text-slate-900 hover:underline inline-flex items-center gap-1"
+            className="font-semibold text-[#76543D] hover:text-[#44352D] hover:underline inline-flex items-center gap-1"
           >
             Student Login <ArrowRight className="w-3 h-3" />
           </Link>

@@ -7,18 +7,41 @@ export default {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb', // Primary
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+        cocoa: {
+          DEFAULT: '#44352D',
+          dark: '#342822',
+          light: '#534239',
         },
+        warmBrown: {
+          DEFAULT: '#76543D',
+          hover: '#644632',
+          light: '#8d654a',
+        },
+        bronze: {
+          DEFAULT: '#A17C5B',
+          light: '#b59272',
+        },
+        champagne: {
+          DEFAULT: '#F1E7D9',
+          light: '#F8F3EC',
+          dark: '#E5D6C3',
+        },
+        ivory: {
+          DEFAULT: '#FAF8F4',
+          light: '#FDFCFB',
+        },
+        softBeige: {
+          DEFAULT: '#F6F0E8',
+          hover: '#EFE6DB',
+        },
+        borderCocoa: '#E8DED2',
+        textCocoa: {
+          main: '#44352D',
+          muted: '#82776C',
+        },
+        statusSuccess: '#27845B',
+        statusWarning: '#C58A32',
+        statusDanger: '#C94C4C',
       },
     },
   },

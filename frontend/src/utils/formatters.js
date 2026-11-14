@@ -46,27 +46,28 @@ export const getDeadlineStatus = (deadlineString) => {
 export const getStatusColor = (status) => {
   const map = {
     // Placement Drive statuses
-    Draft: 'bg-slate-100 text-slate-700 border-slate-200',
-    Published: 'bg-slate-100 text-slate-800 border-slate-300 font-medium',
-    Closed: 'bg-stone-100 text-stone-700 border-stone-200',
-    Completed: 'bg-slate-100 text-slate-700 border-slate-200',
-    Upcoming: 'bg-slate-100 text-slate-800 border-slate-200',
-    Ongoing: 'bg-stone-100 text-stone-700 border-stone-200',
-    Cancelled: 'bg-stone-100 text-stone-600 border-stone-200',
+    Draft: 'bg-[#F6F0E8] text-[#82776C] border-[#E8DED2]',
+    Published: 'bg-[#F1E7D9] text-[#44352D] border-[#E8DED2] font-medium',
+    Closed: 'bg-[#F6F0E8] text-[#82776C] border-[#E8DED2]',
+    Completed: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20',
+    Upcoming: 'bg-[#F1E7D9] text-[#76543D] border-[#E8DED2]',
+    Ongoing: 'bg-[#C58A32]/10 text-[#C58A32] border-[#C58A32]/20',
+    Cancelled: 'bg-[#C94C4C]/10 text-[#C94C4C] border-[#C94C4C]/20',
+    Active: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20 font-medium',
 
     // Application statuses
-    Applied: 'bg-slate-100 text-slate-700 border-slate-200',
-    'Under Review': 'bg-slate-100 text-slate-800 border-slate-200',
-    Shortlisted: 'bg-slate-200 text-slate-900 border-slate-300 font-medium',
-    Interviewing: 'bg-stone-100 text-stone-800 border-stone-200',
-    Selected: 'bg-slate-900 text-white border-slate-900 font-medium',
-    Rejected: 'bg-stone-100 text-stone-600 border-stone-200',
+    Applied: 'bg-[#F6F0E8] text-[#76543D] border-[#E8DED2]',
+    'Under Review': 'bg-[#F1E7D9] text-[#44352D] border-[#E8DED2]',
+    Shortlisted: 'bg-[#C58A32]/10 text-[#C58A32] border-[#C58A32]/20 font-medium',
+    Interviewing: 'bg-[#A17C5B]/15 text-[#76543D] border-[#A17C5B]/30 font-medium',
+    Selected: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20 font-medium',
+    Rejected: 'bg-[#C94C4C]/10 text-[#C94C4C] border-[#C94C4C]/20',
 
     // Placement status
-    Placed: 'bg-slate-900 text-white border-slate-900 font-medium',
-    'Not Placed': 'bg-slate-100 text-slate-600 border-slate-200',
+    Placed: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20 font-semibold',
+    'Not Placed': 'bg-[#F6F0E8] text-[#82776C] border-[#E8DED2]',
   };
 
-  return map[status] || 'bg-slate-100 text-slate-700 border-slate-200';
+  return map[status] || 'bg-[#F6F0E8] text-[#44352D] border-[#E8DED2]';
 };
 

@@ -102,18 +102,18 @@ const VerifyEmail = () => {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E2E8F0]">
+      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E8DED2]">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-slate-900 flex items-center justify-center text-white shadow-sm">
+          <div className="w-7 h-7 rounded-md bg-[#44352D] flex items-center justify-center text-[#F1E7D9] shadow-sm">
             <GraduationCap className="w-4 h-4" />
           </div>
-          <span className="font-bold text-[#0F172A] text-sm tracking-tight">
+          <span className="font-bold text-[#44352D] text-sm tracking-tight">
             CampusPlacement
           </span>
         </Link>
         <Link
           to="/"
-          className="text-xs font-medium text-[#64748B] hover:text-slate-900 transition-colors"
+          className="text-xs font-semibold text-[#82776C] hover:text-[#44352D] transition-colors"
         >
           Back to Home
         </Link>
@@ -121,25 +121,25 @@ const VerifyEmail = () => {
 
       {loading ? (
         <div className="py-8 text-center space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-slate-700 mx-auto" />
-          <h2 className="text-base font-semibold text-[#0F172A]">
+          <Loader2 className="w-8 h-8 animate-spin text-[#76543D] mx-auto" />
+          <h2 className="text-base font-bold text-[#44352D]">
             Verifying Your College Email
           </h2>
-          <p className="text-xs text-[#64748B]">
+          <p className="text-xs text-[#82776C]">
             Please wait while we validate your security verification token...
           </p>
         </div>
       ) : success ? (
         <div className="py-3 text-center space-y-4">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 flex items-center justify-center mx-auto">
-            <CheckCircle2 className="w-6 h-6 text-slate-700" />
+          <div className="w-12 h-12 rounded-xl bg-[#F1E7D9] border border-[#E8DED2] text-[#76543D] flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-6 h-6 text-[#27845B]" />
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-[#0F172A] tracking-tight">
+            <h2 className="text-lg font-bold text-[#44352D] tracking-tight">
               Email Verified Successfully!
             </h2>
-            <p className="text-xs text-[#64748B] mt-1 leading-relaxed max-w-sm mx-auto">
+            <p className="text-xs text-[#82776C] mt-1 leading-relaxed max-w-sm mx-auto">
               Your college email address has been confirmed. You are now eligible to apply for all active campus placement drives and receive notifications.
             </p>
           </div>
@@ -169,13 +169,13 @@ const VerifyEmail = () => {
       ) : (
         <div className="py-2 space-y-4">
           <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-xl bg-stone-100 border border-stone-200 text-stone-700 flex items-center justify-center mx-auto">
-              <XCircle className="w-6 h-6 text-stone-600" />
+            <div className="w-12 h-12 rounded-xl bg-[#C94C4C]/10 border border-[#C94C4C]/20 text-[#C94C4C] flex items-center justify-center mx-auto">
+              <XCircle className="w-6 h-6 text-[#C94C4C]" />
             </div>
-            <h2 className="text-lg font-bold text-[#0F172A] tracking-tight">
+            <h2 className="text-lg font-bold text-[#44352D] tracking-tight">
               Verification Link Expired or Invalid
             </h2>
-            <p className="text-xs text-[#64748B] leading-relaxed max-w-sm mx-auto">
+            <p className="text-xs text-[#82776C] leading-relaxed max-w-sm mx-auto">
               {errorMessage ||
                 'This email verification token has expired or has already been used. Please request a new link below.'}
             </p>
@@ -216,7 +216,7 @@ const VerifyEmail = () => {
           <div className="pt-2 text-center">
             <Link
               to="/student/login"
-              className="text-xs font-semibold text-slate-800 hover:underline"
+              className="text-xs font-bold text-[#44352D] hover:text-[#76543D] hover:underline"
             >
               Back to Sign In
             </Link>

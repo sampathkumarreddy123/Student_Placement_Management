@@ -9,12 +9,13 @@ const Badge = ({
   className = '',
 }) => {
   const variantStyles = {
-    primary: 'bg-slate-100 text-slate-800 border-slate-200',
-    secondary: 'bg-slate-100 text-slate-700 border-slate-200',
-    success: 'bg-slate-100 text-slate-800 border-slate-200',
-    warning: 'bg-stone-100 text-stone-700 border-stone-200',
-    danger: 'bg-stone-100 text-stone-700 border-stone-200',
-    purple: 'bg-slate-100 text-slate-800 border-slate-200',
+    primary: 'bg-[#F1E7D9] text-[#44352D] border-[#E8DED2]',
+    secondary: 'bg-[#F6F0E8] text-[#76543D] border-[#E8DED2]',
+    success: 'bg-[#27845B]/10 text-[#27845B] border-[#27845B]/20',
+    warning: 'bg-[#C58A32]/10 text-[#C58A32] border-[#C58A32]/20',
+    danger: 'bg-[#C94C4C]/10 text-[#C94C4C] border-[#C94C4C]/20',
+    champagne: 'bg-[#F1E7D9] text-[#44352D] border-[#E8DED2]',
+    cocoa: 'bg-[#44352D] text-white border-[#44352D]',
   };
 
   const sizes = {

@@ -9,8 +9,8 @@ const LoadingSpinner = ({ text = 'Loading data...', size = 'md', className = '' 
   };
 
   return (
-    <div className={`flex flex-col items-center justify-center py-12 gap-3 text-slate-500 ${className}`}>
-      <Loader2 className={`${sizes[size]} animate-spin text-blue-600`} />
+    <div className={`flex flex-col items-center justify-center py-12 gap-3 text-[#82776C] ${className}`}>
+      <Loader2 className={`${sizes[size]} animate-spin text-[#76543D]`} />
       {text && <span className="text-xs font-medium">{text}</span>}
     </div>
   );

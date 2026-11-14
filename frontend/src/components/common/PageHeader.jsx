@@ -15,23 +15,23 @@ const PageHeader = ({
 }) => {
   return (
     <div
-      className={`bg-white rounded-2xl border border-slate-200/90 shadow-sm p-6 relative overflow-hidden ${className}`}
+      className={`bg-white rounded-2xl border border-[#E8DED2] shadow-sm p-6 relative overflow-hidden ${className}`}
     >
       {/* Optional Breadcrumbs */}
       {breadcrumbs.length > 0 && (
-        <nav className="flex items-center gap-1.5 text-xs text-slate-400 mb-2">
+        <nav className="flex items-center gap-1.5 text-xs text-[#82776C] mb-2">
           {breadcrumbs.map((crumb, idx) => (
             <React.Fragment key={crumb.label || idx}>
-              {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-slate-300" />}
+              {idx > 0 && <ChevronRight className="w-3.5 h-3.5 text-[#A17C5B]/50" />}
               {crumb.to ? (
                 <Link
                   to={crumb.to}
-                  className="hover:text-slate-900 transition-colors"
+                  className="hover:text-[#44352D] transition-colors"
                 >
                   {crumb.label}
                 </Link>
               ) : (
-                <span className="font-semibold text-slate-700">{crumb.label}</span>
+                <span className="font-semibold text-[#44352D]">{crumb.label}</span>
               )}
             </React.Fragment>
           ))}
@@ -46,7 +46,7 @@ const PageHeader = ({
             {backTo && (
               <Link
                 to={backTo}
-                className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-slate-900 font-medium mr-1 transition-colors"
+                className="inline-flex items-center gap-1 text-xs text-[#76543D] hover:text-[#44352D] font-medium mr-1 transition-colors"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />
                 <span>{backLabel}</span>
@@ -54,26 +54,26 @@ const PageHeader = ({
             )}
 
             {category && (
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F1E7D9] text-[#44352D] border border-[#E8DED2]">
                 {category}
               </span>
             )}
 
             {badge && (
               typeof badge === 'string' ? (
-                <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-700">
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#F6F0E8] text-[#76543D] border border-[#E8DED2]">
                   {badge}
                 </span>
               ) : badge
             )}
           </div>
 
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#44352D] tracking-tight">
             {title}
           </h1>
 
           {subtitle && (
-            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#82776C] mt-1 max-w-2xl leading-relaxed">
               {subtitle}
             </p>
           )}

@@ -45,12 +45,12 @@ const Pagination = ({
 
   return (
     <div
-      className={`px-4 py-3 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${className}`}
+      className={`px-4 py-3 bg-white border-t border-[#E8DED2] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${className}`}
     >
-      <div className="text-slate-500 text-center sm:text-left">
-        Showing <span className="font-semibold text-slate-800">{startItem}</span> to{' '}
-        <span className="font-semibold text-slate-800">{endItem}</span> of{' '}
-        <span className="font-semibold text-slate-800">{totalCount}</span> results
+      <div className="text-[#82776C] text-center sm:text-left">
+        Showing <span className="font-semibold text-[#44352D]">{startItem}</span> to{' '}
+        <span className="font-semibold text-[#44352D]">{endItem}</span> of{' '}
+        <span className="font-semibold text-[#44352D]">{totalCount}</span> results
       </div>
 
       <div className="flex items-center gap-1.5">
@@ -58,7 +58,7 @@ const Pagination = ({
           type="button"
           onClick={() => onPageChange(page - 1)}
           disabled={page <= 1}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-lg border border-[#E8DED2] text-[#44352D] hover:bg-[#F6F0E8] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           title="Previous Page"
           aria-label="Previous Page"
         >
@@ -69,7 +69,7 @@ const Pagination = ({
           {getPageNumbers().map((num, idx) => {
             if (num === '...') {
               return (
-                <span key={`dots-${idx}`} className="px-2 text-slate-400 font-bold">
+                <span key={`dots-${idx}`} className="px-2 text-[#82776C] font-bold">
                   ...
                 </span>
               );
@@ -82,8 +82,8 @@ const Pagination = ({
                 onClick={() => onPageChange(num)}
                 className={`min-w-[30px] h-[30px] px-2 rounded-lg font-medium transition-colors flex items-center justify-center ${
                   isActive
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-700 hover:bg-slate-100 border border-slate-200'
+                    ? 'bg-[#44352D] text-white shadow-sm'
+                    : 'text-[#44352D] hover:bg-[#F6F0E8] border border-[#E8DED2]'
                 }`}
               >
                 {num}
@@ -96,7 +96,7 @@ const Pagination = ({
           type="button"
           onClick={() => onPageChange(page + 1)}
           disabled={page >= totalPages}
-          className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          className="p-1.5 rounded-lg border border-[#E8DED2] text-[#44352D] hover:bg-[#F6F0E8] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           title="Next Page"
           aria-label="Next Page"
         >

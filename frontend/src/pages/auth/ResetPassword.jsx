@@ -68,18 +68,18 @@ const ResetPassword = () => {
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E2E8F0]">
+      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E8DED2]">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-slate-900 flex items-center justify-center text-white shadow-sm">
+          <div className="w-7 h-7 rounded-md bg-[#44352D] flex items-center justify-center text-[#F1E7D9] shadow-sm">
             <KeyRound className="w-4 h-4" />
           </div>
-          <span className="font-bold text-[#0F172A] text-sm tracking-tight">
+          <span className="font-bold text-[#44352D] text-sm tracking-tight">
             CampusPlacement
           </span>
         </Link>
         <Link
           to="/login"
-          className="text-xs font-medium text-[#64748B] hover:text-slate-900 inline-flex items-center gap-1 transition-colors"
+          className="text-xs font-semibold text-[#82776C] hover:text-[#44352D] inline-flex items-center gap-1 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Login
@@ -88,15 +88,15 @@ const ResetPassword = () => {
 
       {success ? (
         <div className="space-y-4 text-center py-2">
-          <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200 text-slate-800 flex items-center justify-center mx-auto">
-            <CheckCircle2 className="w-6 h-6 text-slate-700" />
+          <div className="w-12 h-12 rounded-xl bg-[#F1E7D9] border border-[#E8DED2] text-[#76543D] flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-6 h-6 text-[#27845B]" />
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-[#0F172A] tracking-tight">
+            <h2 className="text-lg font-bold text-[#44352D] tracking-tight">
               Password Reset Complete
             </h2>
-            <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
+            <p className="text-xs text-[#82776C] mt-1 leading-relaxed">
               Your password has been securely updated. You will be redirected to the sign-in page shortly.
             </p>
           </div>
@@ -104,7 +104,7 @@ const ResetPassword = () => {
           <div className="pt-2">
             <Link
               to="/login"
-              className="inline-flex items-center justify-center w-full px-4 py-2 text-xs font-semibold text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition-colors shadow-sm"
+              className="inline-flex items-center justify-center w-full px-4 py-2 text-xs font-semibold text-white bg-[#44352D] rounded-lg hover:bg-[#342822] transition-colors shadow-sm"
             >
               Sign In Now
             </Link>
@@ -113,10 +113,10 @@ const ResetPassword = () => {
       ) : (
         <>
           <div className="mb-5">
-            <h2 className="text-lg font-bold text-[#0F172A] tracking-tight">
+            <h2 className="text-lg font-bold text-[#44352D] tracking-tight">
               Create New Password
             </h2>
-            <p className="text-xs text-[#64748B] mt-0.5">
+            <p className="text-xs text-[#82776C] mt-0.5">
               Enter and confirm your new secure password.
             </p>
           </div>
@@ -132,7 +132,7 @@ const ResetPassword = () => {
                 <div className="mt-2 text-center">
                   <Link
                     to="/forgot-password"
-                    className="text-xs font-semibold text-slate-900 hover:underline"
+                    className="text-xs font-bold text-[#44352D] hover:text-[#76543D] hover:underline"
                   >
                     Request a new password reset link &rarr;
                   </Link>
@@ -190,10 +190,10 @@ const ResetPassword = () => {
             </Button>
           </form>
 
-          <div className="mt-5 pt-4 border-t border-[#E2E8F0] text-center text-xs">
+          <div className="mt-5 pt-4 border-t border-[#E8DED2] text-center text-xs">
             <Link
               to="/login"
-              className="font-medium text-[#64748B] hover:text-slate-900 transition-colors"
+              className="font-bold text-[#44352D] hover:text-[#76543D] transition-colors"
             >
               Back to Sign In
             </Link>

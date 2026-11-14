@@ -17,17 +17,17 @@ const EmptyState = ({
 }) => {
   return (
     <div
-      className={`bg-white rounded-2xl border border-slate-200/90 p-8 sm:p-12 text-center shadow-sm flex flex-col items-center justify-center ${className}`}
+      className={`bg-white rounded-2xl border border-[#E8DED2] p-8 sm:p-12 text-center shadow-sm flex flex-col items-center justify-center ${className}`}
     >
-      <div className="w-14 h-14 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-center text-slate-400 mb-4 shadow-inner">
-        <Icon className="w-7 h-7 text-slate-400" />
+      <div className="w-14 h-14 rounded-2xl bg-[#F6F0E8] border border-[#E8DED2] flex items-center justify-center text-[#A17C5B] mb-4 shadow-sm">
+        <Icon className="w-7 h-7 text-[#A17C5B]" />
       </div>
 
-      <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
+      <h3 className="text-base sm:text-lg font-bold text-[#44352D] tracking-tight">
         {title}
       </h3>
 
-      <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-sm sm:max-w-md mx-auto leading-relaxed">
+      <p className="text-xs sm:text-sm text-[#82776C] mt-1 max-w-sm sm:max-w-md mx-auto leading-relaxed">
         {description}
       </p>
 

@@ -133,18 +133,18 @@ const Register = () => {
   return (
     <div>
       {/* Header: Logo & Back to Home */}
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E2E8F0]">
+      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#E8DED2]">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-slate-900 flex items-center justify-center text-white shadow-sm">
+          <div className="w-7 h-7 rounded-md bg-[#44352D] flex items-center justify-center text-[#F1E7D9] shadow-sm">
             <GraduationCap className="w-4 h-4" />
           </div>
-          <span className="font-bold text-[#0F172A] text-sm tracking-tight">
+          <span className="font-bold text-[#44352D] text-sm tracking-tight">
             CampusPlacement
           </span>
         </Link>
         <Link
           to="/"
-          className="text-xs font-medium text-[#64748B] hover:text-slate-900 inline-flex items-center gap-1 transition-colors"
+          className="text-xs font-semibold text-[#82776C] hover:text-[#44352D] inline-flex items-center gap-1 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Back to Home
@@ -153,10 +153,10 @@ const Register = () => {
 
       {/* Title & Subtitle */}
       <div className="mb-5">
-        <h2 className="text-lg font-bold text-[#0F172A] tracking-tight">
+        <h2 className="text-lg font-bold text-[#44352D] tracking-tight">
           Student Registration
         </h2>
-        <p className="text-xs text-[#64748B] mt-0.5">
+        <p className="text-xs text-[#82776C] mt-0.5">
           Create your student account to apply for recruitment drives
         </p>
       </div>
@@ -228,17 +228,17 @@ const Register = () => {
           <div>
             <label
               htmlFor="department"
-              className="block text-xs font-medium text-[#0F172A] mb-1.5"
+              className="block text-xs font-semibold text-[#44352D] mb-1.5"
             >
-              Department <span className="text-stone-500">*</span>
+              Department <span className="text-[#C94C4C]">*</span>
             </label>
             <select
               id="department"
               name="department"
               value={formData.department}
               onChange={handleChange}
-              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-slate-600 focus:ring-1 focus:ring-slate-600 bg-white ${
-                fieldErrors.department ? 'border-stone-300' : 'border-[#E2E8F0]'
+              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#F1E7D9] bg-white text-[#44352D] ${
+                fieldErrors.department ? 'border-[#C94C4C]' : 'border-[#E8DED2]'
               }`}
             >
               <option value="">Select Department</option>
@@ -249,24 +249,24 @@ const Register = () => {
               ))}
             </select>
             {fieldErrors.department && (
-              <p className="mt-1 text-xs text-stone-600 font-medium">{fieldErrors.department}</p>
+              <p className="mt-1 text-xs text-[#C94C4C] font-medium">{fieldErrors.department}</p>
             )}
           </div>
 
           <div>
             <label
               htmlFor="graduationYear"
-              className="block text-xs font-medium text-[#0F172A] mb-1.5"
+              className="block text-xs font-semibold text-[#44352D] mb-1.5"
             >
-              Graduation Year <span className="text-stone-500">*</span>
+              Graduation Year <span className="text-[#C94C4C]">*</span>
             </label>
             <select
               id="graduationYear"
               name="graduationYear"
               value={formData.graduationYear}
               onChange={handleChange}
-              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-slate-600 focus:ring-1 focus:ring-slate-600 bg-white ${
-                fieldErrors.graduationYear ? 'border-stone-300' : 'border-[#E2E8F0]'
+              className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-[#76543D] focus:ring-1 focus:ring-[#F1E7D9] bg-white text-[#44352D] ${
+                fieldErrors.graduationYear ? 'border-[#C94C4C]' : 'border-[#E8DED2]'
               }`}
             >
               <option value="">Select Year</option>
@@ -277,7 +277,7 @@ const Register = () => {
               ))}
             </select>
             {fieldErrors.graduationYear && (
-              <p className="mt-1 text-xs text-stone-600 font-medium">{fieldErrors.graduationYear}</p>
+              <p className="mt-1 text-xs text-[#C94C4C] font-medium">{fieldErrors.graduationYear}</p>
             )}
           </div>
         </div>
@@ -327,12 +327,12 @@ const Register = () => {
       </form>
 
       {/* Footer link */}
-      <div className="mt-5 pt-4 border-t border-[#E2E8F0] text-center text-xs">
-        <p className="text-[#64748B]">
+      <div className="mt-5 pt-4 border-t border-[#E8DED2] text-center text-xs">
+        <p className="text-[#82776C]">
           Already have an account?{' '}
           <Link
             to="/student/login"
-            className="font-semibold text-slate-900 hover:underline"
+            className="font-bold text-[#44352D] hover:text-[#76543D] hover:underline"
           >
             Sign In
           </Link>
