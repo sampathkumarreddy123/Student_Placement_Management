@@ -122,30 +122,15 @@ const StudentLogin = () => {
 
   return (
     <div>
-      {/* Brand Header */}
-      <div className="flex items-center justify-center gap-2.5 pb-4 mb-4 border-b border-[#DBEAFE]">
-        <div className="w-8 h-8 rounded-lg bg-[#163A5F] flex items-center justify-center text-white shadow-sm">
-          <GraduationCap className="w-5 h-5" />
-        </div>
-        <div className="flex flex-col text-left">
-          <span className="font-bold text-[#172554] text-base leading-tight tracking-tight">
-            MITS Placements
-          </span>
-          <span className="text-[10px] text-[#64748B] font-medium leading-tight">
-            Training & Placement Cell
-          </span>
-        </div>
-      </div>
-
       {/* Role Selection Tabs */}
-      <div className="flex p-1 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl mb-5">
-        <div className="flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 bg-[#2563EB] text-white shadow-sm cursor-default">
+      <div className="flex p-1 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl mb-6">
+        <div className="flex-1 py-2.5 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 bg-[#2563EB] text-white shadow-sm cursor-default">
           <GraduationCap className="w-4 h-4" />
           <span>Student Login</span>
         </div>
         <Link
           to="/officer/login"
-          className="flex-1 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 text-[#64748B] hover:text-[#172554] hover:bg-white/70"
+          className="flex-1 py-2.5 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 text-[#64748B] hover:text-[#172554] hover:bg-white/80"
         >
           <ShieldCheck className="w-4 h-4" />
           <span>Placement Officer</span>
@@ -153,12 +138,12 @@ const StudentLogin = () => {
       </div>
 
       {/* Title & Subtitle */}
-      <div className="mb-5">
-        <h2 className="text-lg font-bold text-[#172554] tracking-tight">
-          Student Login
+      <div className="mb-6">
+        <h2 className="text-xl font-bold text-[#172554] tracking-tight">
+          Student Sign In
         </h2>
-        <p className="text-xs text-[#64748B] mt-0.5">
-          Enter your college email and password to access your placement portal
+        <p className="text-xs text-[#64748B] mt-1 leading-relaxed">
+          Enter your registered college email and password to access your placement portal
         </p>
       </div>
 
