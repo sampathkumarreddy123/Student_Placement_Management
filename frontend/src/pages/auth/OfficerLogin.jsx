@@ -123,23 +123,34 @@ const OfficerLogin = () => {
 
   return (
     <div>
-      {/* Header: Logo & Back to Home */}
-      <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#DBEAFE]">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-[#163A5F] flex items-center justify-center text-white shadow-sm">
-            <ShieldCheck className="w-4 h-4" />
-          </div>
-          <span className="font-bold text-[#172554] text-sm tracking-tight">
+      {/* Brand Header */}
+      <div className="flex items-center justify-center gap-2.5 pb-4 mb-4 border-b border-[#DBEAFE]">
+        <div className="w-8 h-8 rounded-lg bg-[#163A5F] flex items-center justify-center text-white shadow-sm">
+          <ShieldCheck className="w-5 h-5" />
+        </div>
+        <div className="flex flex-col text-left">
+          <span className="font-bold text-[#172554] text-base leading-tight tracking-tight">
             CampusPlacement
           </span>
-        </Link>
+          <span className="text-[10px] text-[#64748B] font-semibold leading-tight">
+            Recruitment Management Portal
+          </span>
+        </div>
+      </div>
+
+      {/* Role Selection Tabs */}
+      <div className="flex p-1 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl mb-5">
         <Link
-          to="/"
-          className="text-xs font-semibold text-[#64748B] hover:text-[#172554] inline-flex items-center gap-1 transition-colors"
+          to="/student/login"
+          className="flex-1 py-2 text-xs font-semibold rounded-lg transition-all flex items-center justify-center gap-1.5 text-[#64748B] hover:text-[#172554] hover:bg-white/70"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Back to Home
+          <GraduationCap className="w-4 h-4" />
+          <span>Student Login</span>
         </Link>
+        <div className="flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 bg-[#163A5F] text-white shadow-sm cursor-default">
+          <ShieldCheck className="w-4 h-4" />
+          <span>Placement Officer</span>
+        </div>
       </div>
 
       {/* Title & Subtitle */}
@@ -224,15 +235,20 @@ const OfficerLogin = () => {
         </Button>
       </form>
 
-      {/* Back to Home bottom link */}
-      <div className="mt-5 pt-4 border-t border-[#DBEAFE] text-center text-xs">
-        <Link
-          to="/"
-          className="font-semibold text-[#64748B] hover:text-[#172554] inline-flex items-center gap-1 transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Back to Home
-        </Link>
+      {/* Security notice & Candidate switch */}
+      <div className="mt-5 pt-4 border-t border-[#DBEAFE] text-center text-xs space-y-2">
+        <p className="text-[11px] text-[#64748B]">
+          Placement Cell • Administrative Security
+        </p>
+        <p className="text-[11px] text-[#64748B]">
+          Are you a candidate?{' '}
+          <Link
+            to="/student/login"
+            className="font-semibold text-[#2563EB] hover:text-[#163A5F] hover:underline"
+          >
+            Switch to Student Login
+          </Link>
+        </p>
       </div>
     </div>
   );

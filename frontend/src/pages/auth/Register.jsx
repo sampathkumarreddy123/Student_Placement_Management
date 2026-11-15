@@ -143,11 +143,11 @@ const Register = () => {
           </span>
         </Link>
         <Link
-          to="/"
+          to="/student/login"
           className="text-xs font-semibold text-[#64748B] hover:text-[#172554] inline-flex items-center gap-1 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          Back to Home
+          Back to Sign In
         </Link>
       </div>
 

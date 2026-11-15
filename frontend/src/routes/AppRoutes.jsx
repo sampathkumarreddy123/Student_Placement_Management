@@ -36,20 +36,48 @@ import ManageStudents from '../pages/officer/ManageStudents';
 import ManageApplications from '../pages/officer/ManageApplications';
 import NotificationsPage from '../pages/NotificationsPage';
 
-// Hook
+// Common Components & Hook
+import LoadingSpinner from '../components/common/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
+
+// Direct Portal Entry: automatically routes to respective dashboard if logged in, or login if not
+const RootRedirect = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#EFF6FF]">
+        <LoadingSpinner text="Connecting to placement portal..." />
+      </div>
+    );
+  }
+
+  if (user) {
+    return (
+      <Navigate
+        to={user.role === 'officer' ? '/officer/dashboard' : '/student/dashboard'}
+        replace
+      />
+    );
+  }
+
+  return <Navigate to="/student/login" replace />;
+};
 
 const AppRoutes = () => {
   const { user } = useAuth();
 
   return (
     <Routes>
-      {/* Public Pages */}
-      <Route path="/" element={<LandingPage />} />
+      {/* Root Portal Entry: opens dashboard if authenticated, or login if not */}
+      <Route path="/" element={<RootRedirect />} />
+
+      {/* Optional Landing Page */}
+      <Route path="/landing" element={<LandingPage />} />
 
       {/* Auth Pages */}
       <Route element={<AuthLayout />}>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Navigate to="/student/login" replace />} />
         <Route path="/student/login" element={<StudentLogin />} />
         <Route path="/student/register" element={<Register />} />
         <Route path="/officer/login" element={<OfficerLogin />} />
