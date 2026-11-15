@@ -12,6 +12,7 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [devResetUrl, setDevResetUrl] = useState('');
 
   const validate = () => {
     if (!email.trim()) {
@@ -37,7 +38,10 @@ const ForgotPassword = () => {
 
     try {
       setLoading(true);
-      await authService.forgotPassword(email.trim());
+      const res = await authService.forgotPassword(email.trim());
+      if (res?.devResetUrl) {
+        setDevResetUrl(res.devResetUrl);
+      }
       setSubmitted(true);
     } catch (err) {
       setError(
@@ -94,6 +98,23 @@ const ForgotPassword = () => {
               <li>Password reset links are time-limited to 15 minutes for security.</li>
             </ul>
           </div>
+
+          {devResetUrl && (
+            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-left text-xs space-y-1.5 shadow-sm">
+              <span className="font-bold text-amber-900 block">
+                Direct Password Reset Link (Testing Fallback):
+              </span>
+              <p className="text-[11px] text-amber-700">
+                Because external SMTP is offline or port-restricted on this environment, use this direct link to complete the reset:
+              </p>
+              <a
+                href={devResetUrl}
+                className="text-[#2563EB] hover:text-[#163A5F] underline font-medium break-all block"
+              >
+                {devResetUrl}
+              </a>
+            </div>
+          )}
 
           <div className="pt-2 flex flex-col gap-2">
             <Button
