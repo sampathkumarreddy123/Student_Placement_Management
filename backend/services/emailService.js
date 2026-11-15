@@ -81,6 +81,9 @@ export const getTransporter = async () => {
       host: emailHost || 'smtp.office365.com',
       port: emailPort,
       secure: false, // Office365 uses STARTTLS on 587
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 7000,
       auth: {
         type: 'OAuth2',
         user: emailUser,
@@ -105,6 +108,9 @@ export const getTransporter = async () => {
       host: emailHost,
       port: emailPort,
       secure: emailSecure,
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 7000,
       auth: {
         user: emailUser,
         pass: emailPassword,
@@ -122,6 +128,9 @@ export const getTransporter = async () => {
   if (process.env.EMAIL_SERVICE && emailUser && emailPassword) {
     cachedTransporter = nodemailer.createTransport({
       service: process.env.EMAIL_SERVICE,
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 7000,
       auth: {
         user: emailUser,
         pass: emailPassword,

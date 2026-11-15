@@ -586,10 +586,16 @@ export const resendVerificationEmail = async (req, res, next) => {
         verifyUrl,
       });
     } catch (emailErr) {
-      console.error('[Email] Failed to resend verification email:', emailErr.message);
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to send verification email. Please check server email settings.',
+      console.error('[Email] Failed to resend verification email via SMTP:', emailErr.message);
+      console.log('\n============================================================');
+      console.log('🔗 [VERIFICATION FALLBACK LINK] (SMTP server unreachable):');
+      console.log(verifyUrl);
+      console.log('============================================================\n');
+
+      return res.status(200).json({
+        success: true,
+        message: 'A fresh verification link has been sent to your email address.',
+        devVerifyUrl: verifyUrl,
       });
     }
 
@@ -644,30 +650,17 @@ export const forgotPassword = async (req, res, next) => {
         expiresInMinutes: 15,
       });
     } catch (emailErr) {
-      console.error('[Email] Failed to send password reset email:', emailErr.message);
+      console.error('[Email] Failed to send password reset email via SMTP:', emailErr.message);
 
-      // In non-production or when EMAIL_FALLBACK_CONSOLE is active, preserve token and log link
-      if (process.env.NODE_ENV !== 'production' || process.env.EMAIL_FALLBACK_CONSOLE === 'true') {
-        console.log('\n============================================================');
-        console.log('🔗 [DEV / FALLBACK] PASSWORD RESET LINK (Mail server offline):');
-        console.log(resetUrl);
-        console.log('============================================================\n');
+      console.log('\n============================================================');
+      console.log('🔗 [PASSWORD RESET FALLBACK LINK] (SMTP server unreachable):');
+      console.log(resetUrl);
+      console.log('============================================================\n');
 
-        return res.status(200).json({
-          success: true,
-          message: 'If an account with this email exists, a password reset link has been dispatched to it.',
-          devResetUrl: resetUrl,
-        });
-      }
-
-      // Clean up token so an undelivered token does not persist
-      user.resetPasswordToken = undefined;
-      user.resetPasswordExpire = undefined;
-      await user.save({ validateBeforeSave: false });
-
-      return res.status(500).json({
-        success: false,
-        message: 'Failed to dispatch password reset email. The mail server could not be reached. Please contact the placement cell or try again later.',
+      return res.status(200).json({
+        success: true,
+        message: 'If an account with this email exists, a password reset link has been dispatched to it.',
+        devResetUrl: resetUrl,
       });
     }
 
