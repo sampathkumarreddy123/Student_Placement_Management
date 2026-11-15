@@ -19,18 +19,21 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
   const deadlineInfo = getDeadlineStatus(drive.applicationClosingDate || drive.registrationDeadline);
   const isClosedStatus = drive.status === 'Closed' || drive.status === 'Completed';
 
+  const companyName = drive.company?.name || (typeof drive.company === 'string' ? drive.company : 'Company');
+  const companyInitial = companyName ? companyName.charAt(0).toUpperCase() : 'C';
+
   return (
     <>
-      <div className="bg-white rounded-2xl border border-[#DBEAFE] hover:border-[#2563EB]/40 transition-all shadow-sm hover:shadow-md p-5 flex flex-col justify-between">
+      <div className="bg-white rounded-xl border border-[#DBEAFE] hover:border-[#2563EB]/40 hover:shadow-md transition-all p-5 flex flex-col justify-between group">
         <div>
-          {/* ROW 1: Company Logo & Details (Left) + Badges (Right) */}
+          {/* Header: Company Avatar/Logo + Name & Single Status/Eligibility Badge */}
           <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#DBEAFE]">
-            <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-2.5 min-w-0">
               {drive.company?.logoUrl ? (
                 <img
                   src={drive.company.logoUrl}
-                  alt={drive.company?.name || 'Company'}
-                  className="w-10 h-10 rounded-xl object-contain p-1 border border-[#DBEAFE] bg-white flex-shrink-0"
+                  alt={companyName}
+                  className="w-9 h-9 rounded-lg object-contain p-0.5 border border-[#DBEAFE] bg-white flex-shrink-0"
                   onError={(e) => {
                     e.target.onerror = null;
                     e.target.style.display = 'none';
@@ -38,13 +41,13 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
                 />
               ) : null}
               {(!drive.company?.logoUrl || undefined) && (
-                <div className="w-10 h-10 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-base flex-shrink-0">
-                  {drive.company?.name ? drive.company.name.charAt(0).toUpperCase() : 'C'}
+                <div className="w-9 h-9 rounded-lg bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-sm flex-shrink-0">
+                  {companyInitial}
                 </div>
               )}
               <div className="min-w-0">
-                <p className="font-semibold text-[#172554] text-xs truncate leading-tight">
-                  {drive.company?.name || 'Company'}
+                <p className="font-semibold text-xs text-[#172554] truncate leading-tight">
+                  {companyName}
                 </p>
                 <p className="text-[11px] text-[#64748B] truncate mt-0.5">
                   {drive.employmentType || drive.company?.industry || 'Full-Time'}
@@ -52,68 +55,68 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
               </div>
             </div>
 
-            {/* Badges on Top Right with clean horizontal alignment */}
-            <div className="flex flex-wrap items-center justify-end gap-1.5 flex-shrink-0">
-              <Badge status={drive.status} size="sm" />
-              {!isOfficer && drive.isEligible !== undefined && (
+            {/* Clean Single Status or Eligibility Badge */}
+            <div className="flex-shrink-0">
+              {isOfficer ? (
+                <Badge status={drive.status} size="sm" />
+              ) : drive.userApplicationStatus ? (
+                <Badge status={drive.userApplicationStatus} size="sm" />
+              ) : drive.isEligible !== undefined ? (
                 <EligibilityBadge
                   isEligible={drive.isEligible}
                   onViewDetails={() => setShowEligibilityModal(true)}
                 />
+              ) : (
+                <Badge status={drive.status} size="sm" />
               )}
             </div>
           </div>
 
-          {/* ROW 2: Drive Title (Gets 100% full card width, no overlap!) */}
-          <h3 className="font-bold text-[#172554] text-sm sm:text-base leading-snug hover:text-[#2563EB] transition-colors my-3 min-h-[2.5rem] flex items-center">
+          {/* Drive Title */}
+          <h3 className="font-bold text-[#172554] text-base leading-snug group-hover:text-[#2563EB] transition-colors my-3 min-h-[2.5rem] flex items-center">
             <Link to={`/drives/${drive._id}`} className="line-clamp-2">
               {drive.title}
             </Link>
           </h3>
 
-          {/* ROW 3: Highlights Grid (Job Role, Package, Location, CGPA) */}
-          <div className="grid grid-cols-2 gap-2.5 my-3 p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] text-xs">
+          {/* Highlights: Package & Criteria */}
+          <div className="flex items-baseline justify-between mb-3 pb-3 border-b border-[#DBEAFE]/60">
             <div>
-              <span className="text-[#64748B] block text-[11px]">Job Role</span>
-              <span className="font-medium text-[#172554] flex items-center gap-1.5 mt-0.5 truncate">
-                <Briefcase className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
-                <span className="truncate" title={drive.jobRole}>{drive.jobRole}</span>
-              </span>
-            </div>
-
-            <div>
-              <span className="text-[#64748B] block text-[11px]">Package / CTC</span>
-              <span className="font-bold text-[#172554] mt-0.5 block truncate">
+              <span className="text-[11px] font-medium text-[#64748B] block">Package (CTC)</span>
+              <span className="text-base font-bold text-[#163A5F]">
                 {formatLPA(drive.packageLPA)}
               </span>
             </div>
-
-            <div className="mt-0.5">
-              <span className="text-[#64748B] block text-[11px]">Location</span>
-              <span className="font-medium text-[#172554] flex items-center gap-1.5 mt-0.5 truncate">
-                <MapPin className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
-                <span className="truncate" title={drive.location}>{drive.location || 'Multiple'}</span>
-              </span>
-            </div>
-
-            <div className="mt-0.5">
-              <span className="text-[#64748B] block text-[11px]">Required CGPA</span>
-              <span className="font-medium text-[#172554] flex items-center gap-1.5 mt-0.5">
-                <GraduationCap className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
-                <span>{drive.eligibilityCriteria?.minCgpa ? `${drive.eligibilityCriteria.minCgpa}+ CGPA` : 'No cutoff'}</span>
+            <div className="text-right">
+              <span className="text-[11px] font-medium text-[#64748B] block">Min Criteria</span>
+              <span className="text-xs font-semibold text-[#172554]">
+                {drive.eligibilityCriteria?.minCgpa ? `${drive.eligibilityCriteria.minCgpa}+ CGPA` : 'Open to All'}
               </span>
             </div>
           </div>
 
-          {/* ROW 4: Drive Date & Deadline Status */}
-          <div className="flex items-center justify-between text-xs text-[#64748B] py-1.5 px-0.5 mb-2">
-            <div className="flex items-center gap-1.5">
+          {/* Role & Location Chips */}
+          <div className="flex flex-wrap items-center gap-1.5 mb-3 text-xs">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#EFF6FF] border border-[#DBEAFE] rounded-md text-[11px] font-medium text-[#163A5F]">
+              <Briefcase className="w-3 h-3 text-[#2563EB] flex-shrink-0" />
+              <span className="truncate max-w-[130px]" title={drive.jobRole}>{drive.jobRole}</span>
+            </span>
+
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-[#EFF6FF] border border-[#DBEAFE] rounded-md text-[11px] font-medium text-[#163A5F]">
+              <MapPin className="w-3 h-3 text-[#2563EB] flex-shrink-0" />
+              <span className="truncate max-w-[120px]" title={drive.location}>{drive.location || 'Multiple'}</span>
+            </span>
+          </div>
+
+          {/* Drive Date & Deadline */}
+          <div className="flex items-center justify-between text-xs text-[#64748B] mb-2 pt-1">
+            <span className="flex items-center gap-1 text-[11px]">
               <Calendar className="w-3.5 h-3.5 text-[#64748B]" />
               <span>Drive: {formatDate(drive.driveDate || drive.applicationClosingDate)}</span>
-            </div>
+            </span>
 
-            <div
-              className={`flex items-center gap-1 font-medium ${
+            <span
+              className={`flex items-center gap-1 text-[11px] font-medium ${
                 deadlineInfo.isUrgent
                   ? 'text-[#D97706]'
                   : deadlineInfo.isClosed || isClosedStatus
@@ -122,40 +125,48 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
               }`}
             >
               <Clock className="w-3.5 h-3.5" />
-              <span>{isClosedStatus ? 'Applications Closed' : deadlineInfo.text}</span>
-            </div>
+              <span>{isClosedStatus ? 'Closed' : deadlineInfo.text}</span>
+            </span>
           </div>
         </div>
 
-        {/* ROW 5: Action Buttons (Equal width, clean border) */}
-        <div className="flex items-center gap-2 pt-3 border-t border-[#DBEAFE] mt-2">
-          <Link to={`/drives/${drive._id}`} className="flex-1">
-            <Button variant="outline" size="sm" className="w-full">
-              View Details
-            </Button>
-          </Link>
-
+        {/* Action Button(s) */}
+        <div className="pt-3 border-t border-[#DBEAFE] mt-2">
           {isOfficer ? (
-            <Link to={`/officer/applications?driveId=${drive._id}`} className="flex-1">
+            <Link to={`/officer/applications?driveId=${drive._id}`} className="block">
               <Button variant="secondary" size="sm" className="w-full">
                 Applicants ({drive.applicantCount ?? 0})
               </Button>
             </Link>
           ) : drive.userApplicationStatus ? (
-            <div className="flex-1 text-center py-1">
-              <Badge status={drive.userApplicationStatus} size="sm" />
+            <Link to="/student/applications" className="block">
+              <Button variant="outline" size="sm" className="w-full">
+                View Application Status
+              </Button>
+            </Link>
+          ) : drive.isEligible && !isClosedStatus && !deadlineInfo.isClosed ? (
+            <div className="flex gap-2">
+              <Link to={`/drives/${drive._id}`} className="flex-1">
+                <Button variant="outline" size="sm" className="w-full">
+                  Details
+                </Button>
+              </Link>
+              <Button
+                variant="primary"
+                size="sm"
+                className="flex-1"
+                isLoading={applying}
+                onClick={() => onApply && onApply(drive._id)}
+              >
+                Apply Now
+              </Button>
             </div>
           ) : (
-            <Button
-              variant="primary"
-              size="sm"
-              className="flex-1"
-              disabled={!drive.isEligible || deadlineInfo.isClosed || isClosedStatus}
-              isLoading={applying}
-              onClick={() => onApply && onApply(drive._id)}
-            >
-              {isClosedStatus ? 'Closed' : deadlineInfo.isClosed ? 'Expired' : 'Apply Now'}
-            </Button>
+            <Link to={`/drives/${drive._id}`} className="block">
+              <Button variant="outline" size="sm" className="w-full">
+                View Details
+              </Button>
+            </Link>
           )}
         </div>
       </div>
