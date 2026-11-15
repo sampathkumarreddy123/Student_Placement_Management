@@ -14,6 +14,8 @@ import {
   Award,
   ShieldCheck,
   History,
+  ListOrdered,
+  CheckCircle2,
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Badge from '../common/Badge';
@@ -112,6 +114,85 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
               Your application is under evaluation by the recruitment committee. Updates will appear here.
             </div>
           )}
+        </div>
+
+        {/* Recruitment Round Progression */}
+        <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-[#DBEAFE]">
+            <h5 className="text-xs font-bold text-[#172554] flex items-center gap-1.5">
+              <ListOrdered className="w-4 h-4 text-[#2563EB]" /> Recruitment Round Progression
+            </h5>
+            <span className="text-[11px] font-semibold text-[#2563EB]">
+              {application.status === 'Selected'
+                ? '🎉 Officially Selected'
+                : application.status === 'Rejected'
+                ? 'Process Concluded'
+                : `Currently in Round ${application.currentRound || 1}`}
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {application.roundResults && application.roundResults.length > 0 ? (
+              application.roundResults.map((r, i) => (
+                <div
+                  key={i}
+                  className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs transition-all ${
+                    r.status === 'Passed'
+                      ? 'bg-[#0D9488]/5 border-[#0D9488]/30'
+                      : r.status === 'Failed'
+                      ? 'bg-red-50/50 border-red-200'
+                      : 'bg-[#F0F7FF] border-[#DBEAFE]'
+                  }`}
+                >
+                  <div className="flex items-start gap-2.5">
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 mt-0.5 ${
+                        r.status === 'Passed'
+                          ? 'bg-[#0D9488] text-white'
+                          : r.status === 'Failed'
+                          ? 'bg-red-600 text-white'
+                          : 'bg-[#2563EB] text-white'
+                      }`}
+                    >
+                      {r.roundNumber}
+                    </div>
+                    <div>
+                      <span className="font-bold text-[#172554] block">
+                        {r.roundName}
+                      </span>
+                      {r.remarks && (
+                        <p className="text-[11px] text-[#64748B] mt-0.5 italic">
+                          Feedback: "{r.remarks}"
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 self-start sm:self-center">
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        r.status === 'Passed'
+                          ? 'bg-[#0D9488]/15 text-[#0D9488]'
+                          : r.status === 'Failed'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-amber-100 text-amber-800'
+                      }`}
+                    >
+                      {r.status === 'Passed' && '✓ Passed'}
+                      {r.status === 'Failed' && '✗ Not Cleared'}
+                      {r.status === 'Pending' && '⏳ In Evaluation'}
+                      {r.status === 'Absent' && 'Absent'}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-3 bg-[#F0F7FF] rounded-lg border border-[#DBEAFE] text-xs text-[#64748B] flex items-center gap-2">
+                <Clock className="w-4 h-4 text-[#2563EB]" />
+                <span>Round-by-round evaluations will appear here as they are conducted.</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Status History Timeline for Students */}

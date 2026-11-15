@@ -16,6 +16,7 @@ import {
   Layers,
   Sparkles,
   FileText,
+  ListOrdered,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { driveService } from '../../services/driveService';
@@ -162,13 +163,20 @@ const DriveDetails = () => {
           </div>
 
           {/* Action / Application Button */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {isOfficer ? (
-              <Link to={`/officer/applications?driveId=${drive._id}`}>
-                <Button variant="primary" size="md" icon={Users}>
-                  View Applicants ({drive.applicantCount ?? 0})
-                </Button>
-              </Link>
+              <>
+                <Link to={`/officer/rounds?driveId=${drive._id}`}>
+                  <Button variant="outline" size="md" icon={ListOrdered}>
+                    Recruitment Rounds
+                  </Button>
+                </Link>
+                <Link to={`/officer/applications?driveId=${drive._id}`}>
+                  <Button variant="primary" size="md" icon={Users}>
+                    View Applicants ({drive.applicantCount ?? 0})
+                  </Button>
+                </Link>
+              </>
             ) : drive.userApplication ? (
               <div className="text-right">
                 <span className="text-[11px] text-[#64748B] block mb-1">Your Application:</span>

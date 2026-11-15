@@ -16,6 +16,7 @@ import companyRoutes from './routes/companyRoutes.js';
 import driveRoutes from './routes/driveRoutes.js';
 import applicationRoutes from './routes/applicationRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import roundRoutes from './routes/roundRoutes.js';
 
 // Middleware imports
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
@@ -94,6 +95,9 @@ app.use('/applications', applicationRoutes);
 
 app.use('/api/notifications', notificationRoutes);
 app.use('/notifications', notificationRoutes);
+
+app.use('/api/rounds', roundRoutes);
+app.use('/rounds', roundRoutes);
 
 // Error Handling Middlewares
 app.use(notFound);

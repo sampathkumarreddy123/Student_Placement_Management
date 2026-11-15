@@ -62,6 +62,39 @@ const applicationSchema = new mongoose.Schema(
       type: Number,
       default: 1,
     },
+    roundResults: [
+      {
+        round: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'RecruitmentRound',
+        },
+        roundNumber: {
+          type: Number,
+          required: true,
+        },
+        roundName: {
+          type: String,
+          required: true,
+        },
+        status: {
+          type: String,
+          enum: ['Pending', 'Passed', 'Failed', 'Absent'],
+          default: 'Pending',
+        },
+        remarks: {
+          type: String,
+          default: '',
+        },
+        evaluatedBy: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+        },
+        evaluatedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     selectionRemarks: {
       type: String,
       default: '',

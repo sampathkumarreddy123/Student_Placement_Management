@@ -12,6 +12,7 @@ import {
   Bell,
   ChevronLeft,
   ChevronRight,
+  ListOrdered,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -29,6 +30,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
   const officerLinks = [
     { label: 'Overview & Stats', to: '/officer/dashboard', icon: LayoutDashboard },
     { label: 'Placement Drives', to: '/officer/drives', icon: Briefcase },
+    { label: 'Recruitment Rounds', to: '/officer/rounds', icon: ListOrdered },
     { label: 'Companies', to: '/officer/companies', icon: Building2 },
     { label: 'Student Database', to: '/officer/students', icon: Users },
     { label: 'Applications & Results', to: '/officer/applications', icon: CheckCircle },
