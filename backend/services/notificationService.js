@@ -2,24 +2,86 @@ import Notification from '../models/Notification.js';
 import User from '../models/User.js';
 import Company from '../models/Company.js';
 import PlacementDrive from '../models/PlacementDrive.js';
+import emailService from './emailService.js';
 
 /**
  * Modular Email Dispatcher Hook
- * Ready for Nodemailer / SendGrid / AWS SES integration without architectural changes.
+ * Automatically dispatches branded institutional emails to students for portal events.
  */
 export const sendEmailNotification = async (notification, recipientUser) => {
   try {
     if (!recipientUser?.email) return;
 
-    // Modular Hook: When SMTP credentials (e.g., SMTP_HOST / SENDGRID_API_KEY) are configured,
-    // actual email transport can be invoked here.
-    if (process.env.ENABLE_EMAIL_NOTIFICATIONS === 'true') {
-      console.log(
-        `[Email Service] Simulated email to ${recipientUser.email}: "${notification.title}" - ${notification.message}`
-      );
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      process.env.CLIENT_URL ||
+      'http://localhost:5173';
+    const actionUrl = notification.link
+      ? `${frontendUrl}${notification.link}`
+      : `${frontendUrl}/student/dashboard`;
+
+    switch (notification.type) {
+      case 'APPLICATION_SUBMITTED':
+        await emailService.sendApplicationSubmittedEmail({
+          to: recipientUser.email,
+          name: recipientUser.name,
+          companyName: notification.metadata?.companyName || 'Company',
+          jobRole: notification.metadata?.jobRole || 'Recruitment Drive',
+          packageLPA: notification.metadata?.packageLPA,
+          portalUrl: actionUrl,
+        });
+        break;
+
+      case 'APPLICATION_SELECTED':
+        await emailService.sendSelectionOfferEmail({
+          to: recipientUser.email,
+          name: recipientUser.name,
+          companyName: notification.metadata?.companyName || 'Company',
+          jobRole: notification.metadata?.jobRole || 'Position',
+          packageLPA: notification.metadata?.packageLPA,
+          remarks: notification.metadata?.remarks,
+          portalUrl: actionUrl,
+        });
+        break;
+
+      case 'APPLICATION_SHORTLISTED':
+      case 'APPLICATION_REJECTED':
+      case 'APPLICATION_STATUS_CHANGED':
+        await emailService.sendApplicationStatusUpdateEmail({
+          to: recipientUser.email,
+          name: recipientUser.name,
+          companyName: notification.metadata?.companyName || 'Company',
+          jobRole: notification.metadata?.jobRole || 'Position',
+          newStatus: notification.metadata?.newStatus || notification.title,
+          remarks: notification.metadata?.remarks,
+          portalUrl: actionUrl,
+        });
+        break;
+
+      case 'DRIVE_PUBLISHED':
+        await emailService.sendDriveAnnouncementEmail({
+          to: recipientUser.email,
+          name: recipientUser.name,
+          companyName: notification.metadata?.companyName || 'Company',
+          jobRole: notification.metadata?.jobRole || 'Position',
+          packageLPA: notification.metadata?.packageLPA,
+          deadline: notification.metadata?.deadline,
+          portalUrl: actionUrl,
+        });
+        break;
+
+      default:
+        await emailService.sendGenericNotificationEmail({
+          to: recipientUser.email,
+          name: recipientUser.name,
+          title: notification.title,
+          message: notification.message,
+          portalUrl: actionUrl,
+        });
+        break;
     }
   } catch (err) {
-    console.error('[Email Service Error]', err.message);
+    console.error('[Notification Email Dispatch Error]:', err.message);
   }
 };
 

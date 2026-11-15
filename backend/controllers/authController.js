@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import User from '../models/User.js';
 import StudentProfile from '../models/StudentProfile.js';
 import { generateTokenAndSetCookie, clearTokenCookie } from '../utils/generateToken.js';
-import { sendEmail } from '../utils/sendEmail.js';
+import emailService, { sendEmail } from '../services/emailService.js';
 
 // @desc    Register a new student account
 // @route   POST /api/auth/register
@@ -140,33 +140,18 @@ export const register = async (req, res, next) => {
       backlogs: req.body.backlogs !== undefined ? Number(req.body.backlogs) : 0,
     });
 
-    // Send verification email
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-    const verifyUrl = `${clientUrl}/verify-email/${verificationToken}`;
+    // Send verification email via centralized sender
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      process.env.CLIENT_URL ||
+      'http://localhost:5173';
+    const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
 
     try {
-      await sendEmail({
+      await emailService.sendVerificationEmail({
         to: user.email,
-        subject: 'Verify Your College Email - Campus Placement Portal',
-        text: `Hello ${user.name},\n\nThank you for registering on the Campus Placement Portal.\nPlease verify your college email address by visiting the link below:\n${verifyUrl}\n\nThis verification link expires in 24 hours.\nNote: You will not be able to apply for placement drives until your email is verified.\n\nBest regards,\nCampus Placement Cell`,
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
-              <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #0f172a;">Campus Placement Portal</h2>
-              <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Official Student Verification Service</p>
-            </div>
-            <p style="font-size: 15px; color: #334155; line-height: 1.6;">Hello <strong>${user.name}</strong>,</p>
-            <p style="font-size: 15px; color: #334155; line-height: 1.6;">Thank you for registering. Please confirm your college email address to activate all portal privileges, including applying for placement drives and tracking interview schedules.</p>
-            <div style="margin: 28px 0; text-align: center;">
-              <a href="${verifyUrl}" style="background-color: #334155; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; display: inline-block;">Verify College Email</a>
-            </div>
-            <p style="font-size: 13px; color: #64748b; line-height: 1.6;">This verification link will expire in <strong>24 hours</strong>. If the button above does not work, copy and paste this URL into your browser:</p>
-            <p style="font-size: 12px; color: #64748b; word-break: break-all; background: #f8fafc; padding: 10px; border-radius: 4px;">${verifyUrl}</p>
-            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8;">
-              If you did not create this account, you can safely ignore this message.
-            </div>
-          </div>
-        `,
+        name: user.name,
+        verifyUrl,
       });
     } catch (emailErr) {
       console.error('[Email] Failed to send registration verification email:', emailErr.message);
@@ -573,29 +558,17 @@ export const resendVerificationEmail = async (req, res, next) => {
     const verificationToken = user.getEmailVerificationToken();
     await user.save({ validateBeforeSave: false });
 
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-    const verifyUrl = `${clientUrl}/verify-email/${verificationToken}`;
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      process.env.CLIENT_URL ||
+      'http://localhost:5173';
+    const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
 
     try {
-      await sendEmail({
+      await emailService.sendVerificationEmail({
         to: user.email,
-        subject: 'Verify Your College Email - Campus Placement Portal',
-        text: `Hello ${user.name},\n\nPlease verify your email by clicking the link:\n${verifyUrl}\n\nThis verification link is valid for 24 hours.\n\nCampus Placement Team`,
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
-              <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #0f172a;">Campus Placement Portal</h2>
-              <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Official Student Verification Service</p>
-            </div>
-            <p style="font-size: 15px; color: #334155; line-height: 1.6;">Hello <strong>${user.name}</strong>,</p>
-            <p style="font-size: 15px; color: #334155; line-height: 1.6;">You requested a new verification link. Please click below to verify your college email address:</p>
-            <div style="margin: 28px 0; text-align: center;">
-              <a href="${verifyUrl}" style="background-color: #334155; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; display: inline-block;">Verify College Email</a>
-            </div>
-            <p style="font-size: 13px; color: #64748b; line-height: 1.6;">This verification link will expire in <strong>24 hours</strong>. If the button above does not work, copy and paste this URL into your browser:</p>
-            <p style="font-size: 12px; color: #64748b; word-break: break-all; background: #f8fafc; padding: 10px; border-radius: 4px;">${verifyUrl}</p>
-          </div>
-        `,
+        name: user.name,
+        verifyUrl,
       });
     } catch (emailErr) {
       console.error('[Email] Failed to resend verification email:', emailErr.message);
@@ -623,14 +596,14 @@ export const forgotPassword = async (req, res, next) => {
     if (!email || !email.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide your registered email address.',
+        message: 'Please provide your registered college email address.',
       });
     }
 
     const normalizedEmail = email.trim().toLowerCase();
     const user = await User.findOne({ email: normalizedEmail });
 
-    // Protect against user enumeration by returning standard message even if user not found
+    // Protect against user enumeration by returning standard neutral message even if user not found
     if (!user) {
       return res.status(200).json({
         success: true,
@@ -638,45 +611,33 @@ export const forgotPassword = async (req, res, next) => {
       });
     }
 
+    // Generate 15-minute cryptographically secure reset token
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
 
-    const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
-    const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
+    const frontendUrl =
+      process.env.FRONTEND_URL ||
+      process.env.CLIENT_URL ||
+      'http://localhost:5173';
+    const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
     try {
-      await sendEmail({
+      await emailService.sendPasswordResetEmail({
         to: user.email,
-        subject: 'Password Reset Request - Campus Placement Portal',
-        text: `Hello ${user.name},\n\nYou requested a password reset for your Campus Placement Portal account.\nPlease click the link below to set a new password:\n${resetUrl}\n\nThis reset link is valid for 1 hour.\nIf you did not make this request, you can safely ignore this email.\n\nCampus Placement Team`,
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;">
-            <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;">
-              <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: #0f172a;">Campus Placement Portal</h2>
-              <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Security & Password Management</p>
-            </div>
-            <p style="font-size: 15px; color: #334155; line-height: 1.6;">Hello <strong>${user.name}</strong>,</p>
-            <p style="font-size: 15px; color: #334155; line-height: 1.6;">We received a request to reset the password for your account. Click the button below to choose a new password:</p>
-            <div style="margin: 28px 0; text-align: center;">
-              <a href="${resetUrl}" style="background-color: #334155; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600; display: inline-block;">Reset Password</a>
-            </div>
-            <p style="font-size: 13px; color: #64748b; line-height: 1.6;">This link is single-use and will expire in <strong>1 hour</strong>. If the button does not work, copy and paste this link into your browser:</p>
-            <p style="font-size: 12px; color: #64748b; word-break: break-all; background: #f8fafc; padding: 10px; border-radius: 4px;">${resetUrl}</p>
-            <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #94a3b8;">
-              If you did not request a password reset, no further action is required. Your password will remain unchanged.
-            </div>
-          </div>
-        `,
+        name: user.name,
+        resetUrl,
+        expiresInMinutes: 15,
       });
     } catch (emailErr) {
       console.error('[Email] Failed to send password reset email:', emailErr.message);
+      // Clean up token so an undelivered token does not persist
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
       await user.save({ validateBeforeSave: false });
 
       return res.status(500).json({
         success: false,
-        message: 'Failed to send password reset email. Please try again later or contact the administrator.',
+        message: 'Failed to dispatch password reset email. The mail server could not be reached. Please contact the placement cell or try again later.',
       });
     }
 
@@ -690,11 +651,11 @@ export const forgotPassword = async (req, res, next) => {
 };
 
 // @desc    Reset password using reset token
-// @route   POST /api/auth/reset-password/:token
+// @route   POST /api/auth/reset-password or /api/auth/reset-password/:token
 // @access  Public
 export const resetPassword = async (req, res, next) => {
   try {
-    const rawToken = req.params.token;
+    const rawToken = req.params.token || req.body.token;
     const { password, confirmPassword } = req.body;
 
     if (!rawToken) {
@@ -752,6 +713,25 @@ export const resetPassword = async (req, res, next) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
     await user.save();
+
+    // Send confirmation email to user's registered address
+    emailService
+      .sendPasswordResetConfirmationEmail({
+        to: user.email,
+        name: user.name,
+        resetTime: new Date().toLocaleString('en-US', {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }),
+      })
+      .catch((err) => {
+        console.error('[Email] Failed to send password reset confirmation email:', err.message);
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Password has been reset successfully. You can now log in with your new credentials.',
+    });
 
     return res.status(200).json({
       success: true,

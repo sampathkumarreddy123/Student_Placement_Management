@@ -63,7 +63,7 @@ const ForgotPassword = () => {
           </span>
         </Link>
         <Link
-          to="/login"
+          to="/student/login"
           className="text-xs font-semibold text-[#64748B] hover:text-[#172554] inline-flex items-center gap-1 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
@@ -82,16 +82,16 @@ const ForgotPassword = () => {
               Reset Link Dispatched
             </h2>
             <p className="text-xs text-[#64748B] mt-1 leading-relaxed max-w-sm mx-auto">
-              If an account with <strong>{email}</strong> is registered, we have sent a secure password reset link to it. The link remains valid for <strong>1 hour</strong>.
+              If an account with <strong>{email}</strong> is registered, we have dispatched a secure password reset link to it. The link remains valid for <strong>15 minutes</strong> and can only be used once.
             </p>
           </div>
 
           <div className="p-3 bg-[#EFF6FF] border border-[#DBEAFE] rounded-lg text-left text-xs text-[#64748B] space-y-1">
-            <p className="font-bold text-[#172554]">Did not receive the email?</p>
+            <p className="font-bold text-[#172554]">Did not receive the email in Outlook?</p>
             <ul className="list-disc list-inside space-y-0.5 text-[#64748B]">
-              <li>Check your spam or junk folder.</li>
-              <li>Verify that you entered your registered email correctly.</li>
-              <li>Requests are rate-limited to prevent abuse.</li>
+              <li>Check your Junk / Spam / Quarantine folder.</li>
+              <li>Confirm you entered your registered college roll email correctly.</li>
+              <li>Password reset links are time-limited to 15 minutes for security.</li>
             </ul>
           </div>
 
@@ -108,10 +108,10 @@ const ForgotPassword = () => {
               Try another email address
             </Button>
             <Link
-              to="/login"
+              to="/student/login"
               className="text-xs font-bold text-[#2563EB] hover:text-[#163A5F] hover:underline pt-2 block"
             >
-              Return to Login
+              Return to Student Login
             </Link>
           </div>
         </div>
@@ -122,7 +122,7 @@ const ForgotPassword = () => {
               Forgot Password
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5">
-              Enter your registered email address to receive password reset instructions.
+              Enter your registered MITS college email address to receive password reset instructions.
             </p>
           </div>
 
@@ -137,11 +137,11 @@ const ForgotPassword = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
             <Input
-              label="Registered Email Address"
+              label="College Email Address"
               id="email"
               name="email"
               type="email"
-              placeholder=""
+              placeholder="e.g. 25695A0550@mits.ac.in"
               icon={Mail}
               value={email}
               onChange={(e) => {
@@ -159,7 +159,7 @@ const ForgotPassword = () => {
               isLoading={loading}
               icon={KeyRound}
             >
-              {loading ? 'Sending Link...' : 'Send Reset Link'}
+              {loading ? 'Sending Reset Link...' : 'Send Reset Link'}
             </Button>
           </form>
 
