@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, AlertTriangle } from 'lucide-react';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 const EligibilityBadge = ({
   isEligible,
@@ -34,10 +34,10 @@ const EligibilityBadge = ({
           onViewDetails();
         }
       }}
-      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#DC2626]/10 text-[#DC2626] border border-[#DC2626]/30 hover:bg-[#DC2626]/20 transition-colors ${className}`}
+      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#64748B]/10 text-[#475569] border border-[#64748B]/30 hover:bg-[#64748B]/20 transition-colors ${className}`}
       title="Not Eligible • Click to view criteria breakdown"
     >
-      <AlertTriangle className="w-3 h-3 text-[#DC2626]" />
+      <AlertCircle className="w-3 h-3 text-[#475569]" />
       <span>Not Eligible</span>
     </button>
   );

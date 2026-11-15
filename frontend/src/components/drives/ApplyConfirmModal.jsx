@@ -6,6 +6,7 @@ import {
   GraduationCap,
   FileText,
   CheckCircle2,
+  AlertCircle,
   AlertTriangle,
   XCircle,
   ExternalLink,
@@ -307,15 +308,15 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
 
             {/* Eligibility Status Alert */}
             {drive.isEligible === false && (
-              <div className="p-3.5 rounded-xl bg-[#DC2626]/10 border border-[#DC2626]/25 text-xs text-[#DC2626] flex items-start gap-2.5">
-                <XCircle className="w-4 h-4 text-[#DC2626] flex-shrink-0 mt-0.5" />
+              <div className="p-3.5 rounded-xl bg-[#64748B]/10 border border-[#64748B]/30 text-xs text-[#475569] flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-[#475569] flex-shrink-0 mt-0.5" />
                 <div className="flex-1">
-                  <p className="font-semibold">Not Eligible for this Drive</p>
-                  <p className="text-[11px] text-[#DC2626]/90 mt-0.5">
+                  <p className="font-semibold text-[#172554]">Not Eligible for this Drive</p>
+                  <p className="text-[11px] text-[#64748B] mt-0.5">
                     Your academic profile does not meet the eligibility criteria defined by the placement officer for this company.
                   </p>
                   {drive.eligibilityReasons && drive.eligibilityReasons.length > 0 && (
-                    <ul className="list-disc list-inside mt-1.5 space-y-0.5 text-[11px]">
+                    <ul className="list-disc list-inside mt-1.5 space-y-0.5 text-[11px] text-[#64748B]">
                       {drive.eligibilityReasons.map((r, i) => (
                         <li key={i}>{r}</li>
                       ))}

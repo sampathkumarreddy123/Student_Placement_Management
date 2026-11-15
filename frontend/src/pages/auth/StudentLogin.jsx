@@ -139,7 +139,7 @@ const StudentLogin = () => {
 
       {/* Role Selection Tabs */}
       <div className="flex p-1 bg-[#EFF6FF] border border-[#DBEAFE] rounded-xl mb-5">
-        <div className="flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 bg-[#2563EB] text-white shadow-sm cursor-default">
+        <div className="flex-1 py-2 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 bg-[#172554] text-white shadow-sm cursor-default">
           <GraduationCap className="w-4 h-4" />
           <span>Student Login</span>
         </div>

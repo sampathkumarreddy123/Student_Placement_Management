@@ -18,19 +18,19 @@ const Button = ({
 
   const variants = {
     primary:
-      'bg-[#2563EB] text-white hover:bg-[#1D4ED8] focus:ring-[#2563EB] shadow-sm',
+      'bg-[#172554] text-white hover:bg-[#0f172a] focus:ring-[#172554] shadow-sm',
     secondary:
-      'bg-[#DBEAFE] text-[#163A5F] hover:bg-[#BFDBFE] focus:ring-[#2563EB] border border-[#DBEAFE]',
+      'bg-[#EFF6FF] text-[#172554] hover:bg-[#DBEAFE] focus:ring-[#172554] border border-[#DBEAFE]',
     navy:
-      'bg-[#163A5F] text-white hover:bg-[#0F2843] focus:ring-[#163A5F] shadow-sm',
+      'bg-[#172554] text-white hover:bg-[#0f172a] focus:ring-[#172554] shadow-sm',
     warm:
-      'bg-[#163A5F] text-white hover:bg-[#0F2843] focus:ring-[#163A5F] shadow-sm',
+      'bg-[#172554] text-white hover:bg-[#0f172a] focus:ring-[#172554] shadow-sm',
     outline:
-      'bg-white border border-[#DBEAFE] text-[#163A5F] hover:bg-[#F0F7FF] hover:border-[#2563EB]/40 focus:ring-[#2563EB]',
+      'bg-white border border-[#DBEAFE] text-[#172554] hover:bg-[#F0F7FF] hover:border-[#172554]/40 focus:ring-[#172554]',
     danger:
       'bg-[#DC2626] text-white hover:bg-[#B91C1C] focus:ring-[#DC2626] shadow-sm',
     ghost:
-      'bg-transparent text-[#2563EB] hover:bg-[#EFF6FF] hover:text-[#163A5F] focus:ring-[#2563EB]',
+      'bg-transparent text-[#172554] hover:bg-[#EFF6FF] hover:text-[#0f172a] focus:ring-[#172554]',
     success:
       'bg-[#0D9488] text-white hover:bg-[#0F766E] focus:ring-[#0D9488] shadow-sm',
   };

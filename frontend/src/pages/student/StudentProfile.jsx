@@ -37,6 +37,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import PageHeader from '../../components/common/PageHeader';
 import Modal from '../../components/common/Modal';
 import ChangePasswordModal from '../../components/common/ChangePasswordModal';
+import ProfilePictureModal from '../../components/common/ProfilePictureModal';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -78,6 +79,7 @@ const StudentProfile = () => {
   const [saving, setSaving] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
 
   const [notification, setNotification] = useState(null);
   const [errors, setErrors] = useState({});
@@ -517,7 +519,11 @@ const StudentProfile = () => {
           {/* Avatar & Core Identity */}
           <div className="flex items-center gap-5">
             <div className="relative group">
-              <div className="w-20 h-20 rounded-2xl bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden">
+              <div
+                onClick={() => setShowPhotoModal(true)}
+                className="w-20 h-20 rounded-2xl bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#172554] transition-all"
+                title="Click to view full profile picture"
+              >
                 {profile?.profilePhoto || user?.profilePhoto ? (
                   <img
                     src={getImageUrl(profile?.profilePhoto || user?.profilePhoto)}
@@ -534,7 +540,7 @@ const StudentProfile = () => {
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="absolute -bottom-1 -right-1 p-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg shadow-sm border-2 border-white transition-colors"
+                className="absolute -bottom-1 -right-1 p-1.5 bg-[#172554] hover:bg-[#0f172a] text-white rounded-lg shadow-sm border-2 border-white transition-colors"
                 title="Update Profile Photo"
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -1054,6 +1060,17 @@ const StudentProfile = () => {
       <ChangePasswordModal
         isOpen={passwordModalOpen}
         onClose={() => setPasswordModalOpen(false)}
+      />
+
+      <ProfilePictureModal
+        isOpen={showPhotoModal}
+        onClose={() => setShowPhotoModal(false)}
+        user={{
+          name: profile?.name || user?.name,
+          email: profile?.email || user?.email,
+          profilePhoto: profile?.profilePhoto || user?.profilePhoto,
+          role: 'student',
+        }}
       />
 
       {/* EDIT PROFILE POPUP MODAL */}

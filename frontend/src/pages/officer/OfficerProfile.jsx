@@ -22,6 +22,7 @@ import Badge from '../../components/common/Badge';
 import PageHeader from '../../components/common/PageHeader';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ChangePasswordModal from '../../components/common/ChangePasswordModal';
+import ProfilePictureModal from '../../components/common/ProfilePictureModal';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl } from '../../utils/imageUrl';
@@ -48,6 +49,7 @@ const OfficerProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [removingPhoto, setRemovingPhoto] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [formErrors, setFormErrors] = useState({});
@@ -220,7 +222,11 @@ const OfficerProfile = () => {
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
           {/* Avatar with Camera Overlay */}
           <div className="relative group flex-shrink-0">
-            <div className="w-24 h-24 rounded-2xl bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden">
+            <div
+              onClick={() => setShowPhotoModal(true)}
+              className="w-24 h-24 rounded-2xl bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#172554] transition-all"
+              title="Click to view full profile picture"
+            >
               {effectivePhoto ? (
                 <img
                   src={getImageUrl(effectivePhoto)}
@@ -237,7 +243,7 @@ const OfficerProfile = () => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto || removingPhoto}
-              className="absolute -bottom-1.5 -right-1.5 p-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-xl shadow-md border-2 border-white transition-all focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+              className="absolute -bottom-1.5 -right-1.5 p-2 bg-[#172554] hover:bg-[#0f172a] text-white rounded-xl shadow-md border-2 border-white transition-all focus:outline-none focus:ring-2 focus:ring-[#172554]"
               title="Upload New Profile Photo"
             >
               <Camera className="w-4 h-4" />
@@ -538,6 +544,17 @@ const OfficerProfile = () => {
       <ChangePasswordModal
         isOpen={changePasswordOpen}
         onClose={() => setChangePasswordOpen(false)}
+      />
+
+      <ProfilePictureModal
+        isOpen={showPhotoModal}
+        onClose={() => setShowPhotoModal(false)}
+        user={{
+          name: formData.name || user?.name,
+          email: formData.email || user?.email,
+          profilePhoto: effectivePhoto,
+          role: 'officer',
+        }}
       />
     </div>
   );

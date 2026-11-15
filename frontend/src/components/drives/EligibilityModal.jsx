@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   CheckCircle2,
   XCircle,
+  AlertCircle,
   AlertTriangle,
   Building2,
   GraduationCap,
@@ -66,8 +67,9 @@ const EligibilityModal = ({
           </div>
 
           <Badge
-            variant={isEligible ? 'success' : 'danger'}
+            variant={isEligible ? 'success' : 'secondary'}
             size="md"
+            className={!isEligible ? 'bg-[#64748B]/10 text-[#475569] border-[#64748B]/30' : ''}
           >
             {isEligible ? 'Overall: Eligible' : 'Overall: Not Eligible'}
           </Badge>
@@ -78,13 +80,13 @@ const EligibilityModal = ({
           className={`p-4 rounded-xl border flex items-start gap-3 ${
             isEligible
               ? 'bg-[#0D9488]/10 border-[#0D9488]/25 text-[#0D9488]'
-              : 'bg-[#DC2626]/10 border-[#DC2626]/25 text-[#DC2626]'
+              : 'bg-[#64748B]/10 border-[#64748B]/30 text-[#475569]'
           }`}
         >
           {isEligible ? (
             <CheckCircle2 className="w-5 h-5 text-[#0D9488] flex-shrink-0 mt-0.5" />
           ) : (
-            <XCircle className="w-5 h-5 text-[#DC2626] flex-shrink-0 mt-0.5" />
+            <AlertCircle className="w-5 h-5 text-[#475569] flex-shrink-0 mt-0.5" />
           )}
           <div className="space-y-1 flex-1">
             <h4 className="font-bold text-xs uppercase tracking-wide">
@@ -153,7 +155,7 @@ const EligibilityModal = ({
                     return (
                       <tr
                         key={idx}
-                        className={isPass ? 'hover:bg-[#F0F7FF]' : 'bg-[#DC2626]/5 hover:bg-[#DC2626]/10'}
+                        className={isPass ? 'hover:bg-[#F0F7FF]' : 'bg-[#64748B]/5 hover:bg-[#64748B]/10'}
                       >
                         <td className="py-2.5 px-3">
                           <span className="font-semibold text-[#172554] block">
@@ -174,7 +176,7 @@ const EligibilityModal = ({
                             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold ${
                               isPass
                                 ? 'bg-[#0D9488]/15 text-[#0D9488] border border-[#0D9488]/30'
-                                : 'bg-[#DC2626]/15 text-[#DC2626] border border-[#DC2626]/30'
+                                : 'bg-[#64748B]/15 text-[#475569] border border-[#64748B]/30'
                             }`}
                           >
                             {isPass ? 'PASS' : 'FAIL'}
@@ -183,7 +185,7 @@ const EligibilityModal = ({
 
                         <td className="py-2.5 px-3 text-[11px] leading-relaxed">
                           <span
-                            className={isPass ? 'text-[#64748B]' : 'text-[#DC2626] font-medium'}
+                            className={isPass ? 'text-[#64748B]' : 'text-[#475569] font-medium'}
                           >
                             {item.reason}
                           </span>

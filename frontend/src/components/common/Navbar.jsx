@@ -14,11 +14,13 @@ import {
   FileText,
   ArrowRight,
   KeyRound,
+  Eye,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { notificationService } from '../../services/notificationService';
 import Badge from './Badge';
 import ChangePasswordModal from './ChangePasswordModal';
+import ProfilePictureModal from './ProfilePictureModal';
 import { getImageUrl } from '../../utils/imageUrl';
 
 const formatRelativeTime = (dateString) => {
@@ -39,6 +41,7 @@ const Navbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -285,7 +288,7 @@ const Navbar = ({ onToggleSidebar }) => {
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-9 h-9 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] hover:bg-[#DBEAFE] transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] overflow-hidden shadow-sm"
+                className="w-9 h-9 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] hover:bg-[#DBEAFE] transition-colors focus:outline-none focus:ring-2 focus:ring-[#172554] overflow-hidden shadow-sm"
                 title={user.name}
               >
                 {user.profilePhoto ? (
@@ -307,9 +310,17 @@ const Navbar = ({ onToggleSidebar }) => {
                     className="fixed inset-0 z-10"
                     onClick={() => setDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-lg border border-[#DBEAFE] py-1.5 z-20 text-sm">
-                    <div className="px-4 py-2.5 border-b border-[#DBEAFE]/80 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] overflow-hidden flex-shrink-0">
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-[#DBEAFE] py-1.5 z-20 text-sm">
+                    {/* Clickable Profile Card to View Photo */}
+                    <div
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        setShowPhotoModal(true);
+                      }}
+                      className="px-4 py-3 border-b border-[#DBEAFE]/80 flex items-center gap-3 cursor-pointer hover:bg-[#F0F7FF] transition-colors group"
+                      title="Click to view full profile picture"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] overflow-hidden flex-shrink-0 group-hover:ring-2 group-hover:ring-[#172554] transition-all">
                         {user.profilePhoto ? (
                           <img
                             src={getImageUrl(user.profilePhoto)}
@@ -322,11 +333,27 @@ const Navbar = ({ onToggleSidebar }) => {
                           </span>
                         )}
                       </div>
-                      <div className="min-w-0">
-                        <p className="font-bold text-[#172554] truncate">{user.name}</p>
-                        <p className="text-xs text-[#64748B] truncate">{user.email}</p>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="font-bold text-[#172554] truncate text-xs sm:text-sm">{user.name}</p>
+                          <Eye className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#172554] flex-shrink-0 ml-1" />
+                        </div>
+                        <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
+                        <span className="text-[10px] text-[#172554] font-medium block mt-0.5 group-hover:underline">View Full Photo</span>
                       </div>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        setShowPhotoModal(true);
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF] text-left text-xs sm:text-sm"
+                    >
+                      <Eye className="w-4 h-4 text-[#172554]" />
+                      <span>View Profile Picture</span>
+                    </button>
 
                     {isStudent && (
                       <Link
@@ -334,7 +361,7 @@ const Navbar = ({ onToggleSidebar }) => {
                         onClick={() => setDropdownOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF]"
                       >
-                        <UserIcon className="w-4 h-4 text-[#2563EB]" />
+                        <UserIcon className="w-4 h-4 text-[#172554]" />
                         My Profile
                       </Link>
                     )}
@@ -345,7 +372,7 @@ const Navbar = ({ onToggleSidebar }) => {
                         onClick={() => setDropdownOpen(false)}
                         className="flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF]"
                       >
-                        <UserIcon className="w-4 h-4 text-[#2563EB]" />
+                        <UserIcon className="w-4 h-4 text-[#172554]" />
                         Officer Profile
                       </Link>
                     )}
@@ -356,7 +383,7 @@ const Navbar = ({ onToggleSidebar }) => {
                       className="flex items-center justify-between px-4 py-2 text-[#172554] hover:bg-[#F0F7FF]"
                     >
                       <div className="flex items-center gap-2">
-                        <Bell className="w-4 h-4 text-[#2563EB]" />
+                        <Bell className="w-4 h-4 text-[#172554]" />
                         <span>Notifications</span>
                       </div>
                       {unreadCount > 0 && (
@@ -374,7 +401,7 @@ const Navbar = ({ onToggleSidebar }) => {
                       }}
                       className="w-full text-left flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF]"
                     >
-                      <KeyRound className="w-4 h-4 text-[#2563EB]" />
+                      <KeyRound className="w-4 h-4 text-[#172554]" />
                       <span>Change Password</span>
                     </button>
 
@@ -397,18 +424,24 @@ const Navbar = ({ onToggleSidebar }) => {
               isOpen={changePasswordOpen}
               onClose={() => setChangePasswordOpen(false)}
             />
+
+            <ProfilePictureModal
+              isOpen={showPhotoModal}
+              onClose={() => setShowPhotoModal(false)}
+              user={user}
+            />
           </div>
         ) : (
           <div className="flex items-center gap-2">
             <Link
               to="/student/login"
-              className="px-3.5 py-1.5 text-xs font-semibold text-[#163A5F] hover:text-[#2563EB]"
+              className="px-3.5 py-1.5 text-xs font-semibold text-[#163A5F] hover:text-[#172554]"
             >
               Sign In
             </Link>
             <Link
               to="/student/register"
-              className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#2563EB] rounded-lg hover:bg-[#1D4ED8] shadow-sm"
+              className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#172554] rounded-lg hover:bg-[#0f172a] shadow-sm"
             >
               Register
             </Link>

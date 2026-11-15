@@ -6,6 +6,7 @@ import {
   ExternalLink,
   CheckCircle2,
   XCircle,
+  AlertCircle,
   ArrowLeft,
   Users,
   ListOrdered,
@@ -365,20 +366,20 @@ const DriveDetails = () => {
                     className={`p-3 rounded-lg border flex items-start gap-2 ${
                       drive.isEligible
                         ? 'bg-[#0D9488]/10 border-[#0D9488]/25 text-[#0D9488]'
-                        : 'bg-[#DC2626]/10 border-[#DC2626]/25 text-[#DC2626]'
+                        : 'bg-[#64748B]/10 border-[#64748B]/30 text-[#475569]'
                     }`}
                   >
                     {drive.isEligible ? (
                       <CheckCircle2 className="w-4 h-4 text-[#0D9488] mt-0.5 flex-shrink-0" />
                     ) : (
-                      <XCircle className="w-4 h-4 text-[#DC2626] mt-0.5 flex-shrink-0" />
+                      <AlertCircle className="w-4 h-4 text-[#475569] mt-0.5 flex-shrink-0" />
                     )}
                     <div className="flex-1">
-                      <p className="font-semibold text-xs">
+                      <p className="font-semibold text-xs text-[#172554]">
                         {drive.isEligible ? 'You Are Eligible' : 'Eligibility Not Met'}
                       </p>
                       {!drive.isEligible && drive.eligibilityReasons && (
-                        <ul className="list-disc pl-4 mt-1 text-[11px] space-y-0.5 opacity-90">
+                        <ul className="list-disc pl-4 mt-1 text-[11px] text-[#64748B] space-y-0.5">
                           {drive.eligibilityReasons.slice(0, 3).map((r, i) => (
                             <li key={i}>{r}</li>
                           ))}

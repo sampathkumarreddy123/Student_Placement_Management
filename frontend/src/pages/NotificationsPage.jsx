@@ -209,7 +209,7 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('all')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'all'
-              ? 'bg-[#2563EB] text-white shadow-sm'
+              ? 'bg-[#172554] text-white shadow-sm'
               : 'text-[#64748B] hover:bg-[#EFF6FF] hover:text-[#172554]'
           }`}
         >
@@ -223,7 +223,7 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('unread')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'unread'
-              ? 'bg-[#2563EB] text-white shadow-sm'
+              ? 'bg-[#172554] text-white shadow-sm'
               : 'text-[#64748B] hover:bg-[#EFF6FF] hover:text-[#172554]'
           }`}
         >
@@ -241,7 +241,7 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('drives')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'drives'
-              ? 'bg-[#2563EB] text-white shadow-sm'
+              ? 'bg-[#172554] text-white shadow-sm'
               : 'text-[#64748B] hover:bg-[#EFF6FF] hover:text-[#172554]'
           }`}
         >
@@ -253,7 +253,7 @@ const NotificationsPage = () => {
           onClick={() => setActiveTab('applications')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
             activeTab === 'applications'
-              ? 'bg-[#2563EB] text-white shadow-sm'
+              ? 'bg-[#172554] text-white shadow-sm'
               : 'text-[#64748B] hover:bg-[#EFF6FF] hover:text-[#172554]'
           }`}
         >
