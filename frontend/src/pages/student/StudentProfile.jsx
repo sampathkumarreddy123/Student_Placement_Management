@@ -39,6 +39,7 @@ import Alert from '../../components/common/Alert';
 import Badge from '../../components/common/Badge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import PageHeader from '../../components/common/PageHeader';
+import Modal from '../../components/common/Modal';
 import ChangePasswordModal from '../../components/common/ChangePasswordModal';
 import { useToast } from '../../context/ToastContext';
 
@@ -75,7 +76,7 @@ const StudentProfile = () => {
   const toast = useToast();
   const { user, updateUserProfile } = useAuth();
 
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
@@ -109,6 +110,25 @@ const StudentProfile = () => {
   const [resendingVerification, setResendingVerification] = useState(false);
   const resumeInputRef = useRef(null);
   const photoInputRef = useRef(null);
+
+  const handleOpenEditModal = () => {
+    setFormData({
+      name: profile?.name || user?.name || '',
+      phone: profile?.phone || '',
+      department: profile?.department || '',
+      batch: profile?.batch || '',
+      cgpa: profile?.cgpa !== undefined && profile?.cgpa !== null && profile?.cgpa > 0 ? profile.cgpa : '',
+      activeBacklogs: profile?.activeBacklogs !== undefined ? profile.activeBacklogs : profile?.backlogs || 0,
+      totalBacklogs: profile?.totalBacklogs !== undefined ? profile.totalBacklogs : 0,
+      tenthPercentage: profile?.tenthPercentage && profile?.tenthPercentage > 0 ? profile.tenthPercentage : '',
+      twelfthPercentage: profile?.twelfthPercentage && profile?.twelfthPercentage > 0 ? profile.twelfthPercentage : '',
+      githubUrl: profile?.githubUrl || '',
+      linkedinUrl: profile?.linkedinUrl || '',
+      skills: Array.isArray(profile?.skills) ? [...profile.skills] : [],
+    });
+    setErrors({});
+    setIsEditModalOpen(true);
+  };
 
   const handleResendVerification = async () => {
     try {
@@ -244,7 +264,7 @@ const StudentProfile = () => {
   };
 
   const handleSaveProfile = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setNotification(null);
 
     if (!validateForm()) {
@@ -261,7 +281,7 @@ const StudentProfile = () => {
       setProfile(res.profile);
       setCompletion(res.completion);
       updateUserProfile(res.profile);
-      setIsEditing(false);
+      setIsEditModalOpen(false);
       toast.success('Academic and personal records saved successfully!');
       setNotification({
         type: 'success',
@@ -430,11 +450,11 @@ const StudentProfile = () => {
         actions={
           <Button
             size="sm"
-            variant={isEditing ? 'outline' : 'primary'}
-            icon={isEditing ? X : Edit3}
-            onClick={() => setIsEditing(!isEditing)}
+            variant="primary"
+            icon={Edit3}
+            onClick={handleOpenEditModal}
           >
-            {isEditing ? 'Cancel Editing' : 'Edit Profile'}
+            Edit Profile
           </Button>
         }
       />
@@ -575,31 +595,16 @@ const StudentProfile = () => {
             </div>
           </div>
 
-          {/* Edit Profile Toggle Button */}
+          {/* Edit Profile Button */}
           <div className="flex items-center gap-2 self-stretch md:self-auto justify-end">
-            {isEditing ? (
-              <Button
-                variant="outline"
-                size="sm"
-                icon={X}
-                onClick={() => {
-                  setIsEditing(false);
-                  setErrors({});
-                  fetchProfileData(); // Reset
-                }}
-              >
-                Cancel
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Edit3}
-                onClick={() => setIsEditing(true)}
-              >
-                Edit Profile
-              </Button>
-            )}
+            <Button
+              variant="primary"
+              size="sm"
+              icon={Edit3}
+              onClick={handleOpenEditModal}
+            >
+              Edit Profile
+            </Button>
           </div>
         </div>
 
@@ -636,209 +641,171 @@ const StudentProfile = () => {
         </div>
       </div>
 
-      {/* Main Profile Content: Edit Form or View Cards */}
-      <form onSubmit={handleSaveProfile} className="space-y-6">
+      {/* Main Profile Content: Clean View Cards */}
+      <div className="space-y-6">
         {/* SECTION 1: Personal & Identification Information */}
         <Card
           title="Personal & College Identification"
-          subtitle="Identity data locked to ensure institutional placement integrity"
+          subtitle="Identity data verified for institutional recruitment tracking"
+          action={
+            <Button
+              size="sm"
+              variant="outline"
+              icon={Edit3}
+              onClick={handleOpenEditModal}
+            >
+              Edit Details
+            </Button>
+          }
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="Full Legal Name"
-              name="name"
-              icon={User}
-              value={formData.name}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              error={errors.name}
-              required
-            />
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
+                <User className="w-3.5 h-3.5 text-[#2563EB]" />
+                Full Legal Name
+              </span>
+              <p className="text-sm font-bold text-[#172554]">
+                {profile?.name || user?.name || '—'}
+              </p>
+            </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-[#172554]">
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#2563EB]" />
                   College Email Address
-                </label>
-                <span className="text-[10px] text-[#64748B] flex items-center gap-1">
+                </span>
+                <span className="text-[10px] text-[#64748B] flex items-center gap-1 font-medium">
                   <Lock className="w-3 h-3 text-[#2563EB]" /> Locked
                 </span>
               </div>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Mail className="h-4 w-4 text-[#2563EB]" />
-                </div>
-                <input
-                  type="email"
-                  value={profile?.email || user?.email || ''}
-                  disabled
-                  className="block w-full rounded-lg border border-[#DBEAFE] bg-[#F0F7FF] text-[#64748B] text-sm pl-9 pr-3 py-2 cursor-not-allowed"
-                />
-              </div>
-              <p className="text-[11px] text-[#64748B] mt-1">
-                College email cannot be modified after registration.
+              <p className="text-sm font-semibold text-[#172554] truncate">
+                {profile?.email || user?.email || '—'}
+              </p>
+              <p className="text-[10px] text-[#64748B] mt-0.5">
+                Permanent institutional email address.
               </p>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-medium text-[#172554]">
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5">
+                  <Hash className="w-3.5 h-3.5 text-[#2563EB]" />
                   University Roll Number
-                </label>
-                <span className="text-[10px] text-[#64748B] flex items-center gap-1">
+                </span>
+                <span className="text-[10px] text-[#64748B] flex items-center gap-1 font-medium">
                   <Lock className="w-3 h-3 text-[#2563EB]" /> Locked
                 </span>
               </div>
-              <div className="relative">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                  <Hash className="h-4 w-4 text-[#2563EB]" />
-                </div>
-                <input
-                  type="text"
-                  value={profile?.rollNumber || ''}
-                  disabled
-                  className="block w-full rounded-lg border border-[#DBEAFE] bg-[#F0F7FF] text-[#64748B] text-sm pl-9 pr-3 py-2 cursor-not-allowed font-mono"
-                />
-              </div>
-              <p className="text-[11px] text-[#64748B] mt-1">
-                Roll number is permanent for academic tracking.
+              <p className="text-sm font-bold font-mono text-[#163A5F]">
+                {profile?.rollNumber || '—'}
+              </p>
+              <p className="text-[10px] text-[#64748B] mt-0.5">
+                Permanent college registration identifier.
               </p>
             </div>
 
-            <Input
-              label="Contact Phone Number"
-              name="phone"
-              type="tel"
-              placeholder="Enter contact phone number"
-              icon={Phone}
-              value={formData.phone}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              error={errors.phone}
-              helperText="Shared with recruiters upon shortlisting"
-            />
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
+                <Phone className="w-3.5 h-3.5 text-[#2563EB]" />
+                Contact Phone Number
+              </span>
+              <p className="text-sm font-semibold text-[#172554]">
+                {profile?.phone || <span className="text-[#64748B] font-normal italic">Not provided yet</span>}
+              </p>
+              <p className="text-[10px] text-[#64748B] mt-0.5">
+                Shared with recruiters upon candidate shortlisting.
+              </p>
+            </div>
           </div>
         </Card>
 
         {/* SECTION 2: Academic Performance & Criteria */}
         <Card
           title="Academic Records & Eligibility Metrics"
-          subtitle="Verified by the Placement Cell for company criteria filtering"
+          subtitle="Verified academic scores used for placement drive cutoff filtering"
+          action={
+            <Button
+              size="sm"
+              variant="outline"
+              icon={Edit3}
+              onClick={handleOpenEditModal}
+            >
+              Edit Scores
+            </Button>
+          }
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-[#172554] mb-1.5">
-                Department / Discipline <span className="text-[#DC2626]">*</span>
-              </label>
-              <select
-                name="department"
-                value={formData.department}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="w-full rounded-lg border border-[#DBEAFE] text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] bg-white text-[#172554] disabled:bg-[#F0F7FF] disabled:text-[#64748B]"
-              >
-                <option value="">Select Department</option>
-                {DEPARTMENTS.map((dept) => (
-                  <option key={dept} value={dept}>
-                    {dept}
-                  </option>
-                ))}
-              </select>
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
+                <GraduationCap className="w-3.5 h-3.5 text-[#2563EB]" />
+                Department / Discipline
+              </span>
+              <p className="text-sm font-bold text-[#172554] truncate">
+                {profile?.department || 'Not selected'}
+              </p>
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-[#172554] mb-1.5">
-                Graduation Year (Batch) <span className="text-[#DC2626]">*</span>
-              </label>
-              <select
-                name="batch"
-                value={formData.batch}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                className="w-full rounded-lg border border-[#DBEAFE] text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] bg-white text-[#172554] disabled:bg-[#F0F7FF] disabled:text-[#64748B]"
-              >
-                <option value="">Select Graduation Year</option>
-                {GRADUATION_YEARS.map((yr) => (
-                  <option key={yr} value={yr}>
-                    Class of {yr}
-                  </option>
-                ))}
-              </select>
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
+                <BookOpen className="w-3.5 h-3.5 text-[#2563EB]" />
+                Graduation Batch
+              </span>
+              <p className="text-sm font-bold text-[#172554]">
+                {profile?.batch ? `Class of ${profile.batch}` : 'Not selected'}
+              </p>
             </div>
 
-            <Input
-              label="Cumulative CGPA (0 - 10)"
-              name="cgpa"
-              type="number"
-              step="0.01"
-              min="0"
-              max="10"
-              placeholder="e.g. 8.20"
-              value={formData.cgpa}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              error={errors.cgpa}
-              required
-            />
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
+                <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
+                Cumulative CGPA
+              </span>
+              <p className="text-base font-bold text-[#163A5F]">
+                {profile?.cgpa ? `${Number(profile.cgpa).toFixed(2)} / 10.0` : 'Not set'}
+              </p>
+            </div>
 
-            <Input
-              label="Active Backlogs"
-              name="activeBacklogs"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={formData.activeBacklogs}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              error={errors.activeBacklogs}
-              required
-              helperText="Currently uncleared subjects"
-            />
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
+                <AlertTriangle className="w-3.5 h-3.5 text-[#2563EB]" />
+                Backlog Status
+              </span>
+              <div className="flex items-center gap-2 mt-0.5">
+                <span
+                  className={`inline-block px-2.5 py-0.5 rounded-full font-semibold text-xs ${
+                    (profile?.activeBacklogs ?? 0) > 0
+                      ? 'bg-[#DC2626]/10 text-[#DC2626] border border-[#DC2626]/30'
+                      : 'bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/30'
+                  }`}
+                >
+                  {profile?.activeBacklogs ?? 0} Active
+                </span>
+                <span className="text-xs text-[#64748B]">
+                  ({profile?.totalBacklogs ?? profile?.activeBacklogs ?? 0} Total)
+                </span>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-[#DBEAFE]">
-            <Input
-              label="Total Historical Backlogs"
-              name="totalBacklogs"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={formData.totalBacklogs}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              error={errors.totalBacklogs}
-              helperText="Total backlogs across all semesters"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4 pt-4 border-t border-[#DBEAFE]">
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <span className="text-[11px] font-medium text-[#64748B] block mb-1">
+                10th Standard Board Percentage
+              </span>
+              <p className="text-sm font-bold text-[#172554]">
+                {profile?.tenthPercentage ? `${profile.tenthPercentage}%` : <span className="text-[#64748B] font-normal italic">Not provided</span>}
+              </p>
+            </div>
 
-            <Input
-              label="10th Standard Marks (%)"
-              name="tenthPercentage"
-              type="number"
-              step="0.1"
-              min="0"
-              max="100"
-              placeholder="e.g. 85.0"
-              value={formData.tenthPercentage}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              error={errors.tenthPercentage}
-              helperText="Secondary board score"
-            />
-
-            <Input
-              label="12th / Diploma Marks (%)"
-              name="twelfthPercentage"
-              type="number"
-              step="0.1"
-              min="0"
-              max="100"
-              placeholder="e.g. 82.0"
-              value={formData.twelfthPercentage}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              error={errors.twelfthPercentage}
-              helperText="Senior secondary board score"
-            />
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <span className="text-[11px] font-medium text-[#64748B] block mb-1">
+                12th / Diploma Board Percentage
+              </span>
+              <p className="text-sm font-bold text-[#172554]">
+                {profile?.twelfthPercentage ? `${profile.twelfthPercentage}%` : <span className="text-[#64748B] font-normal italic">Not provided</span>}
+              </p>
+            </div>
           </div>
         </Card>
 
@@ -846,77 +813,42 @@ const StudentProfile = () => {
         <Card
           title="Technical Skills"
           subtitle="Add frameworks, languages, and technical domains to your profile"
+          action={
+            <Button
+              size="sm"
+              variant="outline"
+              icon={Edit3}
+              onClick={handleOpenEditModal}
+            >
+              Manage Skills
+            </Button>
+          }
         >
-          {isEditing && (
-            <div className="mb-4">
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Type a skill (e.g. React, Python, Docker) and click Add"
-                  icon={Code}
-                  value={newSkill}
-                  onChange={(e) => setNewSkill(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      handleAddSkill();
-                    }
-                  }}
-                />
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="sm"
-                  icon={Plus}
-                  onClick={() => handleAddSkill()}
-                >
-                  Add
-                </Button>
-              </div>
-
-              {/* Quick suggestions */}
-              <div className="mt-2.5 flex flex-wrap items-center gap-1.5 text-xs text-[#64748B]">
-                <span className="text-[11px] text-[#64748B]">Suggestions:</span>
-                {COMMON_SKILLS.filter(
-                  (s) => !formData.skills.some((sk) => sk.toLowerCase() === s.toLowerCase())
-                )
-                  .slice(0, 8)
-                  .map((skill) => (
-                    <button
-                      key={skill}
-                      type="button"
-                      onClick={() => handleAddSkill(skill)}
-                      className="px-2 py-0.5 rounded text-[11px] bg-[#F0F7FF] border border-[#DBEAFE] hover:bg-[#EFF6FF] hover:text-[#163A5F] text-[#2563EB] transition-colors"
-                    >
-                      + {skill}
-                    </button>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {formData.skills.length === 0 ? (
-            <div className="text-center py-6 border border-dashed border-[#DBEAFE] rounded-lg text-xs text-[#64748B]">
-              No technical skills listed yet. Click "Edit Profile" to add your programming languages and tools.
-            </div>
-          ) : (
+          {profile?.skills && profile.skills.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {formData.skills.map((skill) => (
+              {profile.skills.map((skill) => (
                 <span
                   key={skill}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#EFF6FF] text-[#163A5F] border border-[#DBEAFE]"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#EFF6FF] text-[#163A5F] border border-[#DBEAFE]"
                 >
+                  <Code className="w-3.5 h-3.5 text-[#2563EB]" />
                   {skill}
-                  {isEditing && (
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="text-[#64748B] hover:text-[#172554] focus:outline-none"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
                 </span>
               ))}
+            </div>
+          ) : (
+            <div className="text-center py-6 border border-dashed border-[#DBEAFE] rounded-xl text-xs text-[#64748B] bg-[#F0F7FF]">
+              <p className="font-medium text-[#172554]">No technical skills listed yet</p>
+              <p className="mt-1">Add your skills to improve company match scoring and drive eligibility.</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                onClick={handleOpenEditModal}
+              >
+                + Add Technical Skills
+              </Button>
             </div>
           )}
         </Card>
@@ -1008,7 +940,7 @@ const StudentProfile = () => {
               onChange={handleResumeFileChange}
             />
 
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-[#64748B]">
               Note: Only PDF format (.pdf) files up to 5 MB are permitted. Uploaded files undergo automatic server validation.
             </p>
           </div>
@@ -1018,31 +950,83 @@ const StudentProfile = () => {
         <Card
           title="Professional Profiles & Portfolios"
           subtitle="Showcase your open source projects, code repositories, and networking profile"
+          action={
+            <Button
+              size="sm"
+              variant="outline"
+              icon={Edit3}
+              onClick={handleOpenEditModal}
+            >
+              Update Links
+            </Button>
+          }
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input
-              label="GitHub Profile URL"
-              name="githubUrl"
-              placeholder="https://github.com/username"
-              icon={Github}
-              value={formData.githubUrl}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              error={errors.githubUrl}
-              helperText="Links your projects & code commits"
-            />
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#172554] flex-shrink-0">
+                  <Github className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[11px] font-medium text-[#64748B] block">GitHub Profile</span>
+                  {profile?.githubUrl ? (
+                    <a
+                      href={profile.githubUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-bold text-[#2563EB] hover:underline truncate block"
+                    >
+                      {profile.githubUrl}
+                    </a>
+                  ) : (
+                    <span className="text-xs text-[#64748B] italic">Not connected</span>
+                  )}
+                </div>
+              </div>
+              {profile?.githubUrl && (
+                <a
+                  href={profile.githubUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-1.5 rounded-lg text-[#64748B] hover:text-[#172554] hover:bg-white"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+            </div>
 
-            <Input
-              label="LinkedIn Profile URL"
-              name="linkedinUrl"
-              placeholder="https://linkedin.com/in/username"
-              icon={Linkedin}
-              value={formData.linkedinUrl}
-              onChange={handleInputChange}
-              disabled={!isEditing}
-              error={errors.linkedinUrl}
-              helperText="Recruiters view your endorsements & background"
-            />
+            <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] flex-shrink-0">
+                  <Linkedin className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[11px] font-medium text-[#64748B] block">LinkedIn Profile</span>
+                  {profile?.linkedinUrl ? (
+                    <a
+                      href={profile.linkedinUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-bold text-[#2563EB] hover:underline truncate block"
+                    >
+                      {profile.linkedinUrl}
+                    </a>
+                  ) : (
+                    <span className="text-xs text-[#64748B] italic">Not connected</span>
+                  )}
+                </div>
+              </div>
+              {profile?.linkedinUrl && (
+                <a
+                  href={profile.linkedinUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="p-1.5 rounded-lg text-[#64748B] hover:text-[#172554] hover:bg-white"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -1074,42 +1058,288 @@ const StudentProfile = () => {
             </Button>
           </div>
         </Card>
+      </div>
 
-        <ChangePasswordModal
-          isOpen={passwordModalOpen}
-          onClose={() => setPasswordModalOpen(false)}
-        />
+      <ChangePasswordModal
+        isOpen={passwordModalOpen}
+        onClose={() => setPasswordModalOpen(false)}
+      />
 
-        {/* Save Changes Floating Action Bar in Edit Mode */}
-        {isEditing && (
-          <div className="sticky bottom-4 z-20 bg-white/95 backdrop-blur-sm border border-[#DBEAFE] rounded-xl shadow-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3 mt-6">
-            <span className="text-xs text-[#172554] font-medium text-center sm:text-left">
-              You have unsaved edits in your academic profile.
-            </span>
-            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setIsEditing(false);
-                  fetchProfileData();
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                isLoading={saving}
-                icon={Save}
-              >
-                Save Profile Records
-              </Button>
+      {/* EDIT PROFILE POPUP MODAL */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        title="Edit Student Profile"
+        subtitle="Update personal contact details, academic scores, and technical skills"
+        maxWidth="max-w-2xl"
+      >
+        <form onSubmit={handleSaveProfile} className="space-y-5">
+          {/* Section A: Personal Information */}
+          <div className="space-y-3">
+            <h4 className="text-xs font-bold text-[#163A5F] uppercase tracking-wider pb-1.5 border-b border-[#DBEAFE]">
+              1. Personal Information
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <Input
+                label="Full Legal Name"
+                name="name"
+                icon={User}
+                value={formData.name}
+                onChange={handleInputChange}
+                error={errors.name}
+                required
+              />
+
+              <Input
+                label="Contact Phone Number"
+                name="phone"
+                type="tel"
+                placeholder="e.g. +91 9876543210"
+                icon={Phone}
+                value={formData.phone}
+                onChange={handleInputChange}
+                error={errors.phone}
+                helperText="Shared with recruiters upon shortlisting"
+              />
+            </div>
+
+            <div className="p-2.5 bg-[#EFF6FF] border border-[#DBEAFE] rounded-lg text-[11px] text-[#64748B] flex items-center gap-2">
+              <Lock className="w-3.5 h-3.5 text-[#2563EB] flex-shrink-0" />
+              <span>College Email (<strong>{profile?.email}</strong>) and Roll Number (<strong>{profile?.rollNumber}</strong>) are permanent institutional records and cannot be altered.</span>
             </div>
           </div>
-        )}
-      </form>
+
+          {/* Section B: Academic Records */}
+          <div className="space-y-3 pt-2">
+            <h4 className="text-xs font-bold text-[#163A5F] uppercase tracking-wider pb-1.5 border-b border-[#DBEAFE]">
+              2. Academic Performance & Backlogs
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-xs font-medium text-[#172554] mb-1.5">
+                  Department / Discipline <span className="text-[#DC2626]">*</span>
+                </label>
+                <select
+                  name="department"
+                  value={formData.department}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-[#DBEAFE] text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] bg-white text-[#172554]"
+                >
+                  <option value="">Select Department</option>
+                  {DEPARTMENTS.map((dept) => (
+                    <option key={dept} value={dept}>
+                      {dept}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[#172554] mb-1.5">
+                  Graduation Year (Batch) <span className="text-[#DC2626]">*</span>
+                </label>
+                <select
+                  name="batch"
+                  value={formData.batch}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-[#DBEAFE] text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] bg-white text-[#172554]"
+                >
+                  <option value="">Select Graduation Year</option>
+                  {GRADUATION_YEARS.map((yr) => (
+                    <option key={yr} value={yr}>
+                      Class of {yr}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <Input
+                label="Cumulative CGPA (0.00 - 10.00)"
+                name="cgpa"
+                type="number"
+                step="0.01"
+                min="0"
+                max="10"
+                placeholder="e.g. 8.25"
+                value={formData.cgpa}
+                onChange={handleInputChange}
+                error={errors.cgpa}
+                required
+              />
+
+              <Input
+                label="Active Backlogs"
+                name="activeBacklogs"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={formData.activeBacklogs}
+                onChange={handleInputChange}
+                error={errors.activeBacklogs}
+                required
+                helperText="Currently uncleared subjects"
+              />
+
+              <Input
+                label="Total Historical Backlogs"
+                name="totalBacklogs"
+                type="number"
+                min="0"
+                placeholder="0"
+                value={formData.totalBacklogs}
+                onChange={handleInputChange}
+                error={errors.totalBacklogs}
+                helperText="Total backlogs across all semesters"
+              />
+
+              <Input
+                label="10th Standard Marks (%)"
+                name="tenthPercentage"
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                placeholder="e.g. 85.0"
+                value={formData.tenthPercentage}
+                onChange={handleInputChange}
+                error={errors.tenthPercentage}
+              />
+
+              <div className="sm:col-span-2">
+                <Input
+                  label="12th / Diploma Marks (%)"
+                  name="twelfthPercentage"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  placeholder="e.g. 82.5"
+                  value={formData.twelfthPercentage}
+                  onChange={handleInputChange}
+                  error={errors.twelfthPercentage}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section C: Technical Skills */}
+          <div className="space-y-3 pt-2">
+            <h4 className="text-xs font-bold text-[#163A5F] uppercase tracking-wider pb-1.5 border-b border-[#DBEAFE]">
+              3. Technical Skills
+            </h4>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Add skill (e.g. React, Python, Docker)..."
+                icon={Code}
+                value={newSkill}
+                onChange={(e) => setNewSkill(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddSkill();
+                  }
+                }}
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                icon={Plus}
+                onClick={() => handleAddSkill()}
+              >
+                Add
+              </Button>
+            </div>
+
+            {/* Quick Suggestions */}
+            <div className="flex flex-wrap items-center gap-1.5 text-xs text-[#64748B]">
+              <span className="text-[11px] text-[#64748B]">Quick add:</span>
+              {COMMON_SKILLS.filter(
+                (s) => !formData.skills.some((sk) => sk.toLowerCase() === s.toLowerCase())
+              )
+                .slice(0, 6)
+                .map((skill) => (
+                  <button
+                    key={skill}
+                    type="button"
+                    onClick={() => handleAddSkill(skill)}
+                    className="px-2 py-0.5 rounded text-[11px] bg-[#F0F7FF] border border-[#DBEAFE] hover:bg-[#EFF6FF] text-[#2563EB] transition-colors"
+                  >
+                    + {skill}
+                  </button>
+                ))}
+            </div>
+
+            {/* Active Skills List */}
+            {formData.skills.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {formData.skills.map((skill) => (
+                  <span
+                    key={skill}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-[#EFF6FF] text-[#163A5F] border border-[#DBEAFE]"
+                  >
+                    {skill}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(skill)}
+                      className="text-[#64748B] hover:text-[#DC2626] focus:outline-none"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section D: Portfolio Links */}
+          <div className="space-y-3 pt-2">
+            <h4 className="text-xs font-bold text-[#163A5F] uppercase tracking-wider pb-1.5 border-b border-[#DBEAFE]">
+              4. Professional Links
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <Input
+                label="GitHub Profile URL"
+                name="githubUrl"
+                placeholder="https://github.com/username"
+                icon={Github}
+                value={formData.githubUrl}
+                onChange={handleInputChange}
+                error={errors.githubUrl}
+              />
+              <Input
+                label="LinkedIn Profile URL"
+                name="linkedinUrl"
+                placeholder="https://linkedin.com/in/username"
+                icon={Linkedin}
+                value={formData.linkedinUrl}
+                onChange={handleInputChange}
+                error={errors.linkedinUrl}
+              />
+            </div>
+          </div>
+
+          {/* Modal Action Buttons */}
+          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-[#DBEAFE]">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              size="sm"
+              isLoading={saving}
+              icon={Save}
+            >
+              Save Profile Changes
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 };
