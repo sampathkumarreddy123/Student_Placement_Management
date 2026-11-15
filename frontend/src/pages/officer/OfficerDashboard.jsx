@@ -24,13 +24,16 @@ import {
   Sparkles,
   MapPin,
   CheckCircle,
+  User,
 } from 'lucide-react';
+import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/studentService';
 import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Badge from '../../components/common/Badge';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const formatRelativeTime = (dateString) => {
   if (!dateString) return '';
@@ -47,6 +50,7 @@ const formatRelativeTime = (dateString) => {
 
 const OfficerDashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [dashboardData, setDashboardData] = useState(null);
@@ -212,21 +216,36 @@ const OfficerDashboard = () => {
       {/* SECTION 1: Top Navigation Header & Operations Bar */}
       <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm p-6 relative overflow-hidden">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#EFF6FF] text-[#163A5F] border border-[#DBEAFE]">
-                Placement Cell Administration
-              </span>
-              <span className="text-xs text-[#64748B]">•</span>
-              <span className="text-xs text-[#64748B] font-medium">Academic Year 2025–2026</span>
+          <div className="flex items-center gap-4">
+            <Link to="/officer/profile" className="flex-shrink-0 group" title="View & Edit Officer Profile">
+              <div className="w-14 h-14 rounded-2xl bg-[#EFF6FF] border border-[#DBEAFE] group-hover:border-[#2563EB] flex items-center justify-center text-[#163A5F] font-bold text-xl overflow-hidden shadow-sm transition-all">
+                {user?.profilePhoto ? (
+                  <img
+                    src={getImageUrl(user.profilePhoto)}
+                    alt={user?.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{(user?.name || 'O').charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+            </Link>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#EFF6FF] text-[#163A5F] border border-[#DBEAFE]">
+                  Placement Cell Administration
+                </span>
+                <span className="text-xs text-[#64748B]">•</span>
+                <span className="text-xs text-[#64748B] font-medium">Academic Year 2025–2026</span>
+              </div>
+              <h1 className="text-2xl font-bold text-[#172554] tracking-tight">
+                Welcome, {user?.name || 'Placement Officer'}
+              </h1>
+              <p className="text-xs text-[#64748B] mt-0.5 max-w-2xl">
+                Live institutional dashboard tracking corporate recruitment drives, applicant progression,
+                and department-level placement performance.
+              </p>
             </div>
-            <h1 className="text-2xl font-bold text-[#172554] tracking-tight">
-              Placement Officer Operations
-            </h1>
-            <p className="text-xs text-[#64748B] mt-1 max-w-2xl">
-              Live institutional dashboard tracking corporate recruitment drives, applicant progression,
-              and department-level placement performance from MongoDB.
-            </p>
           </div>
 
           {/* Action buttons */}
@@ -241,9 +260,14 @@ const OfficerDashboard = () => {
             >
               {refreshing ? 'Updating...' : 'Refresh Data'}
             </Button>
+            <Link to="/officer/profile">
+              <Button variant="outline" size="sm" icon={User}>
+                Profile
+              </Button>
+            </Link>
             <Link to="/officer/reports">
               <Button variant="outline" size="sm" icon={BarChart3}>
-                Reports & Analytics
+                Reports
               </Button>
             </Link>
             <Link to="/officer/companies?action=new">
@@ -253,7 +277,7 @@ const OfficerDashboard = () => {
             </Link>
             <Link to="/officer/drives?action=new">
               <Button size="sm" icon={PlusCircle}>
-                Create Placement Drive
+                Create Drive
               </Button>
             </Link>
           </div>

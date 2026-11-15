@@ -23,6 +23,7 @@ import {
   Github,
   Linkedin,
   Camera,
+  Trash2,
   Layers,
   Sparkles,
   RotateCcw,
@@ -42,6 +43,7 @@ import PageHeader from '../../components/common/PageHeader';
 import Modal from '../../components/common/Modal';
 import ChangePasswordModal from '../../components/common/ChangePasswordModal';
 import { useToast } from '../../context/ToastContext';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const DEPARTMENTS = [
   'Computer Science',
@@ -74,7 +76,7 @@ const COMMON_SKILLS = [
 
 const StudentProfile = () => {
   const toast = useToast();
-  const { user, updateUserProfile } = useAuth();
+  const { user, updateUserProfile, updateUserData } = useAuth();
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -388,7 +390,10 @@ const StudentProfile = () => {
       data.append('avatar', file);
 
       const res = await studentService.uploadAvatar(data);
-      setProfile((prev) => ({ ...prev, profilePhoto: res.profilePhoto }));
+      const updatedPhoto = res.profilePhoto || '';
+      setProfile((prev) => ({ ...prev, profilePhoto: updatedPhoto }));
+      if (updateUserData) updateUserData({ profilePhoto: updatedPhoto });
+      if (updateUserProfile) updateUserProfile({ ...profile, profilePhoto: updatedPhoto });
       toast.success('Profile photo updated successfully!');
       setNotification({
         type: 'success',
@@ -403,6 +408,24 @@ const StudentProfile = () => {
     } finally {
       setUploadingPhoto(false);
       e.target.value = '';
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!profile?.profilePhoto) return;
+    if (!window.confirm('Are you sure you want to remove your profile photo?')) return;
+
+    try {
+      setUploadingPhoto(true);
+      await studentService.deleteAvatar();
+      setProfile((prev) => ({ ...prev, profilePhoto: '' }));
+      if (updateUserData) updateUserData({ profilePhoto: '' });
+      if (updateUserProfile) updateUserProfile({ ...profile, profilePhoto: '' });
+      toast.success('Profile photo removed.');
+    } catch (err) {
+      toast.error('Could not remove photo.');
+    } finally {
+      setUploadingPhoto(false);
     }
   };
 
@@ -500,9 +523,9 @@ const StudentProfile = () => {
           <div className="flex items-center gap-5">
             <div className="relative group">
               <div className="w-20 h-20 rounded-2xl bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden">
-                {profile?.profilePhoto ? (
+                {profile?.profilePhoto || user?.profilePhoto ? (
                   <img
-                    src={profile.profilePhoto}
+                    src={getImageUrl(profile?.profilePhoto || user?.profilePhoto)}
                     alt={profile?.name || user?.name}
                     className="w-full h-full object-cover"
                   />
@@ -521,6 +544,19 @@ const StudentProfile = () => {
               >
                 <Camera className="w-3.5 h-3.5" />
               </button>
+
+              {/* Remove Photo Button */}
+              {(profile?.profilePhoto || user?.profilePhoto) && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  disabled={uploadingPhoto}
+                  className="absolute -top-1 -right-1 p-1 bg-rose-500 hover:bg-rose-600 text-white rounded-md shadow-sm border border-white transition-colors"
+                  title="Remove Profile Photo"
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              )}
               <input
                 ref={photoInputRef}
                 type="file"

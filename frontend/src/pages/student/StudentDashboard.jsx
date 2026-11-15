@@ -36,6 +36,7 @@ import {
   TableSkeleton,
 } from '../../components/common/Skeleton';
 import { formatDate, formatLPA } from '../../utils/formatters';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const StudentDashboard = () => {
   const { user } = useAuth();
@@ -135,24 +136,37 @@ const StudentDashboard = () => {
       {/* 1. TOP DASHBOARD OVERVIEW SECTION */}
       <div className="bg-white rounded-2xl border border-[#DBEAFE] p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative">
         {/* Left: Welcome & Student Overview */}
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#172554] tracking-tight">
-              Welcome back, {user?.name || 'Student'}!
-            </h1>
-            <Badge
-              variant={selectedCompaniesCount > 0 ? 'success' : 'primary'}
-              size="sm"
-            >
-              {selectedCompaniesCount > 0 ? 'Placed' : 'Seeking Placement'}
-            </Badge>
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-xl flex-shrink-0 overflow-hidden shadow-sm">
+            {user?.profilePhoto ? (
+              <img
+                src={getImageUrl(user.profilePhoto)}
+                alt={user?.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span>{(user?.name || 'S').charAt(0).toUpperCase()}</span>
+            )}
           </div>
+          <div className="space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#172554] tracking-tight">
+                Welcome back, {user?.name || 'Student'}!
+              </h1>
+              <Badge
+                variant={selectedCompaniesCount > 0 ? 'success' : 'primary'}
+                size="sm"
+              >
+                {selectedCompaniesCount > 0 ? 'Placed' : 'Seeking Placement'}
+              </Badge>
+            </div>
 
-          <p className="text-xs text-[#64748B] flex items-center gap-2">
-            <span className="font-semibold text-[#172554]">Academic Year 2025–2026</span>
-            <span>•</span>
-            <span>Campus Placement Portal</span>
-          </p>
+            <p className="text-xs text-[#64748B] flex items-center gap-2">
+              <span className="font-semibold text-[#172554]">Academic Year 2025–2026</span>
+              <span>•</span>
+              <span>Campus Placement Portal</span>
+            </p>
+          </div>
         </div>
 
         {/* Right: Profile Completion & Notification Bell */}

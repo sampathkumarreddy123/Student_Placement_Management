@@ -21,6 +21,7 @@ import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import Pagination from '../../components/common/Pagination';
 import StudentProfileModal from '../../components/officer/StudentProfileModal';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const DEPARTMENTS = [
   'All Departments',
@@ -206,16 +207,31 @@ const ManageStudents = () => {
               <tbody className="divide-y divide-[#DBEAFE]/60">
                 {paginatedStudents.map((profile) => (
                   <tr key={profile._id} className="hover:bg-[#F0F7FF] transition-colors">
-                    <td className="py-3.5 px-4 min-w-[200px]">
-                      <div className="font-semibold text-[#172554] leading-tight">
-                        {profile.user?.name || 'Student Name'}
-                      </div>
-                      <div className="text-[11px] text-[#64748B] mt-0.5 flex items-center gap-1.5">
-                        <span className="font-mono text-[#163A5F] bg-[#EFF6FF] border border-[#DBEAFE] px-1.5 py-0.2 rounded font-semibold">
-                          {profile.rollNumber}
-                        </span>
-                        <span>•</span>
-                        <span>{profile.user?.email}</span>
+                    <td className="py-3.5 px-4 min-w-[220px]">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-xs flex-shrink-0 overflow-hidden shadow-sm">
+                          {profile.profilePhoto || profile.user?.profilePhoto ? (
+                            <img
+                              src={getImageUrl(profile.profilePhoto || profile.user?.profilePhoto)}
+                              alt={profile.user?.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span>{profile.user?.name ? profile.user.name.charAt(0).toUpperCase() : 'S'}</span>
+                          )}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-[#172554] leading-tight truncate">
+                            {profile.user?.name || 'Student Name'}
+                          </div>
+                          <div className="text-[11px] text-[#64748B] mt-0.5 flex items-center gap-1.5 truncate">
+                            <span className="font-mono text-[#163A5F] bg-[#EFF6FF] border border-[#DBEAFE] px-1.5 py-0.2 rounded font-semibold">
+                              {profile.rollNumber}
+                            </span>
+                            <span>•</span>
+                            <span className="truncate">{profile.user?.email}</span>
+                          </div>
+                        </div>
                       </div>
                     </td>
 

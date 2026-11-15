@@ -38,6 +38,7 @@ import EmptyState from '../../components/common/EmptyState';
 import Pagination from '../../components/common/Pagination';
 import { useToast } from '../../context/ToastContext';
 import { formatDate, formatLPA } from '../../utils/formatters';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const STATUS_OPTIONS = [
   'All',
@@ -519,7 +520,7 @@ const ManageApplications = () => {
                         <div className="flex items-center gap-2.5">
                           {student.profilePhoto ? (
                             <img
-                              src={student.profilePhoto}
+                              src={getImageUrl(student.profilePhoto)}
                               alt={student.name}
                               className="w-8 h-8 rounded-full object-cover border border-[#DBEAFE] flex-shrink-0"
                             />

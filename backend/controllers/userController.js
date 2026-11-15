@@ -6,6 +6,7 @@ import StudentProfile from '../models/StudentProfile.js';
 import Application from '../models/Application.js';
 import PlacementDrive from '../models/PlacementDrive.js';
 import Company from '../models/Company.js';
+import OfficerProfile from '../models/OfficerProfile.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -257,7 +258,10 @@ export const updateMyProfile = async (req, res, next) => {
     if (department !== undefined) profile.department = department.trim();
     if (batch !== undefined) profile.batch = Number(batch);
     if (phone !== undefined) profile.phone = phone.trim();
-    if (profilePhoto !== undefined) profile.profilePhoto = profilePhoto;
+    if (profilePhoto !== undefined) {
+      profile.profilePhoto = profilePhoto;
+      await User.findByIdAndUpdate(req.user._id, { profilePhoto });
+    }
 
     if (skills !== undefined) {
       profile.skills = Array.isArray(skills)
@@ -393,9 +397,9 @@ export const downloadResumeFile = async (req, res, next) => {
   }
 };
 
-// @desc    Upload student profile photo / avatar
+// @desc    Upload profile photo / avatar (Students & Placement Officers)
 // @route   POST /api/users/profile/avatar
-// @access  Private (Student)
+// @access  Private (Student & Officer)
 export const uploadAvatarFile = async (req, res, next) => {
   try {
     if (!req.file) {
@@ -407,15 +411,190 @@ export const uploadAvatarFile = async (req, res, next) => {
 
     const photoUrl = `/uploads/avatars/${req.file.filename}`;
 
-    await Promise.all([
-      User.findByIdAndUpdate(req.user._id, { profilePhoto: photoUrl }),
-      StudentProfile.findOneAndUpdate({ user: req.user._id }, { profilePhoto: photoUrl }),
-    ]);
+    // Generate Base64 data URL for resilience on ephemeral serverless hosts (Render, Vercel)
+    let effectivePhoto = photoUrl;
+    try {
+      if (fs.existsSync(req.file.path)) {
+        const fileBuffer = fs.readFileSync(req.file.path);
+        const mime = req.file.mimetype || 'image/jpeg';
+        effectivePhoto = `data:${mime};base64,${fileBuffer.toString('base64')}`;
+      }
+    } catch (readErr) {
+      console.warn('[Avatar Upload] Base64 generation warning, using file path:', readErr.message);
+      effectivePhoto = photoUrl;
+    }
+
+    // Always update User record
+    await User.findByIdAndUpdate(req.user._id, { profilePhoto: effectivePhoto });
+
+    // Update role-specific profile
+    if (req.user.role === 'student') {
+      await StudentProfile.findOneAndUpdate(
+        { user: req.user._id },
+        { profilePhoto: effectivePhoto }
+      );
+    } else if (req.user.role === 'officer') {
+      await OfficerProfile.findOneAndUpdate(
+        { user: req.user._id },
+        { profilePhoto: effectivePhoto },
+        { upsert: true, new: true }
+      );
+    }
 
     res.status(200).json({
       success: true,
       message: 'Profile photo updated successfully!',
-      profilePhoto: photoUrl,
+      profilePhoto: effectivePhoto,
+      relativeUrl: photoUrl,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Remove / Clear profile photo
+// @route   DELETE /api/users/profile/avatar
+// @access  Private (Student & Officer)
+export const deleteAvatarFile = async (req, res, next) => {
+  try {
+    await User.findByIdAndUpdate(req.user._id, { profilePhoto: '' });
+
+    if (req.user.role === 'student') {
+      await StudentProfile.findOneAndUpdate({ user: req.user._id }, { profilePhoto: '' });
+    } else if (req.user.role === 'officer') {
+      await OfficerProfile.findOneAndUpdate({ user: req.user._id }, { profilePhoto: '' });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile photo removed successfully.',
+      profilePhoto: '',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get Placement Officer profile
+// @route   GET /api/users/officer/profile
+// @access  Private (Officer)
+export const getOfficerProfile = async (req, res, next) => {
+  try {
+    let officerProfile = await OfficerProfile.findOne({ user: req.user._id });
+    if (!officerProfile) {
+      officerProfile = await OfficerProfile.create({
+        user: req.user._id,
+        designation: 'Training & Placement Officer',
+        department: 'Training & Placement Cell',
+        officeLocation: 'Training & Placement Office, Admin Block',
+        profilePhoto: req.user.profilePhoto || '',
+      });
+    }
+
+    const effectivePhoto = req.user.profilePhoto || officerProfile.profilePhoto || '';
+
+    res.status(200).json({
+      success: true,
+      profile: {
+        _id: officerProfile._id,
+        user: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+        designation: officerProfile.designation || 'Placement Officer',
+        department: officerProfile.department || 'Training & Placement Cell',
+        phone: officerProfile.phone || '',
+        officeLocation:
+          officerProfile.officeLocation || 'Training & Placement Office, Admin Block',
+        employeeId: officerProfile.employeeId || '',
+        linkedinUrl: officerProfile.linkedinUrl || '',
+        bio: officerProfile.bio || '',
+        profilePhoto: effectivePhoto,
+        createdAt: officerProfile.createdAt,
+        updatedAt: officerProfile.updatedAt,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update Placement Officer profile
+// @route   PUT /api/users/officer/profile
+// @access  Private (Officer)
+export const updateOfficerProfile = async (req, res, next) => {
+  try {
+    const {
+      name,
+      designation,
+      department,
+      phone,
+      officeLocation,
+      employeeId,
+      linkedinUrl,
+      bio,
+      profilePhoto,
+    } = req.body;
+
+    let officerProfile = await OfficerProfile.findOne({ user: req.user._id });
+    if (!officerProfile) {
+      officerProfile = new OfficerProfile({ user: req.user._id });
+    }
+
+    if (designation !== undefined) officerProfile.designation = designation.trim();
+    if (department !== undefined) officerProfile.department = department.trim();
+    if (phone !== undefined) officerProfile.phone = phone.trim();
+    if (officeLocation !== undefined) officerProfile.officeLocation = officeLocation.trim();
+    if (employeeId !== undefined) officerProfile.employeeId = employeeId.trim();
+    if (bio !== undefined) officerProfile.bio = bio.trim();
+
+    if (linkedinUrl !== undefined) {
+      const urlPattern = /^https?:\/\/.+/i;
+      if (linkedinUrl && !urlPattern.test(linkedinUrl.trim())) {
+        return res.status(400).json({
+          success: false,
+          message: 'LinkedIn URL must start with http:// or https://',
+        });
+      }
+      officerProfile.linkedinUrl = linkedinUrl ? linkedinUrl.trim() : '';
+    }
+
+    if (profilePhoto !== undefined) {
+      officerProfile.profilePhoto = profilePhoto;
+      await User.findByIdAndUpdate(req.user._id, { profilePhoto });
+    }
+
+    await officerProfile.save();
+
+    let updatedUser = req.user;
+    if (name && name.trim() && name.trim() !== req.user.name) {
+      updatedUser = await User.findByIdAndUpdate(
+        req.user._id,
+        { name: name.trim() },
+        { new: true }
+      );
+    }
+
+    const effectivePhoto = updatedUser.profilePhoto || officerProfile.profilePhoto || '';
+
+    res.status(200).json({
+      success: true,
+      message: 'Placement Officer profile updated successfully!',
+      profile: {
+        _id: officerProfile._id,
+        user: req.user._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        designation: officerProfile.designation,
+        department: officerProfile.department,
+        phone: officerProfile.phone,
+        officeLocation: officerProfile.officeLocation,
+        employeeId: officerProfile.employeeId,
+        linkedinUrl: officerProfile.linkedinUrl,
+        bio: officerProfile.bio,
+        profilePhoto: effectivePhoto,
+      },
     });
   } catch (error) {
     next(error);

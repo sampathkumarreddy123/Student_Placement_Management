@@ -23,6 +23,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { notificationService } from '../../services/notificationService';
 import Badge from './Badge';
 import ChangePasswordModal from './ChangePasswordModal';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const formatRelativeTime = (dateString) => {
   if (!dateString) return '';
@@ -297,9 +298,20 @@ const Navbar = ({ onToggleSidebar }) => {
             <div className="relative">
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-9 h-9 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] hover:bg-[#DBEAFE] transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                className="w-9 h-9 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] hover:bg-[#DBEAFE] transition-colors focus:outline-none focus:ring-2 focus:ring-[#2563EB] overflow-hidden shadow-sm"
+                title={user.name}
               >
-                <UserIcon className="w-4 h-4 text-[#2563EB]" />
+                {user.profilePhoto ? (
+                  <img
+                    src={getImageUrl(user.profilePhoto)}
+                    alt={user.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xs font-bold text-[#163A5F]">
+                    {(user.name || 'U').charAt(0).toUpperCase()}
+                  </span>
+                )}
               </button>
 
               {dropdownOpen && (
@@ -308,10 +320,25 @@ const Navbar = ({ onToggleSidebar }) => {
                     className="fixed inset-0 z-10"
                     onClick={() => setDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-[#DBEAFE] py-1.5 z-20 text-sm">
-                    <div className="px-4 py-2 border-b border-[#DBEAFE]/80">
-                      <p className="font-bold text-[#172554] truncate">{user.name}</p>
-                      <p className="text-xs text-[#64748B] truncate">{user.email}</p>
+                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl shadow-lg border border-[#DBEAFE] py-1.5 z-20 text-sm">
+                    <div className="px-4 py-2.5 border-b border-[#DBEAFE]/80 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] overflow-hidden flex-shrink-0">
+                        {user.profilePhoto ? (
+                          <img
+                            src={getImageUrl(user.profilePhoto)}
+                            alt={user.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xs font-bold text-[#163A5F]">
+                            {(user.name || 'U').charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-[#172554] truncate">{user.name}</p>
+                        <p className="text-xs text-[#64748B] truncate">{user.email}</p>
+                      </div>
                     </div>
 
                     {isStudent && (
@@ -322,6 +349,17 @@ const Navbar = ({ onToggleSidebar }) => {
                       >
                         <UserIcon className="w-4 h-4 text-[#2563EB]" />
                         My Profile
+                      </Link>
+                    )}
+
+                    {isOfficer && (
+                      <Link
+                        to="/officer/profile"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF]"
+                      >
+                        <UserIcon className="w-4 h-4 text-[#2563EB]" />
+                        Officer Profile
                       </Link>
                     )}
 

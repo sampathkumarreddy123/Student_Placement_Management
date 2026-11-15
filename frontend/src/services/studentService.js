@@ -29,6 +29,11 @@ export const studentService = {
     return response.data;
   },
 
+  deleteAvatar: async () => {
+    const response = await api.delete('/users/profile/avatar');
+    return response.data;
+  },
+
   downloadResume: async () => {
     const response = await api.get('/users/profile/resume/download', {
       responseType: 'blob',

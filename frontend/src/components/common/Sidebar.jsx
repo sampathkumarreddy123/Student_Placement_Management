@@ -36,6 +36,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
     { label: 'Student Database', to: '/officer/students', icon: Users },
     { label: 'Applications & Results', to: '/officer/applications', icon: CheckCircle },
     { label: 'Reports & Analytics', to: '/officer/reports', icon: BarChart3 },
+    { label: 'Officer Profile', to: '/officer/profile', icon: User },
     { label: 'Notifications', to: '/notifications', icon: Bell },
   ];
 

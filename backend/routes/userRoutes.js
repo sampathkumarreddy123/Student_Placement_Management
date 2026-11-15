@@ -5,6 +5,9 @@ import {
   uploadResumeFile,
   downloadResumeFile,
   uploadAvatarFile,
+  deleteAvatarFile,
+  getOfficerProfile,
+  updateOfficerProfile,
   getAllStudents,
   getStudentById,
   getPlacementStats,
@@ -26,15 +29,22 @@ router.post(
   uploadResumeFile
 );
 router.get('/profile/resume/download', protect, authorize('student'), downloadResumeFile);
+
+// Profile Avatar routes (Both Student & Placement Officer)
 router.post(
   '/profile/avatar',
   protect,
-  authorize('student'),
+  authorize('student', 'officer'),
   uploadAvatar.single('avatar'),
   uploadAvatarFile
 );
+router.delete('/profile/avatar', protect, authorize('student', 'officer'), deleteAvatarFile);
 
-// Officer routes
+// Officer Profile Management routes
+router.get('/officer/profile', protect, authorize('officer'), getOfficerProfile);
+router.put('/officer/profile', protect, authorize('officer'), updateOfficerProfile);
+
+// Officer Management routes
 router.get('/students', protect, authorize('officer'), getAllStudents);
 router.get('/students/:id', protect, authorize('officer'), getStudentById);
 router.get('/stats', protect, authorize('officer'), getPlacementStats);

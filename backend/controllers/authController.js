@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User.js';
 import StudentProfile from '../models/StudentProfile.js';
+import OfficerProfile from '../models/OfficerProfile.js';
 import { generateTokenAndSetCookie, clearTokenCookie } from '../utils/generateToken.js';
 import emailService, { sendEmail } from '../services/emailService.js';
 
@@ -256,7 +257,11 @@ const authenticateUser = async ({ email, password, requiredRole, rememberMe = fa
       'placedCompany',
       'name industry'
     );
+  } else if (user.role === 'officer') {
+    profile = await OfficerProfile.findOne({ user: user._id });
   }
+
+  const effectivePhoto = user.profilePhoto || profile?.profilePhoto || '';
 
   // Set secure HTTP-only cookie
   const token = generateTokenAndSetCookie(res, user._id, user.role, rememberMe);
@@ -273,6 +278,7 @@ const authenticateUser = async ({ email, password, requiredRole, rememberMe = fa
         name: user.name,
         email: user.email,
         role: user.role,
+        profilePhoto: effectivePhoto,
         isEmailVerified: Boolean(user.isEmailVerified),
         profile: profile || null,
       },
@@ -459,15 +465,24 @@ export const getMe = async (req, res, next) => {
         'placedCompany',
         'name industry'
       );
+    } else if (user.role === 'officer') {
+      profile = await OfficerProfile.findOne({ user: user._id });
+      if (!profile) {
+        profile = await OfficerProfile.create({ user: user._id });
+      }
     }
+
+    const effectivePhoto = user.profilePhoto || profile?.profilePhoto || '';
 
     res.status(200).json({
       success: true,
       user: {
         id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        profilePhoto: effectivePhoto,
         isEmailVerified: Boolean(user.isEmailVerified),
         createdAt: user.createdAt,
         profile: profile || null,

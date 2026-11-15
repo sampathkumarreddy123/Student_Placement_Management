@@ -81,8 +81,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const updateUserData = (updatedData) => {
+    setUser((prev) => (prev ? { ...prev, ...updatedData } : null));
+  };
+
   const updateUserProfile = (newProfile) => {
-    setUser((prev) => (prev ? { ...prev, profile: newProfile } : null));
+    setUser((prev) =>
+      prev
+        ? {
+            ...prev,
+            profile: newProfile,
+            profilePhoto: newProfile?.profilePhoto || prev.profilePhoto || '',
+          }
+        : null
+    );
   };
 
   const value = {
@@ -99,6 +111,7 @@ export const AuthProvider = ({ children }) => {
     logout,
     checkAuth,
     updateUserProfile,
+    updateUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -22,6 +22,7 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import { studentService } from '../../services/studentService';
 import { applicationService } from '../../services/applicationService';
 import { formatDate, formatLPA } from '../../utils/formatters';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
   const [data, setData] = useState(null);
@@ -112,7 +113,7 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
             <div className="flex items-center gap-3.5">
               {student.profilePhoto ? (
                 <img
-                  src={student.profilePhoto}
+                  src={getImageUrl(student.profilePhoto)}
                   alt={student.name}
                   className="w-14 h-14 rounded-full object-cover border-2 border-[#DBEAFE] shadow-sm"
                 />
