@@ -1,7 +1,6 @@
 import React from 'react';
 import Modal from './Modal';
 import { getImageUrl } from '../../utils/imageUrl';
-import { User, Eye, X } from 'lucide-react';
 
 const ProfilePictureModal = ({ isOpen, onClose, user }) => {
   if (!user) return null;

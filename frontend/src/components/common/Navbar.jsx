@@ -14,7 +14,7 @@ import {
   FileText,
   ArrowRight,
   KeyRound,
-  Eye,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { notificationService } from '../../services/notificationService';
@@ -284,12 +284,14 @@ const Navbar = ({ onToggleSidebar }) => {
               )}
             </div>
 
-            {/* Profile Avatar Dropdown */}
-            <div className="relative">
+            {/* Profile Avatar & Account Menu */}
+            <div className="relative flex items-center bg-[#F0F7FF] border border-[#DBEAFE] rounded-full p-1 pl-1 pr-2.5 shadow-sm">
+              {/* Profile Icon - Clicking directly opens the full profile picture popup modal */}
               <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="w-9 h-9 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] hover:bg-[#DBEAFE] transition-colors focus:outline-none focus:ring-2 focus:ring-[#172554] overflow-hidden shadow-sm"
-                title={user.name}
+                type="button"
+                onClick={() => setShowPhotoModal(true)}
+                className="w-8 h-8 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] hover:ring-2 hover:ring-[#172554] transition-all focus:outline-none overflow-hidden cursor-pointer flex-shrink-0"
+                title="Click to view full profile picture"
               >
                 {user.profilePhoto ? (
                   <img
@@ -304,23 +306,36 @@ const Navbar = ({ onToggleSidebar }) => {
                 )}
               </button>
 
+              {/* Account Dropdown Toggle */}
+              <button
+                type="button"
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-1.5 ml-1.5 text-[#172554] hover:text-[#2563EB] text-xs font-semibold focus:outline-none"
+                title="Account menu"
+              >
+                <span className="hidden sm:inline max-w-[100px] truncate">
+                  {user.name?.split(' ')[0] || 'Account'}
+                </span>
+                <ChevronDown className="w-3.5 h-3.5 text-[#64748B]" />
+              </button>
+
               {dropdownOpen && (
                 <>
                   <div
                     className="fixed inset-0 z-10"
                     onClick={() => setDropdownOpen(false)}
                   />
-                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-[#DBEAFE] py-1.5 z-20 text-sm">
-                    {/* Clickable Profile Card to View Photo */}
-                    <div
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        setShowPhotoModal(true);
-                      }}
-                      className="px-4 py-3 border-b border-[#DBEAFE]/80 flex items-center gap-3 cursor-pointer hover:bg-[#F0F7FF] transition-colors group"
-                      title="Click to view full profile picture"
-                    >
-                      <div className="w-10 h-10 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] overflow-hidden flex-shrink-0 group-hover:ring-2 group-hover:ring-[#172554] transition-all">
+                  <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-[#DBEAFE] py-1.5 z-20 text-sm">
+                    {/* User Info Header (Clean & Minimal) */}
+                    <div className="px-4 py-3 border-b border-[#DBEAFE]/80 flex items-center gap-3">
+                      <div
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          setShowPhotoModal(true);
+                        }}
+                        className="w-10 h-10 rounded-full bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] overflow-hidden flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-[#172554] transition-all"
+                        title="Click to view full profile picture"
+                      >
                         {user.profilePhoto ? (
                           <img
                             src={getImageUrl(user.profilePhoto)}
@@ -334,32 +349,19 @@ const Navbar = ({ onToggleSidebar }) => {
                         )}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="font-bold text-[#172554] truncate text-xs sm:text-sm">{user.name}</p>
-                          <Eye className="w-3.5 h-3.5 text-[#64748B] group-hover:text-[#172554] flex-shrink-0 ml-1" />
-                        </div>
+                        <p className="font-bold text-[#172554] truncate text-xs sm:text-sm">{user.name}</p>
                         <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
-                        <span className="text-[10px] text-[#172554] font-medium block mt-0.5 group-hover:underline">View Full Photo</span>
+                        <span className="text-[10px] text-[#0D9488] font-semibold uppercase tracking-wider block mt-0.5">
+                          {isOfficer ? 'Placement Officer' : 'Student'}
+                        </span>
                       </div>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        setShowPhotoModal(true);
-                      }}
-                      className="w-full flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF] text-left text-xs sm:text-sm"
-                    >
-                      <Eye className="w-4 h-4 text-[#172554]" />
-                      <span>View Profile Picture</span>
-                    </button>
 
                     {isStudent && (
                       <Link
                         to="/student/profile"
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF]"
+                        className="flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF] text-xs sm:text-sm"
                       >
                         <UserIcon className="w-4 h-4 text-[#172554]" />
                         My Profile
@@ -370,7 +372,7 @@ const Navbar = ({ onToggleSidebar }) => {
                       <Link
                         to="/officer/profile"
                         onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF]"
+                        className="flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF] text-xs sm:text-sm"
                       >
                         <UserIcon className="w-4 h-4 text-[#172554]" />
                         Officer Profile
