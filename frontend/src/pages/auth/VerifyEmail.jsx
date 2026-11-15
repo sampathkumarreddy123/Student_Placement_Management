@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   CheckCircle2,
@@ -28,25 +28,32 @@ const VerifyEmail = () => {
   const [resendLoading, setResendLoading] = useState(false);
   const [resendSuccess, setResendSuccess] = useState('');
   const [resendError, setResendError] = useState('');
+  const [devVerifyUrl, setDevVerifyUrl] = useState('');
+
+  const verifiedRef = useRef(false);
 
   useEffect(() => {
+    const cleanToken = (token || '').trim();
+    if (!cleanToken) {
+      setErrorMessage('Verification token is missing from the link.');
+      setLoading(false);
+      return;
+    }
+
+    if (verifiedRef.current) return;
+    verifiedRef.current = true;
+
     let isMounted = true;
 
     const performVerification = async () => {
-      if (!token) {
-        setErrorMessage('Verification token is missing from the link.');
-        setLoading(false);
-        return;
-      }
-
       try {
         setLoading(true);
-        await authService.verifyEmail(token);
+        await authService.verifyEmail(cleanToken);
         if (isMounted) {
           setSuccess(true);
-          // Refresh session to update isEmailVerified flag
+          setErrorMessage('');
           if (checkAuth) {
-            await checkAuth();
+            checkAuth();
           }
         }
       } catch (err) {
@@ -69,7 +76,7 @@ const VerifyEmail = () => {
     return () => {
       isMounted = false;
     };
-  }, [token, checkAuth]);
+  }, [token]);
 
   const handleResend = async (e) => {
     e.preventDefault();
@@ -84,7 +91,11 @@ const VerifyEmail = () => {
       setResendLoading(true);
       setResendError('');
       setResendSuccess('');
+      setDevVerifyUrl('');
       const res = await authService.resendVerification(targetEmail);
+      if (res?.devVerifyUrl) {
+        setDevVerifyUrl(res.devVerifyUrl);
+      }
       setResendSuccess(
         res.message || 'A fresh verification email has been sent. Please check your inbox.'
       );
@@ -183,6 +194,20 @@ const VerifyEmail = () => {
 
           {resendSuccess && (
             <Alert type="success" message={resendSuccess} className="text-xs" />
+          )}
+
+          {devVerifyUrl && (
+            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-left text-xs space-y-1.5 shadow-sm">
+              <span className="font-bold text-amber-900 block">
+                Direct Verification Link:
+              </span>
+              <a
+                href={devVerifyUrl}
+                className="text-[#2563EB] hover:text-[#163A5F] underline font-medium break-all block"
+              >
+                {devVerifyUrl}
+              </a>
+            </div>
           )}
 
           {resendError && (

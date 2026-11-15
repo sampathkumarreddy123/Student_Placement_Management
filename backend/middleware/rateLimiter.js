@@ -15,28 +15,28 @@ export const authLimiter = rateLimit({
   },
 });
 
-// Strict rate limiter for password reset requests (prevents email spamming)
+// Rate limiter for password reset requests (prevents email spamming)
 export const passwordResetLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per windowMs
+  max: 20, // 20 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
   skip: isTestEnv,
   message: {
     success: false,
-    message: 'Too many password reset requests. Please wait 15 minutes before requesting another reset link.',
+    message: 'Too many password reset requests. Please wait a few minutes before requesting another reset link.',
   },
 });
 
 // Rate limiter for resending verification emails
 export const resendVerificationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 requests per windowMs
+  max: 20, // 20 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
   skip: isTestEnv,
   message: {
     success: false,
-    message: 'Too many verification email requests. Please wait 15 minutes before requesting a new link.',
+    message: 'Too many verification email requests. Please wait a few minutes before requesting a new link.',
   },
 });

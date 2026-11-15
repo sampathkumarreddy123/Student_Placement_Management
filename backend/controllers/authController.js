@@ -6,6 +6,30 @@ import OfficerProfile from '../models/OfficerProfile.js';
 import { generateTokenAndSetCookie, clearTokenCookie } from '../utils/generateToken.js';
 import emailService, { sendEmail } from '../services/emailService.js';
 
+/**
+ * Dynamically resolves the frontend URL based on client request headers (Vercel, LAN, or local)
+ */
+export const getFrontendBaseUrl = (req) => {
+  const origin = req.get('origin');
+  if (origin && !origin.includes(':5000')) {
+    return origin.replace(/\/+$/, '');
+  }
+  const referer = req.get('referer');
+  if (referer) {
+    try {
+      const parsed = new URL(referer);
+      if (!parsed.host.includes(':5000')) {
+        return `${parsed.protocol}//${parsed.host}`.replace(/\/+$/, '');
+      }
+    } catch (_) {}
+  }
+  return (
+    process.env.FRONTEND_URL ||
+    process.env.CLIENT_URL ||
+    'http://localhost:5173'
+  ).replace(/\/+$/, '');
+};
+
 // @desc    Register a new student account
 // @route   POST /api/auth/register
 // @access  Public (Students only - Officer accounts cannot be registered publicly)
@@ -142,10 +166,7 @@ export const register = async (req, res, next) => {
     });
 
     // Send verification email via centralized sender
-    const frontendUrl =
-      process.env.FRONTEND_URL ||
-      process.env.CLIENT_URL ||
-      'http://localhost:5173';
+    const frontendUrl = getFrontendBaseUrl(req);
     const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
 
     try {
@@ -498,7 +519,7 @@ export const getMe = async (req, res, next) => {
 // @access  Public
 export const verifyEmail = async (req, res, next) => {
   try {
-    const rawToken = req.params.token;
+    const rawToken = (req.params.token || req.query.token || '').trim();
     if (!rawToken) {
       return res.status(400).json({
         success: false,
@@ -508,12 +529,30 @@ export const verifyEmail = async (req, res, next) => {
 
     const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
 
-    const user = await User.findOne({
+    // 1. Check if token matches an active, unexpired verification request
+    let user = await User.findOne({
       emailVerificationToken: hashedToken,
       emailVerificationExpire: { $gt: Date.now() },
     });
 
     if (!user) {
+      // 2. Fallback: Check if user with this token is ALREADY verified (handles repeat clicks, SafeLinks scans, React Strict Mode)
+      const alreadyVerifiedUser = await User.findOne({
+        emailVerificationToken: hashedToken,
+      });
+
+      if (alreadyVerifiedUser && alreadyVerifiedUser.isEmailVerified) {
+        return res.status(200).json({
+          success: true,
+          message: 'Your college email address is verified! You can apply for placement drives.',
+          user: {
+            id: alreadyVerifiedUser._id,
+            email: alreadyVerifiedUser.email,
+            isEmailVerified: true,
+          },
+        });
+      }
+
       return res.status(400).json({
         success: false,
         message: 'Invalid or expired email verification link. Please request a new verification link.',
@@ -521,8 +560,6 @@ export const verifyEmail = async (req, res, next) => {
     }
 
     user.isEmailVerified = true;
-    user.emailVerificationToken = undefined;
-    user.emailVerificationExpire = undefined;
     await user.save({ validateBeforeSave: false });
 
     return res.status(200).json({
@@ -573,10 +610,7 @@ export const resendVerificationEmail = async (req, res, next) => {
     const verificationToken = user.getEmailVerificationToken();
     await user.save({ validateBeforeSave: false });
 
-    const frontendUrl =
-      process.env.FRONTEND_URL ||
-      process.env.CLIENT_URL ||
-      'http://localhost:5173';
+    const frontendUrl = getFrontendBaseUrl(req);
     const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
 
     try {
@@ -602,6 +636,7 @@ export const resendVerificationEmail = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: 'A fresh verification link has been sent to your email address.',
+      devVerifyUrl: process.env.NODE_ENV !== 'production' ? verifyUrl : undefined,
     });
   } catch (error) {
     next(error);
@@ -632,14 +667,11 @@ export const forgotPassword = async (req, res, next) => {
       });
     }
 
-    // Generate 15-minute cryptographically secure reset token
+    // Generate 60-minute cryptographically secure reset token
     const resetToken = user.getResetPasswordToken();
     await user.save({ validateBeforeSave: false });
 
-    const frontendUrl =
-      process.env.FRONTEND_URL ||
-      process.env.CLIENT_URL ||
-      'http://localhost:5173';
+    const frontendUrl = getFrontendBaseUrl(req);
     const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
 
     try {
@@ -647,7 +679,7 @@ export const forgotPassword = async (req, res, next) => {
         to: user.email,
         name: user.name,
         resetUrl,
-        expiresInMinutes: 15,
+        expiresInMinutes: 60,
       });
     } catch (emailErr) {
       console.error('[Email] Failed to send password reset email via SMTP:', emailErr.message);
@@ -667,6 +699,7 @@ export const forgotPassword = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: 'If an account with this email exists, a password reset link has been dispatched to it.',
+      devResetUrl: process.env.NODE_ENV !== 'production' ? resetUrl : undefined,
     });
   } catch (error) {
     next(error);
@@ -678,7 +711,7 @@ export const forgotPassword = async (req, res, next) => {
 // @access  Public
 export const resetPassword = async (req, res, next) => {
   try {
-    const rawToken = req.params.token || req.body.token;
+    const rawToken = (req.params.token || req.body.token || req.query?.token || '').trim();
     const { password, confirmPassword } = req.body;
 
     if (!rawToken) {

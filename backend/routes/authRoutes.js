@@ -36,8 +36,8 @@ router.post('/resend-verification', resendVerificationLimiter, resendVerificatio
 
 // Password recovery & management
 router.post('/forgot-password', passwordResetLimiter, forgotPassword);
-router.post('/reset-password/:token', passwordResetLimiter, resetPassword);
-router.post('/reset-password', passwordResetLimiter, resetPassword);
+router.post('/reset-password/:token', authLimiter, resetPassword);
+router.post('/reset-password', authLimiter, resetPassword);
 router.put('/change-password', protect, changePassword);
 
 // Session verification

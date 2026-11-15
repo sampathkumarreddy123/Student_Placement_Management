@@ -56,7 +56,8 @@ export const authService = {
   },
 
   verifyEmail: async (token) => {
-    const response = await api.get(`/auth/verify-email/${token}`);
+    const cleanToken = (token || '').trim();
+    const response = await api.get(`/auth/verify-email/${cleanToken}`);
     return response.data;
   },
 
@@ -71,7 +72,11 @@ export const authService = {
   },
 
   resetPassword: async (token, passwords) => {
-    const response = await api.post(`/auth/reset-password/${token}`, passwords);
+    const cleanToken = (token || passwords?.token || '').trim();
+    const response = await api.post(`/auth/reset-password/${cleanToken}`, {
+      ...passwords,
+      token: cleanToken,
+    });
     return response.data;
   },
 

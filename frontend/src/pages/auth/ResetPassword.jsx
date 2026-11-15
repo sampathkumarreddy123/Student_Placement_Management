@@ -11,7 +11,7 @@ const ResetPassword = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const resetToken = token || searchParams.get('token') || '';
+  const resetToken = (token || searchParams.get('token') || '').trim();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -66,7 +66,7 @@ const ResetPassword = () => {
       setError(
         err.response?.data?.message ||
           err.message ||
-          'Failed to reset password. The link may have expired (15-minute limit) or already been used.'
+          'Failed to reset password. The link may have expired (60-minute limit) or already been used.'
       );
     } finally {
       setLoading(false);
@@ -147,7 +147,7 @@ const ResetPassword = () => {
               Create New Password
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5">
-              Enter and confirm your new secure password. Reset links are valid for 15 minutes.
+              Enter and confirm your new secure password. Reset links are valid for 60 minutes.
             </p>
           </div>
 

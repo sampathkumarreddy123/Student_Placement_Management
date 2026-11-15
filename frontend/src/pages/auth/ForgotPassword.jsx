@@ -86,7 +86,7 @@ const ForgotPassword = () => {
               Reset Link Dispatched
             </h2>
             <p className="text-xs text-[#64748B] mt-1 leading-relaxed max-w-sm mx-auto">
-              If an account with <strong>{email}</strong> is registered, we have dispatched a secure password reset link to it. The link remains valid for <strong>15 minutes</strong> and can only be used once.
+              If an account with <strong>{email}</strong> is registered, we have dispatched a secure password reset link to it. The link remains valid for <strong>60 minutes</strong> and can only be used once.
             </p>
           </div>
 
@@ -95,7 +95,7 @@ const ForgotPassword = () => {
             <ul className="list-disc list-inside space-y-0.5 text-[#64748B]">
               <li>Check your Junk / Spam / Quarantine folder.</li>
               <li>Confirm you entered your registered college roll email correctly.</li>
-              <li>Password reset links are time-limited to 15 minutes for security.</li>
+              <li>Password reset links are time-limited to 60 minutes for security.</li>
             </ul>
           </div>
 
