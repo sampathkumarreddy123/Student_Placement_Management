@@ -13,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ListOrdered,
+  BarChart3,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -34,6 +35,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
     { label: 'Companies', to: '/officer/companies', icon: Building2 },
     { label: 'Student Database', to: '/officer/students', icon: Users },
     { label: 'Applications & Results', to: '/officer/applications', icon: CheckCircle },
+    { label: 'Reports & Analytics', to: '/officer/reports', icon: BarChart3 },
     { label: 'Notifications', to: '/notifications', icon: Bell },
   ];
 

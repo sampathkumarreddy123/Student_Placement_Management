@@ -241,6 +241,11 @@ const OfficerDashboard = () => {
             >
               {refreshing ? 'Updating...' : 'Refresh Data'}
             </Button>
+            <Link to="/officer/reports">
+              <Button variant="outline" size="sm" icon={BarChart3}>
+                Reports & Analytics
+              </Button>
+            </Link>
             <Link to="/officer/companies?action=new">
               <Button variant="outline" size="sm" icon={Building2}>
                 Add Company

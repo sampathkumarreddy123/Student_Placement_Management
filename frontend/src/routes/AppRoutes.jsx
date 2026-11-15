@@ -35,6 +35,7 @@ import ManageCompanies from '../pages/officer/ManageCompanies';
 import ManageStudents from '../pages/officer/ManageStudents';
 import ManageApplications from '../pages/officer/ManageApplications';
 import ManageRounds from '../pages/officer/ManageRounds';
+import ManageReports from '../pages/officer/ManageReports';
 import NotificationsPage from '../pages/NotificationsPage';
 
 // Common Components & Hook
@@ -122,6 +123,7 @@ const AppRoutes = () => {
         <Route path="students" element={<ManageStudents />} />
         <Route path="applications" element={<ManageApplications />} />
         <Route path="rounds" element={<ManageRounds />} />
+        <Route path="reports" element={<ManageReports />} />
       </Route>
 
       {/* Drive Details Route - works for both Student and Officer */}
