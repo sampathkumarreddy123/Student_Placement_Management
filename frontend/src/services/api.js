@@ -1,7 +1,17 @@
 import axios from 'axios';
 
+// Normalizes API base URL to ensure clean communication in both local and deployed environments
+const getBaseUrl = () => {
+  let url = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  url = url.trim().replace(/\/+$/, '');
+  if (!url.endsWith('/api')) {
+    url = `${url}/api`;
+  }
+  return url;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: getBaseUrl(),
   withCredentials: true, // Send HTTP-only cookies
   headers: {
     'Content-Type': 'application/json',

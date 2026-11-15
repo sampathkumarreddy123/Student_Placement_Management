@@ -41,27 +41,34 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:3000',
+  'https://student-placement-management-portal.vercel.app',
   process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps, curl, postman)
-      if (!origin || allowedOrigins.includes(origin)) {
+      // allow requests with no origin (like mobile apps, curl, postman) or matching origin
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('.onrender.com')
+      ) {
         callback(null, true);
       } else {
-        callback(null, true); // Allow during development
+        callback(null, true); // Fallback to allow during deployment setup
       }
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-setup-token'],
   })
 );
 
 // Health check endpoint
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.status(200).json({
     status: 'online',
     timestamp: new Date().toISOString(),
@@ -69,13 +76,24 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Mount API routes
+// Mount API routes (support both /api/* and root /* endpoints)
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/users', userRoutes);
+app.use('/users', userRoutes);
+
 app.use('/api/companies', companyRoutes);
+app.use('/companies', companyRoutes);
+
 app.use('/api/drives', driveRoutes);
+app.use('/drives', driveRoutes);
+
 app.use('/api/applications', applicationRoutes);
+app.use('/applications', applicationRoutes);
+
 app.use('/api/notifications', notificationRoutes);
+app.use('/notifications', notificationRoutes);
 
 // Error Handling Middlewares
 app.use(notFound);

@@ -14,7 +14,7 @@ export const generateTokenAndSetCookie = (res, userId, role, rememberMe = false)
   res.cookie('token', token, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
     maxAge,
   });
 
@@ -27,7 +27,7 @@ export const clearTokenCookie = (res) => {
     httpOnly: true,
     expires: new Date(0),
     secure: isProduction,
-    sameSite: isProduction ? 'strict' : 'lax',
+    sameSite: isProduction ? 'none' : 'lax',
   });
 };
 
