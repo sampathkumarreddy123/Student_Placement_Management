@@ -38,6 +38,7 @@ import PageHeader from '../../components/common/PageHeader';
 import Modal from '../../components/common/Modal';
 import ChangePasswordModal from '../../components/common/ChangePasswordModal';
 import ProfilePictureModal from '../../components/common/ProfilePictureModal';
+import ImageCropperModal from '../../components/common/ImageCropperModal';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -80,6 +81,8 @@ const StudentProfile = () => {
   const [uploadingResume, setUploadingResume] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState('');
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
 
   const [notification, setNotification] = useState(null);
   const [errors, setErrors] = useState({});
@@ -355,56 +358,51 @@ const StudentProfile = () => {
     }
   };
 
-  const handleAvatarFileChange = async (e) => {
+  const handleAvatarFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       toast.error('Please choose an image file (JPG, PNG, WebP).');
-      setNotification({
-        type: 'error',
-        text: 'Please choose an image file (JPG, PNG, WebP).',
-      });
       e.target.value = '';
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Image size must be smaller than 2 MB.');
-      setNotification({
-        type: 'error',
-        text: 'Image size must be smaller than 2 MB.',
-      });
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size must be smaller than 5 MB.');
       e.target.value = '';
       return;
     }
 
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result);
+      setIsCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleCropComplete = async (croppedFile) => {
     try {
       setUploadingPhoto(true);
       setNotification(null);
       const data = new FormData();
-      data.append('avatar', file);
+      data.append('avatar', croppedFile);
 
       const res = await studentService.uploadAvatar(data);
       const updatedPhoto = res.profilePhoto || '';
       setProfile((prev) => ({ ...prev, profilePhoto: updatedPhoto }));
       if (updateUserData) updateUserData({ profilePhoto: updatedPhoto });
       if (updateUserProfile) updateUserProfile({ ...profile, profilePhoto: updatedPhoto });
-      toast.success('Profile photo updated successfully!');
-      setNotification({
-        type: 'success',
-        text: 'Profile photo updated successfully!',
-      });
+      toast.success('Profile photo cropped and updated successfully!');
+      setIsCropModalOpen(false);
+      setCropImageSrc('');
     } catch (err) {
       toast.error(err.message || 'Failed to upload profile photo.');
-      setNotification({
-        type: 'error',
-        text: err.message || 'Failed to upload profile photo.',
-      });
     } finally {
       setUploadingPhoto(false);
-      e.target.value = '';
     }
   };
 
@@ -1071,6 +1069,17 @@ const StudentProfile = () => {
           profilePhoto: profile?.profilePhoto || user?.profilePhoto,
           role: 'student',
         }}
+      />
+
+      <ImageCropperModal
+        isOpen={isCropModalOpen}
+        onClose={() => {
+          setIsCropModalOpen(false);
+          setCropImageSrc('');
+        }}
+        imageSrc={cropImageSrc}
+        onCropComplete={handleCropComplete}
+        isUploading={uploadingPhoto}
       />
 
       {/* EDIT PROFILE POPUP MODAL */}

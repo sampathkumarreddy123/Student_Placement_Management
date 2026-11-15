@@ -23,6 +23,7 @@ import PageHeader from '../../components/common/PageHeader';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ChangePasswordModal from '../../components/common/ChangePasswordModal';
 import ProfilePictureModal from '../../components/common/ProfilePictureModal';
+import ImageCropperModal from '../../components/common/ImageCropperModal';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl } from '../../utils/imageUrl';
@@ -49,6 +50,8 @@ const OfficerProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState('');
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [removingPhoto, setRemovingPhoto] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
@@ -140,8 +143,8 @@ const OfficerProfile = () => {
     }
   };
 
-  // Upload Profile Photo
-  const handlePhotoUpload = async (e) => {
+  // Select Photo for Interactive Cropping
+  const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -160,23 +163,35 @@ const OfficerProfile = () => {
       return;
     }
 
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result);
+      setIsCropModalOpen(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  // Complete Crop & Upload
+  const handleCropComplete = async (croppedFile) => {
     try {
       setUploadingPhoto(true);
       const data = new FormData();
-      data.append('avatar', file);
+      data.append('avatar', croppedFile);
 
       const res = await officerService.uploadAvatar(data);
       if (res.success && res.profilePhoto) {
         setFormData((prev) => ({ ...prev, profilePhoto: res.profilePhoto }));
         updateUserData({ profilePhoto: res.profilePhoto });
-        toast.showSuccess('Profile photo updated successfully!');
+        toast.showSuccess('Profile photo cropped and updated successfully!');
+        setIsCropModalOpen(false);
+        setCropImageSrc('');
       }
     } catch (err) {
       console.error('Photo upload failed:', err);
       toast.showError(err.message || 'Failed to upload profile photo.');
     } finally {
       setUploadingPhoto(false);
-      e.target.value = '';
     }
   };
 
@@ -532,7 +547,7 @@ const OfficerProfile = () => {
               size="sm"
               disabled={saving}
               leftIcon={<Save className="w-4 h-4 text-white" />}
-              className="bg-[#163A5F] hover:bg-[#1E4976] text-white px-6 shadow-sm"
+              className="bg-[#172554] hover:bg-[#0f172a] text-white px-6 shadow-sm"
             >
               {saving ? 'Saving Changes...' : 'Save Profile Details'}
             </Button>
@@ -546,6 +561,7 @@ const OfficerProfile = () => {
         onClose={() => setChangePasswordOpen(false)}
       />
 
+      {/* 5. Profile Picture Full View Modal */}
       <ProfilePictureModal
         isOpen={showPhotoModal}
         onClose={() => setShowPhotoModal(false)}
@@ -555,6 +571,18 @@ const OfficerProfile = () => {
           profilePhoto: effectivePhoto,
           role: 'officer',
         }}
+      />
+
+      {/* 6. Profile Picture Cropper Modal */}
+      <ImageCropperModal
+        isOpen={isCropModalOpen}
+        onClose={() => {
+          setIsCropModalOpen(false);
+          setCropImageSrc('');
+        }}
+        imageSrc={cropImageSrc}
+        onCropComplete={handleCropComplete}
+        isUploading={uploadingPhoto}
       />
     </div>
   );

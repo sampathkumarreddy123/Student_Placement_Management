@@ -80,7 +80,20 @@ export const ToastProvider = ({ children }) => {
   };
 
   return (
-    <ToastContext.Provider value={{ addToast, success, error, warning, info, removeToast }}>
+    <ToastContext.Provider
+      value={{
+        addToast,
+        success,
+        error,
+        warning,
+        info,
+        removeToast,
+        showSuccess: success,
+        showError: error,
+        showWarning: warning,
+        showInfo: info,
+      }}
+    >
       {children}
 
       {/* Floating Toast Container */}
