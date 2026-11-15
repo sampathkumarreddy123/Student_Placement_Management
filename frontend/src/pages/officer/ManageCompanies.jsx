@@ -14,16 +14,11 @@ import {
   Archive,
   RotateCcw,
   Upload,
-  Image as ImageIcon,
-  CheckCircle2,
   AlertTriangle,
-  ChevronLeft,
-  ChevronRight,
   LayoutGrid,
   List,
   Globe,
   UserCheck,
-  X,
 } from 'lucide-react';
 import { companyService } from '../../services/companyService';
 import Card from '../../components/common/Card';
@@ -37,6 +32,7 @@ import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import Pagination from '../../components/common/Pagination';
 import { useToast } from '../../context/ToastContext';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const INDUSTRIES = [
   'Information Technology',
@@ -465,7 +461,7 @@ const ManageCompanies = () => {
                       <div className="flex items-center gap-3">
                         {comp.logoUrl ? (
                           <img
-                            src={comp.logoUrl}
+                            src={getImageUrl(comp.logoUrl)}
                             alt={comp.name}
                             className="w-10 h-10 rounded-xl object-contain p-1 border border-[#DBEAFE] bg-white flex-shrink-0"
                             onError={(e) => {
@@ -598,7 +594,7 @@ const ManageCompanies = () => {
                   <div className="flex items-center gap-3">
                     {comp.logoUrl ? (
                       <img
-                        src={comp.logoUrl}
+                        src={getImageUrl(comp.logoUrl)}
                         alt={comp.name}
                         className="w-12 h-12 rounded-xl object-contain p-1 border border-[#DBEAFE] bg-white"
                         onError={(e) => {
@@ -704,7 +700,7 @@ const ManageCompanies = () => {
           <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center gap-4">
             <div className="w-16 h-16 rounded-xl bg-white border border-[#DBEAFE] flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm">
               {logoPreview ? (
-                <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-contain p-1" />
+                <img src={getImageUrl(logoPreview)} alt="Logo Preview" className="w-full h-full object-contain p-1" />
               ) : (
                 <Building2 className="w-7 h-7 text-[#2563EB]/40" />
               )}

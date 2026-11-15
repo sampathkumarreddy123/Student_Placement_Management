@@ -4,25 +4,12 @@ import {
   ListOrdered,
   Plus,
   Calendar,
-  Clock,
-  Building2,
-  Briefcase,
   Users,
-  CheckCircle2,
-  XCircle,
-  AlertCircle,
   ArrowRight,
   Edit,
   Trash2,
-  ExternalLink,
-  ChevronRight,
-  Filter,
   Search,
-  Award,
-  Sparkles,
-  MapPin,
   Laptop,
-  HelpCircle,
   Check,
   X,
   FileText,
@@ -395,7 +382,7 @@ const ManageRounds = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-[#172554] flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[#2563EB]" />
+              <ListOrdered className="w-4 h-4 text-[#2563EB]" />
               Recruitment Pipeline Stages ({rounds.length})
             </h3>
             <span className="text-xs text-[#64748B]">

@@ -8,18 +8,11 @@ import {
   Briefcase,
   IdCard,
   Linkedin,
-  FileText,
   Camera,
   Trash2,
-  CheckCircle2,
-  AlertCircle,
   Save,
   KeyRound,
   ShieldCheck,
-  Calendar,
-  Clock,
-  Sparkles,
-  ExternalLink,
 } from 'lucide-react';
 import { officerService } from '../../services/officerService';
 import Card from '../../components/common/Card';

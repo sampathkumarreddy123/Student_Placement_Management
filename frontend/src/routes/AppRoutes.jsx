@@ -11,7 +11,6 @@ import ProtectedRoute from './ProtectedRoute';
 
 // Pages
 import LandingPage from '../pages/LandingPage';
-import Login from '../pages/auth/Login';
 import StudentLogin from '../pages/auth/StudentLogin';
 import OfficerLogin from '../pages/auth/OfficerLogin';
 import OfficerRegister from '../pages/auth/OfficerRegister';

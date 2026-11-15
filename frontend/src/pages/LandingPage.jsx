@@ -34,10 +34,10 @@ const LandingPage = () => {
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-[#172554] text-base leading-tight tracking-tight">
-                CampusPlacement
+                MITS Placements
               </span>
-              <span className="text-[11px] text-[#64748B] font-semibold leading-tight">
-                Recruitment Portal
+              <span className="text-[11px] text-[#64748B] font-medium leading-tight">
+                Training & Placement Cell
               </span>
             </div>
           </Link>
@@ -233,7 +233,7 @@ const LandingPage = () => {
 
       {/* Footer */}
       <footer className="bg-white border-t border-[#DBEAFE] py-5 text-center text-xs text-[#64748B]">
-        <p>© 2026 CampusPlacement. College Placement Management Portal.</p>
+        <p>© 2026 Madanapalle Institute of Technology & Science • Training & Placement Cell</p>
       </footer>
     </div>
   );

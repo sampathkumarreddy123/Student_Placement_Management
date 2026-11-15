@@ -7,24 +7,16 @@ import {
   FileText,
   Award,
   UserCheck,
-  TrendingUp,
   PlusCircle,
   ArrowRight,
   RefreshCw,
-  ExternalLink,
   ChevronRight,
   CheckCircle2,
   AlertCircle,
-  Calendar,
   Clock,
-  Layers,
   BarChart3,
   PieChart,
   Activity,
-  Sparkles,
-  MapPin,
-  CheckCircle,
-  User,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/studentService';
@@ -152,42 +144,6 @@ const OfficerDashboard = () => {
     },
   ];
 
-  // Quick Action Buttons
-  const quickActions = [
-    {
-      title: 'Add Company',
-      description: 'Register partner employers, POC details & logos',
-      icon: Building2,
-      to: '/officer/companies?action=new',
-      btnText: 'Add New Company',
-      color: 'text-[#163A5F] bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#DBEAFE]',
-    },
-    {
-      title: 'Create Placement Drive',
-      description: 'Define packages, dates, eligibility criteria & rounds',
-      icon: PlusCircle,
-      to: '/officer/drives?action=new',
-      btnText: 'Create Drive',
-      color: 'text-[#163A5F] bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#DBEAFE]',
-    },
-    {
-      title: 'View Applicants',
-      description: 'Screen candidates, update selection rounds & remarks',
-      icon: Users,
-      to: '/officer/applications',
-      btnText: 'Manage Applicants',
-      color: 'text-[#163A5F] bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#DBEAFE]',
-    },
-    {
-      title: 'Manage Companies',
-      description: 'Search, filter, update or archive recruiting partners',
-      icon: Layers,
-      to: '/officer/companies',
-      btnText: 'Explore Directory',
-      color: 'text-[#163A5F] bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#DBEAFE]',
-    },
-  ];
-
   // Colors for Application Status Distribution
   const statusColors = {
     Applied: { bar: 'bg-[#163A5F]', badge: 'bg-[#F0F7FF] text-[#172554]' },
@@ -258,18 +214,8 @@ const OfficerDashboard = () => {
               onClick={() => fetchDashboard(true)}
               title="Fetch latest data from database"
             >
-              {refreshing ? 'Updating...' : 'Refresh Data'}
+              {refreshing ? 'Updating...' : 'Refresh'}
             </Button>
-            <Link to="/officer/profile">
-              <Button variant="outline" size="sm" icon={User}>
-                Profile
-              </Button>
-            </Link>
-            <Link to="/officer/reports">
-              <Button variant="outline" size="sm" icon={BarChart3}>
-                Reports
-              </Button>
-            </Link>
             <Link to="/officer/companies?action=new">
               <Button variant="outline" size="sm" icon={Building2}>
                 Add Company
@@ -333,55 +279,7 @@ const OfficerDashboard = () => {
         </div>
       </div>
 
-      {/* SECTION 3: QUICK ACTIONS PANEL */}
-      <div className="bg-[#F0F7FF] rounded-2xl border border-[#DBEAFE] p-4 sm:p-5">
-        <div className="flex items-center justify-between mb-3 px-1">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#2563EB]" />
-            <h3 className="text-xs font-bold text-[#172554] uppercase tracking-wider">
-              Quick Administrative Actions
-            </h3>
-          </div>
-          <span className="text-[11px] text-[#64748B]">Common administrative workflows</span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
-          {quickActions.map((act) => {
-            const Icon = act.icon;
-            return (
-              <div
-                key={act.title}
-                className="bg-white p-4 rounded-xl border border-[#DBEAFE] shadow-sm flex flex-col justify-between hover:border-[#2563EB]/50 transition-all"
-              >
-                <div>
-                  <div className="flex items-center gap-2.5 mb-2">
-                    <div className="p-2 rounded-lg bg-[#EFF6FF] text-[#2563EB]">
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <h4 className="font-semibold text-[#172554] text-xs sm:text-sm">
-                      {act.title}
-                    </h4>
-                  </div>
-                  <p className="text-xs text-[#64748B] leading-relaxed mb-3">
-                    {act.description}
-                  </p>
-                </div>
-                <Link to={act.to} className="w-full">
-                  <button
-                    type="button"
-                    className={`w-full py-1.5 px-3 rounded-lg text-xs font-medium transition-colors flex items-center justify-center gap-1.5 ${act.color}`}
-                  >
-                    <span>{act.btnText}</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </Link>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* SECTION 4: PLACEMENT ANALYTICS (4 Visual Charts) */}
+      {/* SECTION 3: PLACEMENT ANALYTICS (4 Visual Charts) */}
       <div>
         <div className="flex items-center justify-between mb-3 px-1">
           <div className="flex items-center gap-2">
@@ -633,7 +531,7 @@ const OfficerDashboard = () => {
         </div>
       </div>
 
-      {/* SECTION 5: RECENT PLACEMENT DRIVES */}
+      {/* SECTION 4: RECENT PLACEMENT DRIVES */}
       <Card
         title="Recent Placement Drives"
         subtitle="Latest campus recruitment drives scheduled by the placement cell"
@@ -673,7 +571,7 @@ const OfficerDashboard = () => {
                         <div className="flex items-center gap-2.5">
                           {drive.company?.logoUrl ? (
                             <img
-                              src={drive.company.logoUrl}
+                              src={getImageUrl(drive.company.logoUrl)}
                               alt={drive.company?.name || 'Company'}
                               className="w-8 h-8 rounded-lg object-contain p-0.5 border border-[#DBEAFE] bg-white flex-shrink-0"
                             />

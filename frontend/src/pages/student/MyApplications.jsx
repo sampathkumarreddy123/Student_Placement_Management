@@ -2,18 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   FileText,
-  Building2,
-  Calendar,
-  Clock,
-  ExternalLink,
   ArrowRight,
   Eye,
-  CheckCircle2,
-  XCircle,
-  Briefcase,
-  AlertCircle,
   Search,
-  RotateCcw,
 } from 'lucide-react';
 import { applicationService } from '../../services/applicationService';
 import Card from '../../components/common/Card';
@@ -25,6 +16,7 @@ import EmptyState from '../../components/common/EmptyState';
 import Pagination from '../../components/common/Pagination';
 import ApplicationDetailsModal from '../../components/applications/ApplicationDetailsModal';
 import { formatDate, formatLPA } from '../../utils/formatters';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const STATUS_FILTERS = [
   { id: 'All', label: 'All Applications' },
@@ -258,7 +250,7 @@ const MyApplications = () => {
                         <div className="flex items-center gap-3">
                           {company?.logoUrl ? (
                             <img
-                              src={company.logoUrl}
+                              src={getImageUrl(company.logoUrl)}
                               alt={company?.name}
                               className="w-9 h-9 rounded-lg object-contain p-0.5 border border-[#DBEAFE] bg-white flex-shrink-0"
                             />

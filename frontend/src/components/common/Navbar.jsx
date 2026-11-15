@@ -5,17 +5,13 @@ import {
   LogOut,
   User as UserIcon,
   Menu,
-  X,
   Bell,
   Briefcase,
-  Building,
-  Users,
   Check,
   Award,
   UserCheck,
   XCircle,
   FileText,
-  Clock,
   ArrowRight,
   KeyRound,
 } from 'lucide-react';
@@ -162,9 +158,9 @@ const Navbar = ({ onToggleSidebar }) => {
             </div>
             <div>
               <span className="font-bold text-[#172554] text-base tracking-tight leading-none block">
-                CampusPlacement
+                MITS Placements
               </span>
-              <span className="text-[10px] text-[#64748B] font-semibold tracking-wide uppercase">
+              <span className="text-[10px] text-[#64748B] font-medium tracking-wide uppercase">
                 {isOfficer ? 'Officer Portal' : isStudent ? 'Student Portal' : 'Portal'}
               </span>
             </div>
@@ -174,15 +170,6 @@ const Navbar = ({ onToggleSidebar }) => {
         {/* Right Side: Notification Bell & User Profile */}
         {user ? (
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* User role pill (desktop) */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1 bg-[#EFF6FF] border border-[#DBEAFE] rounded-full text-xs">
-              <span className="w-2 h-2 rounded-full bg-[#2563EB]" />
-              <span className="text-[#172554] font-medium truncate max-w-[120px]">{user.name}</span>
-              <Badge variant="accent" size="sm">
-                {user.role}
-              </Badge>
-            </div>
-
             {/* Notification Bell Dropdown */}
             <div className="relative">
               <button

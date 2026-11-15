@@ -5,7 +5,6 @@ import {
   Lock,
   LogIn,
   GraduationCap,
-  ArrowLeft,
   LogOut,
   ShieldCheck,
 } from 'lucide-react';
@@ -130,10 +129,10 @@ const StudentLogin = () => {
         </div>
         <div className="flex flex-col text-left">
           <span className="font-bold text-[#172554] text-base leading-tight tracking-tight">
-            CampusPlacement
+            MITS Placements
           </span>
-          <span className="text-[10px] text-[#64748B] font-semibold leading-tight">
-            Recruitment Management Portal
+          <span className="text-[10px] text-[#64748B] font-medium leading-tight">
+            Training & Placement Cell
           </span>
         </div>
       </div>
@@ -236,7 +235,7 @@ const StudentLogin = () => {
       </form>
 
       {/* Footer action */}
-      <div className="mt-5 pt-4 border-t border-[#DBEAFE] text-center text-xs space-y-2">
+      <div className="mt-5 pt-4 border-t border-[#DBEAFE] text-center text-xs">
         <p className="text-[#64748B]">
           Don't have an account?{' '}
           <Link
@@ -244,15 +243,6 @@ const StudentLogin = () => {
             className="font-bold text-[#2563EB] hover:text-[#163A5F] hover:underline"
           >
             Create a Student Account
-          </Link>
-        </p>
-        <p className="text-[11px] text-[#64748B]">
-          Are you a placement officer?{' '}
-          <Link
-            to="/officer/login"
-            className="font-semibold text-[#163A5F] hover:text-[#2563EB] hover:underline"
-          >
-            Go to Officer Sign In
           </Link>
         </p>
       </div>

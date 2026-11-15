@@ -4,12 +4,8 @@ import {
   Search,
   Filter,
   ExternalLink,
-  GraduationCap,
-  Award,
-  BookOpen,
   Eye,
   RotateCcw,
-  FileText,
 } from 'lucide-react';
 import { studentService } from '../../services/studentService';
 import Card from '../../components/common/Card';

@@ -4,7 +4,6 @@ import {
   ShieldCheck,
   Lock,
   Mail,
-  ArrowLeft,
   GraduationCap,
   LogOut,
   AlertCircle,
@@ -130,10 +129,10 @@ const OfficerLogin = () => {
         </div>
         <div className="flex flex-col text-left">
           <span className="font-bold text-[#172554] text-base leading-tight tracking-tight">
-            CampusPlacement
+            MITS Placements
           </span>
-          <span className="text-[10px] text-[#64748B] font-semibold leading-tight">
-            Recruitment Management Portal
+          <span className="text-[10px] text-[#64748B] font-medium leading-tight">
+            Training & Placement Cell
           </span>
         </div>
       </div>
@@ -235,19 +234,10 @@ const OfficerLogin = () => {
         </Button>
       </form>
 
-      {/* Security notice & Candidate switch */}
-      <div className="mt-5 pt-4 border-t border-[#DBEAFE] text-center text-xs space-y-2">
+      {/* Security notice */}
+      <div className="mt-5 pt-4 border-t border-[#DBEAFE] text-center text-xs">
         <p className="text-[11px] text-[#64748B]">
           Placement Cell • Administrative Security
-        </p>
-        <p className="text-[11px] text-[#64748B]">
-          Are you a candidate?{' '}
-          <Link
-            to="/student/login"
-            className="font-semibold text-[#2563EB] hover:text-[#163A5F] hover:underline"
-          >
-            Switch to Student Login
-          </Link>
         </p>
       </div>
     </div>

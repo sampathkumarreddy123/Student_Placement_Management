@@ -13,9 +13,11 @@ import Badge from '../common/Badge';
 import EligibilityBadge from './EligibilityBadge';
 import EligibilityModal from './EligibilityModal';
 import Button from '../common/Button';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
   const [showEligibilityModal, setShowEligibilityModal] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const deadlineInfo = getDeadlineStatus(drive.applicationClosingDate || drive.registrationDeadline);
   const isClosedStatus = drive.status === 'Closed' || drive.status === 'Completed';
 
@@ -29,18 +31,14 @@ const DriveCard = ({ drive, isOfficer = false, onApply, applying = false }) => {
           {/* Header: Company Avatar/Logo + Name & Single Status/Eligibility Badge */}
           <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#DBEAFE]">
             <div className="flex items-center gap-2.5 min-w-0">
-              {drive.company?.logoUrl ? (
+              {drive.company?.logoUrl && !imgError ? (
                 <img
-                  src={drive.company.logoUrl}
+                  src={getImageUrl(drive.company.logoUrl)}
                   alt={companyName}
                   className="w-9 h-9 rounded-lg object-contain p-0.5 border border-[#DBEAFE] bg-white flex-shrink-0"
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.style.display = 'none';
-                  }}
+                  onError={() => setImgError(true)}
                 />
-              ) : null}
-              {(!drive.company?.logoUrl || undefined) && (
+              ) : (
                 <div className="w-9 h-9 rounded-lg bg-[#EFF6FF] border border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-sm flex-shrink-0">
                   {companyInitial}
                 </div>

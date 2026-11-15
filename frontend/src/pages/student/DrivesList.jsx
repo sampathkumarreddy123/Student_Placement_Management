@@ -3,12 +3,8 @@ import {
   Search,
   Filter,
   Briefcase,
-  SlidersHorizontal,
   CheckCircle2,
-  Building2,
-  GraduationCap,
   RotateCcw,
-  Sparkles,
 } from 'lucide-react';
 import { driveService } from '../../services/driveService';
 import { companyService } from '../../services/companyService';

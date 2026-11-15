@@ -29,14 +29,14 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
   ];
 
   const officerLinks = [
-    { label: 'Overview & Stats', to: '/officer/dashboard', icon: LayoutDashboard },
+    { label: 'Dashboard', to: '/officer/dashboard', icon: LayoutDashboard },
     { label: 'Placement Drives', to: '/officer/drives', icon: Briefcase },
     { label: 'Recruitment Rounds', to: '/officer/rounds', icon: ListOrdered },
     { label: 'Companies', to: '/officer/companies', icon: Building2 },
-    { label: 'Student Database', to: '/officer/students', icon: Users },
-    { label: 'Applications & Results', to: '/officer/applications', icon: CheckCircle },
-    { label: 'Reports & Analytics', to: '/officer/reports', icon: BarChart3 },
-    { label: 'Officer Profile', to: '/officer/profile', icon: User },
+    { label: 'Students', to: '/officer/students', icon: Users },
+    { label: 'Applications', to: '/officer/applications', icon: CheckCircle },
+    { label: 'Reports', to: '/officer/reports', icon: BarChart3 },
+    { label: 'Profile', to: '/officer/profile', icon: User },
     { label: 'Notifications', to: '/notifications', icon: Bell },
   ];
 
@@ -113,9 +113,9 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
         <div className="p-3 border-t border-[#1E4976]/60 flex items-center justify-between">
           <div className={`min-w-0 ${isCollapsed ? 'lg:hidden' : 'block'}`}>
             <p className="text-[11px] font-semibold text-white truncate">
-              {isOfficer ? 'Placement Head' : 'Student Portal'}
+              {isOfficer ? 'Placement Officer' : 'Student Portal'}
             </p>
-            <p className="text-[10px] text-white/60 truncate">Academic Year 2025–26</p>
+            <p className="text-[10px] text-white/60 truncate">MITS • 2025–26</p>
           </div>
 
           {onToggleCollapse && (

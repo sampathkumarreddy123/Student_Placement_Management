@@ -5,9 +5,7 @@ import {
   Hash,
   BookOpen,
   GraduationCap,
-  Percent,
   Phone,
-  Link as LinkIcon,
   Code,
   Save,
   CheckCircle2,
@@ -24,11 +22,8 @@ import {
   Linkedin,
   Camera,
   Trash2,
-  Layers,
-  Sparkles,
-  RotateCcw,
+  Award,
   KeyRound,
-  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/studentService';
@@ -648,7 +643,7 @@ const StudentProfile = () => {
         <div className="mt-6 pt-5 border-t border-[#DBEAFE]">
           <div className="flex items-center justify-between text-xs mb-2">
             <span className="font-semibold text-[#172554] flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-[#2563EB]" />
+              <CheckCircle2 className="w-4 h-4 text-[#2563EB]" />
               Profile Completion Status
             </span>
             <span className="font-bold text-[#172554]">
@@ -683,16 +678,6 @@ const StudentProfile = () => {
         <Card
           title="Personal & College Identification"
           subtitle="Identity data verified for institutional recruitment tracking"
-          action={
-            <Button
-              size="sm"
-              variant="outline"
-              icon={Edit3}
-              onClick={handleOpenEditModal}
-            >
-              Edit Details
-            </Button>
-          }
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
@@ -760,16 +745,6 @@ const StudentProfile = () => {
         <Card
           title="Academic Records & Eligibility Metrics"
           subtitle="Verified academic scores used for placement drive cutoff filtering"
-          action={
-            <Button
-              size="sm"
-              variant="outline"
-              icon={Edit3}
-              onClick={handleOpenEditModal}
-            >
-              Edit Scores
-            </Button>
-          }
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
@@ -794,7 +769,7 @@ const StudentProfile = () => {
 
             <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
               <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
-                <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
+                <Award className="w-3.5 h-3.5 text-[#2563EB]" />
                 Cumulative CGPA
               </span>
               <p className="text-base font-bold text-[#163A5F]">
@@ -849,16 +824,6 @@ const StudentProfile = () => {
         <Card
           title="Technical Skills"
           subtitle="Add frameworks, languages, and technical domains to your profile"
-          action={
-            <Button
-              size="sm"
-              variant="outline"
-              icon={Edit3}
-              onClick={handleOpenEditModal}
-            >
-              Manage Skills
-            </Button>
-          }
         >
           {profile?.skills && profile.skills.length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -986,16 +951,6 @@ const StudentProfile = () => {
         <Card
           title="Professional Profiles & Portfolios"
           subtitle="Showcase your open source projects, code repositories, and networking profile"
-          action={
-            <Button
-              size="sm"
-              variant="outline"
-              icon={Edit3}
-              onClick={handleOpenEditModal}
-            >
-              Update Links
-            </Button>
-          }
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">

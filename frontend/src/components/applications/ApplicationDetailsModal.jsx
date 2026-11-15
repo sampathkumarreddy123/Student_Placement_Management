@@ -21,6 +21,7 @@ import Modal from '../common/Modal';
 import Badge from '../common/Badge';
 import Button from '../common/Button';
 import { formatDate, formatLPA } from '../../utils/formatters';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
   if (!application) return null;
@@ -43,7 +44,7 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
           <div className="flex items-center gap-3.5">
             {company?.logoUrl ? (
               <img
-                src={company.logoUrl}
+                src={getImageUrl(company.logoUrl)}
                 alt={company?.name}
                 className="w-12 h-12 rounded-xl object-contain p-1 border border-[#DBEAFE] bg-white flex-shrink-0"
               />

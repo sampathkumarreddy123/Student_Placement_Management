@@ -139,7 +139,7 @@ const Register = () => {
             <GraduationCap className="w-4 h-4" />
           </div>
           <span className="font-bold text-[#172554] text-sm tracking-tight">
-            CampusPlacement
+            MITS Placements
           </span>
         </Link>
         <Link

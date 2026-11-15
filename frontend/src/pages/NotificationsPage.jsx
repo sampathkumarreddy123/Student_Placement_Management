@@ -2,22 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Bell,
-  CheckCircle2,
   Check,
   Trash2,
-  ExternalLink,
   Briefcase,
   FileText,
   Award,
   UserCheck,
   XCircle,
   Clock,
-  Sparkles,
   RefreshCw,
   Filter,
   ArrowRight,
   Inbox,
-  AlertCircle,
 } from 'lucide-react';
 import { notificationService } from '../services/notificationService';
 import { useAuth } from '../hooks/useAuth';

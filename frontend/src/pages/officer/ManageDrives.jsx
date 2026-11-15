@@ -3,7 +3,6 @@ import { Link, useSearchParams } from 'react-router-dom';
 import {
   Plus,
   Briefcase,
-  Calendar,
   Building2,
   Trash2,
   Edit2,
@@ -15,10 +14,8 @@ import {
   XCircle,
   Archive,
   GraduationCap,
-  Clock,
   Layers,
   FileText,
-  AlertCircle,
   X,
   PlusCircle,
 } from 'lucide-react';
@@ -35,6 +32,7 @@ import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import { useToast } from '../../context/ToastContext';
 import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters';
+import { getImageUrl } from '../../utils/imageUrl';
 
 const ALL_DEPTS = [
   'Computer Science',
@@ -577,7 +575,7 @@ const ManageDrives = () => {
                         <div className="flex items-center gap-2.5">
                           {drive.company?.logoUrl ? (
                             <img
-                              src={drive.company.logoUrl}
+                              src={getImageUrl(drive.company.logoUrl)}
                               alt={drive.company.name}
                               className="w-8 h-8 rounded-lg object-contain p-0.5 border border-[#DBEAFE] bg-white flex-shrink-0"
                               onError={(e) => {

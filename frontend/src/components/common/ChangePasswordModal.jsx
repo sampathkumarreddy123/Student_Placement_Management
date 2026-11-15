@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lock, X, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { Lock, X, CheckCircle2 } from 'lucide-react';
 import Input from './Input';
 import Button from './Button';
 import Alert from './Alert';

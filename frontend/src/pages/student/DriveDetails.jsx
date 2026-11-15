@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
-  Building2,
   MapPin,
-  Calendar,
-  Clock,
   Briefcase,
   ExternalLink,
   CheckCircle2,
   XCircle,
-  AlertTriangle,
   ArrowLeft,
-  Award,
   Users,
-  Layers,
-  Sparkles,
-  FileText,
   ListOrdered,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -29,6 +21,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 import EmptyState from '../../components/common/EmptyState';
 import { useToast } from '../../context/ToastContext';
 import { formatLPA, formatDate, getDeadlineStatus } from '../../utils/formatters';
+import { getImageUrl } from '../../utils/imageUrl';
 
 import EligibilityModal from '../../components/drives/EligibilityModal';
 import ApplyConfirmModal from '../../components/drives/ApplyConfirmModal';
@@ -129,7 +122,7 @@ const DriveDetails = () => {
           <div className="flex items-start gap-4">
             {drive.company?.logoUrl ? (
               <img
-                src={drive.company.logoUrl}
+                src={getImageUrl(drive.company.logoUrl)}
                 alt={drive.company?.name || 'Company'}
                 className="w-14 h-14 rounded-xl object-contain p-1 border border-[#DBEAFE] bg-white flex-shrink-0"
                 onError={(e) => {

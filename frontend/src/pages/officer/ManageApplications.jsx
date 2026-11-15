@@ -1,26 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import {
-  FileText,
   Filter,
   Search,
-  Building2,
-  Calendar,
-  Clock,
   ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
   Download,
   Eye,
   Edit3,
   History,
-  CheckCircle2,
-  XCircle,
   Briefcase,
-  GraduationCap,
   RotateCcw,
   Users,
-  Award,
 } from 'lucide-react';
 import { applicationService } from '../../services/applicationService';
 import { driveService } from '../../services/driveService';
@@ -326,7 +316,7 @@ const ManageApplications = () => {
             <div className="flex items-center gap-3">
               {driveInfo.company?.logoUrl ? (
                 <img
-                  src={driveInfo.company.logoUrl}
+                  src={getImageUrl(driveInfo.company.logoUrl)}
                   alt={driveInfo.company?.name}
                   className="w-10 h-10 rounded-lg object-contain p-0.5 border border-[#DBEAFE] bg-white flex-shrink-0"
                 />
