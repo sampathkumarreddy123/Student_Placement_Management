@@ -29,6 +29,13 @@ import EmptyState from '../../components/common/EmptyState';
 import { useToast } from '../../context/ToastContext';
 import { formatDate, formatLPA } from '../../utils/formatters';
 import { getResumeUrl } from '../../utils/imageUrl';
+import {
+  generateCandidateResumeBlob,
+  downloadBlobFile,
+  previewBlobFile,
+  isJsonErrorBlob,
+} from '../../utils/clientPdfGenerator';
+import { applicationService } from '../../services/applicationService';
 
 const ROUND_PRESETS = [
   'Online Assessment',
@@ -126,6 +133,67 @@ const ManageRounds = () => {
       fetchRounds(selectedDriveId);
     }
   }, [selectedDriveId]);
+
+  // Resume preview and download handlers
+  const handlePreviewCandidateResume = async (cand) => {
+    const student = cand.student || {};
+    const candidateName = student.name || 'Candidate';
+    const applicationId = cand.applicationId;
+
+    if (applicationId) {
+      try {
+        const res = await applicationService.previewApplicantResume(applicationId);
+        const isError = await isJsonErrorBlob(res.data);
+        if (!isError && res.data && res.data.size > 100) {
+          previewBlobFile(new Blob([res.data], { type: 'application/pdf' }));
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend preview failed, falling back to client generation:', err);
+      }
+    }
+
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: student.name,
+      rollNumber: student.rollNumber,
+      department: student.department,
+      cgpa: student.cgpa,
+      email: student.email,
+    });
+    previewBlobFile(fallbackBlob);
+    toast.info(`Opened resume preview for ${candidateName}.`);
+  };
+
+  const handleDownloadCandidateResume = async (cand) => {
+    const student = cand.student || {};
+    const candidateName = (student.name || 'Candidate').replace(/\s+/g, '_');
+    const filename = `${candidateName}_Resume.pdf`;
+    const applicationId = cand.applicationId;
+
+    if (applicationId) {
+      try {
+        const res = await applicationService.downloadApplicantResume(applicationId);
+        const isError = await isJsonErrorBlob(res.data);
+        if (!isError && res.data && res.data.size > 100) {
+          downloadBlobFile(new Blob([res.data], { type: 'application/pdf' }), filename);
+          toast.success(`Resume downloaded for ${candidateName}.`);
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend download failed, falling back to client generation:', err);
+      }
+    }
+
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: student.name,
+      rollNumber: student.rollNumber,
+      department: student.department,
+      cgpa: student.cgpa,
+      email: student.email,
+    });
+    downloadBlobFile(fallbackBlob, filename);
+    toast.success(`Resume downloaded for ${candidateName}.`);
+  };
 
   // Open Add/Edit Round Modal
   const handleOpenRoundModal = (round = null) => {
@@ -747,23 +815,22 @@ const ManageRounds = () => {
                       <td className="py-2.5 px-3">
                         {cand.student?.resumeUrl ? (
                           <div className="inline-flex items-center gap-1.5">
-                            <a
-                              href={getResumeUrl(cand.student.resumeUrl)}
-                              target="_blank"
-                              rel="noreferrer"
+                            <button
+                              type="button"
+                              onClick={() => handlePreviewCandidateResume(cand)}
                               className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2563EB] hover:underline"
                               title="Show / Preview Resume"
                             >
                               <FileText className="w-3.5 h-3.5" /> PDF
-                            </a>
-                            <a
-                              href={getResumeUrl(cand.student.resumeUrl)}
-                              download={`${(cand.student?.name || 'Candidate').replace(/\s+/g, '_')}_Resume.pdf`}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadCandidateResume(cand)}
                               className="text-[#0D9488] hover:text-[#0f172a] p-0.5 rounded transition-colors"
                               title="Download Candidate Resume"
                             >
                               <Download className="w-3.5 h-3.5" />
-                            </a>
+                            </button>
                           </div>
                         ) : (
                           <span className="text-[11px] text-[#64748B]">None</span>

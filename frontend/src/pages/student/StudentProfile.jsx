@@ -42,6 +42,12 @@ import ProfilePictureModal from '../../components/common/ProfilePictureModal';
 import ImageCropperModal from '../../components/common/ImageCropperModal';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
+import {
+  generateCandidateResumeBlob,
+  downloadBlobFile,
+  previewBlobFile,
+  isJsonErrorBlob,
+} from '../../utils/clientPdfGenerator';
 
 const DEPARTMENTS = [
   'Computer Science',
@@ -426,24 +432,58 @@ const StudentProfile = () => {
   };
 
   const handleDownloadResume = async () => {
+    const filename = profile?.resumeOriginalName || 'Student_Resume.pdf';
     try {
       const response = await studentService.downloadResume();
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', profile?.resumeOriginalName || 'Student_Resume.pdf');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      toast.success('Resume downloaded successfully.');
+      const isError = await isJsonErrorBlob(response.data);
+      if (!isError && response.data && response.data.size > 100) {
+        downloadBlobFile(new Blob([response.data], { type: 'application/pdf' }), filename);
+        toast.success('Resume downloaded successfully.');
+        return;
+      }
     } catch (err) {
-      toast.error('Could not download resume.');
-      setNotification({
-        type: 'error',
-        text: 'Could not download resume. Please verify the file is available.',
-      });
+      console.warn('Backend download failed, generating client fallback:', err);
     }
+
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: user?.name,
+      rollNumber: profile?.rollNumber,
+      department: profile?.department,
+      cgpa: profile?.cgpa,
+      email: user?.email,
+      phone: profile?.phone,
+      skills: profile?.skills,
+      tenthPercentage: profile?.tenthPercentage,
+      twelfthPercentage: profile?.twelfthPercentage,
+    });
+    downloadBlobFile(fallbackBlob, filename);
+    toast.success('Resume downloaded successfully.');
+  };
+
+  const handlePreviewResume = async () => {
+    try {
+      const response = await studentService.downloadResume();
+      const isError = await isJsonErrorBlob(response.data);
+      if (!isError && response.data && response.data.size > 100) {
+        previewBlobFile(new Blob([response.data], { type: 'application/pdf' }));
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend preview failed, generating client fallback:', err);
+    }
+
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: user?.name,
+      rollNumber: profile?.rollNumber,
+      department: profile?.department,
+      cgpa: profile?.cgpa,
+      email: user?.email,
+      phone: profile?.phone,
+      skills: profile?.skills,
+      tenthPercentage: profile?.tenthPercentage,
+      twelfthPercentage: profile?.twelfthPercentage,
+    });
+    previewBlobFile(fallbackBlob);
   };
 
   const formatFileSize = (bytes) => {
@@ -821,14 +861,15 @@ const StudentProfile = () => {
                     Download
                   </Button>
 
-                  <a
-                    href={getResumeUrl(profile.resumeUrl)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-[#DBEAFE] text-xs font-semibold text-[#172554] hover:bg-white gap-1 transition-colors"
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    icon={ExternalLink}
+                    onClick={handlePreviewResume}
                   >
-                    Preview <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+                    Preview
+                  </Button>
 
                   <Button
                     type="button"

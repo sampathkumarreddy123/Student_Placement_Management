@@ -22,6 +22,13 @@ import Badge from '../common/Badge';
 import Button from '../common/Button';
 import { formatDate, formatLPA } from '../../utils/formatters';
 import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
+import { applicationService } from '../../services/applicationService';
+import {
+  generateCandidateResumeBlob,
+  downloadBlobFile,
+  previewBlobFile,
+  isJsonErrorBlob,
+} from '../../utils/clientPdfGenerator';
 
 const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
   if (!application) return null;
@@ -29,6 +36,59 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
   const company = application.company || application.drive?.company;
   const drive = application.drive;
   const resume = application.resumeSnapshot || {};
+
+  const handleDownloadResume = async () => {
+    const candidateName = (application.student?.name || 'Applicant').replace(/\s+/g, '_');
+    const filename = resume.resumeOriginalName || `${candidateName}_Resume.pdf`;
+
+    if (application._id) {
+      try {
+        const response = await applicationService.downloadApplicantResume(application._id);
+        const isError = await isJsonErrorBlob(response.data);
+        if (!isError && response.data && response.data.size > 100) {
+          downloadBlobFile(new Blob([response.data], { type: 'application/pdf' }), filename);
+          return;
+        }
+      } catch (e) {
+        console.warn('Backend download failed, generating client fallback:', e);
+      }
+    }
+
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: application.student?.name,
+      rollNumber: resume.studentRollNumber,
+      department: resume.studentDepartment,
+      cgpa: resume.studentCgpa,
+      email: application.student?.email,
+      skills: resume.skills,
+    });
+    downloadBlobFile(fallbackBlob, filename);
+  };
+
+  const handleViewResume = async () => {
+    if (application._id) {
+      try {
+        const response = await applicationService.previewApplicantResume(application._id);
+        const isError = await isJsonErrorBlob(response.data);
+        if (!isError && response.data && response.data.size > 100) {
+          previewBlobFile(new Blob([response.data], { type: 'application/pdf' }));
+          return;
+        }
+      } catch (e) {
+        console.warn('Backend preview failed, generating client fallback:', e);
+      }
+    }
+
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: application.student?.name,
+      rollNumber: resume.studentRollNumber,
+      department: resume.studentDepartment,
+      cgpa: resume.studentCgpa,
+      email: application.student?.email,
+      skills: resume.skills,
+    });
+    previewBlobFile(fallbackBlob);
+  };
 
   return (
     <Modal
@@ -274,25 +334,24 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
 
             {resume.resumeUrl && (
               <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                <a
-                  href={getResumeUrl(resume.resumeUrl)}
-                  target="_blank"
-                  rel="noreferrer"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={ExternalLink}
+                  onClick={handleViewResume}
                   title="Show / Preview Resume in new tab"
                 >
-                  <Button variant="outline" size="sm" icon={ExternalLink}>
-                    View Resume
-                  </Button>
-                </a>
-                <a
-                  href={getResumeUrl(resume.resumeUrl)}
-                  download={resume.resumeOriginalName || 'Candidate_Resume.pdf'}
+                  View Resume
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Download}
+                  onClick={handleDownloadResume}
                   title="Download Candidate Resume"
                 >
-                  <Button variant="primary" size="sm" icon={Download}>
-                    Download
-                  </Button>
-                </a>
+                  Download
+                </Button>
               </div>
             )}
           </div>

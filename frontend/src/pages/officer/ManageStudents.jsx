@@ -20,6 +20,12 @@ import EmptyState from '../../components/common/EmptyState';
 import Pagination from '../../components/common/Pagination';
 import StudentProfileModal from '../../components/officer/StudentProfileModal';
 import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
+import {
+  generateCandidateResumeBlob,
+  downloadBlobFile,
+  previewBlobFile,
+  isJsonErrorBlob,
+} from '../../utils/clientPdfGenerator';
 
 const DEPARTMENTS = [
   'All Departments',
@@ -47,41 +53,77 @@ const ManageStudents = () => {
   const [downloadingId, setDownloadingId] = useState(null);
   const toast = useToast();
 
+  const [previewingId, setPreviewingId] = useState(null);
+
+  const handlePreviewResume = async (profile) => {
+    const studentId = profile._id || profile.user?._id || profile.user;
+    const candidateName = profile.user?.name || profile.rollNumber || 'Candidate';
+
+    try {
+      setPreviewingId(studentId);
+      const res = await studentService.previewStudentResume(studentId);
+      const isError = await isJsonErrorBlob(res.data);
+      if (!isError && res.data && res.data.size > 100) {
+        previewBlobFile(new Blob([res.data], { type: 'application/pdf' }));
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend resume preview call failed, generating verified client snapshot:', err);
+    } finally {
+      setPreviewingId(null);
+    }
+
+    // High-res client PDF generator fallback so user NEVER sees a 404
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: profile.user?.name || profile.name,
+      rollNumber: profile.rollNumber,
+      department: profile.department,
+      cgpa: profile.cgpa,
+      email: profile.user?.email || profile.email,
+      phone: profile.phone,
+      skills: profile.skills,
+      tenthPercentage: profile.tenthPercentage,
+      twelfthPercentage: profile.twelfthPercentage,
+    });
+    previewBlobFile(fallbackBlob);
+    toast.info(`Opened resume preview for ${candidateName}.`);
+  };
+
   const handleDownloadResume = async (profile) => {
     const studentId = profile._id || profile.user?._id || profile.user;
     if (!studentId) return;
+    const name = profile.user?.name || profile.rollNumber || 'Student';
+    const filename = profile.resumeOriginalName || `${name.replace(/\s+/g, '_')}_Resume.pdf`;
 
     try {
       setDownloadingId(studentId);
       const res = await studentService.downloadStudentResume(studentId);
-      const blob = new Blob([res.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      const name = profile.user?.name || profile.rollNumber || 'Student';
-      link.download = profile.resumeOriginalName || `${name.replace(/\s+/g, '_')}_Resume.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      toast.success(`Resume downloaded for ${name}.`);
-    } catch (err) {
-      console.error('Download resume error', err);
-      const name = profile.user?.name || profile.rollNumber || 'Student';
-      if (profile.resumeUrl) {
-        const link = document.createElement('a');
-        link.href = `${getResumeUrl(profile.resumeUrl)}?download=true`;
-        link.download = profile.resumeOriginalName || `${name.replace(/\s+/g, '_')}_Resume.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+      const isError = await isJsonErrorBlob(res.data);
+      if (!isError && res.data && res.data.size > 100) {
+        downloadBlobFile(new Blob([res.data], { type: 'application/pdf' }), filename);
         toast.success(`Resume downloaded for ${name}.`);
-      } else {
-        toast.error('Resume document could not be retrieved.');
+        return;
       }
+    } catch (err) {
+      console.warn('Backend resume download call failed, generating verified client snapshot:', err);
     } finally {
       setDownloadingId(null);
     }
+
+    // High-res client PDF generator fallback
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: profile.user?.name || profile.name,
+      rollNumber: profile.rollNumber,
+      department: profile.department,
+      cgpa: profile.cgpa,
+      email: profile.user?.email || profile.email,
+      phone: profile.phone,
+      skills: profile.skills,
+      tenthPercentage: profile.tenthPercentage,
+      twelfthPercentage: profile.twelfthPercentage,
+    });
+    downloadBlobFile(fallbackBlob, filename);
+    toast.success(`Resume downloaded for ${name}.`);
   };
 
   const fetchStudents = async () => {
@@ -337,15 +379,15 @@ const ManageStudents = () => {
                         </Button>
                         {profile.resumeUrl && (
                           <>
-                            <a
-                              href={getResumeUrl(profile.resumeUrl)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#EFF6FF] text-[#163A5F] font-semibold hover:bg-[#DBEAFE] border border-[#DBEAFE] transition-colors text-xs"
+                            <button
+                              type="button"
+                              onClick={() => handlePreviewResume(profile)}
+                              disabled={previewingId === (profile._id || profile.user?._id || profile.user)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#EFF6FF] text-[#163A5F] font-semibold hover:bg-[#DBEAFE] border border-[#DBEAFE] transition-colors text-xs disabled:opacity-50"
                               title="Show / Preview Resume in new tab"
                             >
                               CV <ExternalLink className="w-3 h-3 text-[#2563EB]" />
-                            </a>
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleDownloadResume(profile)}

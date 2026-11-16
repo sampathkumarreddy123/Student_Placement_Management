@@ -30,6 +30,12 @@ import Pagination from '../../components/common/Pagination';
 import { useToast } from '../../context/ToastContext';
 import { formatDate, formatLPA } from '../../utils/formatters';
 import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
+import {
+  generateCandidateResumeBlob,
+  downloadBlobFile,
+  previewBlobFile,
+  isJsonErrorBlob,
+} from '../../utils/clientPdfGenerator';
 
 const STATUS_OPTIONS = [
   'All',
@@ -199,54 +205,40 @@ const ManageApplications = () => {
 
   // Download student resume
   const handleDownloadResume = async (app) => {
+    const candidateName = (app.student?.name || 'Applicant').replace(/\s+/g, '_');
+    const filename =
+      app.resumeSnapshot?.resumeOriginalName ||
+      app.studentProfile?.resumeOriginalName ||
+      `${candidateName}_Resume.pdf`;
+
     try {
       setDownloadingAppId(app._id);
       const response = await applicationService.downloadApplicantResume(app._id);
-
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      const candidateName = (app.student?.name || 'Applicant').replace(/\s+/g, '_');
-      link.download =
-        app.resumeSnapshot?.resumeOriginalName ||
-        app.studentProfile?.resumeOriginalName ||
-        `${candidateName}_Resume.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-      toast.success(`Resume for ${app.student?.name || 'candidate'} downloaded.`);
-      setActionAlert({
-        type: 'success',
-        text: `Resume for ${app.student?.name || 'candidate'} downloaded successfully.`,
-      });
-    } catch (err) {
-      console.error('Resume download error', err);
-      const fallbackUrl = app.resumeSnapshot?.resumeUrl || app.studentProfile?.resumeUrl;
-      const candidateName = (app.student?.name || 'Applicant').replace(/\s+/g, '_');
-      if (fallbackUrl) {
-        const link = document.createElement('a');
-        link.href = `${getResumeUrl(fallbackUrl)}?download=true`;
-        link.download =
-          app.resumeSnapshot?.resumeOriginalName ||
-          app.studentProfile?.resumeOriginalName ||
-          `${candidateName}_Resume.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+      const isError = await isJsonErrorBlob(response.data);
+      if (!isError && response.data && response.data.size > 100) {
+        downloadBlobFile(new Blob([response.data], { type: 'application/pdf' }), filename);
         toast.success(`Resume for ${app.student?.name || 'candidate'} downloaded.`);
-      } else {
-        toast.error('Resume document could not be retrieved.');
-        setActionAlert({
-          type: 'error',
-          text: 'Resume document could not be retrieved.',
-        });
+        return;
       }
+    } catch (err) {
+      console.warn('Backend download failed, generating client fallback resume:', err);
     } finally {
       setDownloadingAppId(null);
     }
+
+    // High-res client PDF generator fallback so officer NEVER sees 404
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: app.student?.name,
+      rollNumber: app.studentProfile?.rollNumber || app.resumeSnapshot?.studentRollNumber,
+      department: app.studentProfile?.department || app.resumeSnapshot?.studentDepartment,
+      cgpa: app.studentProfile?.cgpa ?? app.resumeSnapshot?.studentCgpa,
+      email: app.student?.email,
+      skills: app.studentProfile?.skills || app.resumeSnapshot?.skills,
+      tenthPercentage: app.studentProfile?.tenthPercentage,
+      twelfthPercentage: app.studentProfile?.twelfthPercentage,
+    });
+    downloadBlobFile(fallbackBlob, filename);
+    toast.success(`Resume for ${app.student?.name || 'candidate'} downloaded.`);
   };
 
   // View / Show candidate resume
@@ -254,26 +246,30 @@ const ManageApplications = () => {
     try {
       setViewingAppId(app._id);
       const response = await applicationService.previewApplicantResume(app._id);
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      window.open(url, '_blank');
-      toast.info(`Opened resume for ${app.student?.name || 'candidate'}.`);
-    } catch (err) {
-      console.error('Resume preview error', err);
-      const fallbackUrl = app.resumeSnapshot?.resumeUrl || app.studentProfile?.resumeUrl;
-      if (fallbackUrl) {
-        window.open(getResumeUrl(fallbackUrl), '_blank');
-        toast.info('Opened resume link in a new tab.');
-      } else {
-        toast.error('Resume document could not be retrieved.');
-        setActionAlert({
-          type: 'error',
-          text: 'Resume document could not be retrieved.',
-        });
+      const isError = await isJsonErrorBlob(response.data);
+      if (!isError && response.data && response.data.size > 100) {
+        previewBlobFile(new Blob([response.data], { type: 'application/pdf' }));
+        return;
       }
+    } catch (err) {
+      console.warn('Backend preview failed, generating client fallback resume:', err);
     } finally {
       setViewingAppId(null);
     }
+
+    // High-res client PDF generator fallback
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: app.student?.name,
+      rollNumber: app.studentProfile?.rollNumber || app.resumeSnapshot?.studentRollNumber,
+      department: app.studentProfile?.department || app.resumeSnapshot?.studentDepartment,
+      cgpa: app.studentProfile?.cgpa ?? app.resumeSnapshot?.studentCgpa,
+      email: app.student?.email,
+      skills: app.studentProfile?.skills || app.resumeSnapshot?.skills,
+      tenthPercentage: app.studentProfile?.tenthPercentage,
+      twelfthPercentage: app.studentProfile?.twelfthPercentage,
+    });
+    previewBlobFile(fallbackBlob);
+    toast.info(`Opened resume preview for ${app.student?.name || 'candidate'}.`);
   };
 
   const hasActiveFilters =

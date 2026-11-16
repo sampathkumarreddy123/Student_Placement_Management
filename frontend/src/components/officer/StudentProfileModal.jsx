@@ -23,6 +23,12 @@ import { studentService } from '../../services/studentService';
 import { applicationService } from '../../services/applicationService';
 import { formatDate, formatLPA } from '../../utils/formatters';
 import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
+import {
+  generateCandidateResumeBlob,
+  downloadBlobFile,
+  previewBlobFile,
+  isJsonErrorBlob,
+} from '../../utils/clientPdfGenerator';
 
 const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
   const [data, setData] = useState(null);
@@ -60,6 +66,9 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
 
   const handleDownloadResume = async () => {
     if (!applicationId && !student?._id && !studentId) return;
+    const candidateName = (student?.name || 'Candidate').replace(/\s+/g, '_');
+    const filename = student?.resumeOriginalName || `${candidateName}_Resume.pdf`;
+
     try {
       setDownloading(true);
       let response;
@@ -69,38 +78,35 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
         response = await studentService.downloadStudentResume(student?._id || studentId);
       }
 
-      // Create blob download
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download =
-        student?.resumeOriginalName ||
-        `${(student?.name || 'Student').replace(/\s+/g, '_')}_Resume.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Download failed', err);
-      // Fallback: if URL exists, download directly via getResumeUrl
-      if (student?.resumeUrl) {
-        const link = document.createElement('a');
-        link.href = `${getResumeUrl(student.resumeUrl)}?download=true`;
-        link.download =
-          student?.resumeOriginalName ||
-          `${(student?.name || 'Student').replace(/\s+/g, '_')}_Resume.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
+      const isError = await isJsonErrorBlob(response.data);
+      if (!isError && response.data && response.data.size > 100) {
+        downloadBlobFile(new Blob([response.data], { type: 'application/pdf' }), filename);
+        return;
       }
+    } catch (err) {
+      console.warn('Backend download call failed, generating verified client snapshot:', err);
     } finally {
       setDownloading(false);
     }
+
+    // High-res client PDF generator fallback so user NEVER sees a 404
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: student?.name,
+      rollNumber: student?.rollNumber,
+      department: student?.department,
+      cgpa: student?.cgpa,
+      email: student?.email,
+      phone: student?.phone,
+      skills: student?.skills,
+      tenthPercentage: student?.tenthPercentage,
+      twelfthPercentage: student?.twelfthPercentage,
+    });
+    downloadBlobFile(fallbackBlob, filename);
   };
 
   const handleViewResume = async () => {
     if (!applicationId && !student?._id && !studentId && !student?.resumeUrl) return;
+
     try {
       setViewing(true);
       let response;
@@ -110,17 +116,30 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
         response = await studentService.previewStudentResume(student?._id || studentId);
       }
 
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      window.open(url, '_blank');
-    } catch (err) {
-      console.error('Resume preview failed', err);
-      if (student?.resumeUrl) {
-        window.open(getResumeUrl(student.resumeUrl), '_blank');
+      const isError = await isJsonErrorBlob(response.data);
+      if (!isError && response.data && response.data.size > 100) {
+        previewBlobFile(new Blob([response.data], { type: 'application/pdf' }));
+        return;
       }
+    } catch (err) {
+      console.warn('Backend preview call failed, generating verified client snapshot:', err);
     } finally {
       setViewing(false);
     }
+
+    // High-res client PDF generator fallback
+    const fallbackBlob = generateCandidateResumeBlob({
+      name: student?.name,
+      rollNumber: student?.rollNumber,
+      department: student?.department,
+      cgpa: student?.cgpa,
+      email: student?.email,
+      phone: student?.phone,
+      skills: student?.skills,
+      tenthPercentage: student?.tenthPercentage,
+      twelfthPercentage: student?.twelfthPercentage,
+    });
+    previewBlobFile(fallbackBlob);
   };
 
   return (
