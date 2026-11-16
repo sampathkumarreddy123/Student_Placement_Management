@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, X, CheckCircle2, ShieldCheck, KeyRound, HelpCircle } from 'lucide-react';
+import { Lock, X, CheckCircle2, ShieldCheck, KeyRound } from 'lucide-react';
 import Input from './Input';
 import Button from './Button';
 import Alert from './Alert';
@@ -11,7 +11,6 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
   const { user } = useAuth();
 
   // Password fields
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -44,7 +43,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
         const res = await authService.getMySecurityQuestions();
         if (isMounted && res.success) {
           setHasQuestions(res.hasSecurityQuestions);
-          if (res.hasSecurityQuestions && Array.isArray(res.questions)) {
+          if (res.hasSecurityQuestions && Array.isArray(res.questions) && res.questions.length === 3) {
             setExistingQuestions(res.questions);
             setAnswers(['', '', '']);
           } else {
@@ -82,16 +81,17 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
       updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
-    if (fieldErrors[`setup_${index}`]) {
-      setFieldErrors((prev) => ({ ...prev, [`setup_${index}`]: '' }));
+    if (fieldErrors[`setup_q_${index}`] || fieldErrors[`setup_a_${index}`]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [`setup_q_${index}`]: '',
+        [`setup_a_${index}`]: '',
+      }));
     }
   };
 
   const validate = () => {
     const errs = {};
-    if (!currentPassword) {
-      errs.currentPassword = 'Enter your current password';
-    }
 
     const minLength = user?.role === 'officer' ? 8 : 6;
     if (!newPassword) {
@@ -106,15 +106,11 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
       errs.confirmPassword = 'Passwords do not match';
     }
 
-    if (currentPassword && newPassword && currentPassword === newPassword) {
-      errs.newPassword = 'New password must be different from current password';
-    }
-
     // Validate security questions
     if (hasQuestions) {
       answers.forEach((ans, idx) => {
         if (!ans.trim()) {
-          errs[`answer_${idx}`] = `Answer required for Question #${idx + 1}`;
+          errs[`answer_${idx}`] = `Answer is required for Question #${idx + 1}`;
         }
       });
     } else {
@@ -152,7 +148,6 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
       setLoading(true);
 
       const payload = {
-        currentPassword,
         newPassword,
         confirmPassword,
       };
@@ -181,7 +176,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
       setError(
         err.response?.data?.message ||
           err.message ||
-          'Failed to change password. Please verify your current password and security answers.'
+          'Failed to change password. Please verify your security answers.'
       );
     } finally {
       setLoading(false);
@@ -189,7 +184,6 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
   };
 
   const handleClose = () => {
-    setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
     setAnswers(['', '', '']);
@@ -212,7 +206,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
             <div>
               <h3 className="text-sm font-bold text-[#172554]">Change Password</h3>
               <p className="text-[11px] text-[#64748B]">
-                {user?.role === 'officer' ? 'Officer Security Verification' : 'Student Security Verification'}
+                Security Questions Verification ({user?.role === 'officer' ? 'Placement Officer' : 'Student'})
               </p>
             </div>
           </div>
@@ -232,7 +226,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
             </div>
             <h4 className="text-base font-bold text-[#172554]">Password Updated Successfully</h4>
             <p className="text-xs text-[#64748B] max-w-xs mx-auto">
-              Your credentials and security verification questions have been verified and saved.
+              Your security answers were verified and your password has been securely updated.
             </p>
           </div>
         ) : (
@@ -251,13 +245,13 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
                 <h4 className="text-xs font-bold text-[#172554]">
-                  {hasQuestions ? 'Answer Security Questions' : 'Setup Security Questions'}
+                  {hasQuestions ? 'Answer Your Security Questions' : 'Setup Your Security Questions'}
                 </h4>
               </div>
               <p className="text-[11px] text-[#64748B] leading-snug">
                 {hasQuestions
-                  ? 'Verify your identity by answering the security questions associated with your account before changing your password.'
-                  : 'Select and answer 3 confidential questions. These will be required to verify your identity whenever changing your password.'}
+                  ? 'Verify your identity by entering the correct answers to your 3 registered security questions below.'
+                  : 'Select and answer 3 security questions. Once set, you will answer these questions whenever you change your password.'}
               </p>
 
               {loadingQuestions ? (
@@ -265,22 +259,28 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
                   Loading security questions...
                 </div>
               ) : hasQuestions ? (
-                /* Existing Questions: Prompt for Answers */
+                /* Existing Questions: Display and prompt for answers */
                 <div className="space-y-3 pt-1">
                   {existingQuestions.map((qText, idx) => (
                     <div
                       key={idx}
-                      className="p-2.5 bg-white rounded-lg border border-[#DBEAFE] space-y-1.5 shadow-2xs"
+                      className="p-3 bg-white rounded-lg border border-[#DBEAFE] space-y-1.5 shadow-2xs"
                     >
-                      <p className="text-xs font-semibold text-[#172554]">
-                        {idx + 1}. {qText}
-                      </p>
+                      <div className="flex items-start gap-1.5">
+                        <span className="w-4 h-4 rounded-full bg-[#172554] text-white text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                          {idx + 1}
+                        </span>
+                        <p className="text-xs font-semibold text-[#172554] leading-snug">
+                          {qText}
+                        </p>
+                      </div>
+
                       <Input
                         label=""
                         id={`answer_${idx}`}
                         type="password"
                         showPasswordToggle
-                        placeholder="Your confidential answer"
+                        placeholder="Enter your confidential answer"
                         value={answers[idx]}
                         onChange={(e) => {
                           const next = [...answers];
@@ -345,7 +345,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
                           handleSetupQuestionChange(idx, 'answer', e.target.value)
                         }
                         error={fieldErrors[`setup_a_${idx}`]}
-                        helperText="Answers are case-insensitive"
+                        helperText="Answers are case-insensitive and hashed"
                         required
                         autoComplete="off"
                       />
@@ -355,70 +355,48 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
               )}
             </div>
 
-            {/* Section 2: Passwords */}
-            <div className="space-y-3 pt-1">
+            {/* Section 2: New Passwords */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <Input
-                label="Current Password"
-                id="currentPassword"
-                name="currentPassword"
+                label="New Password"
+                id="newPassword"
+                name="newPassword"
                 type="password"
                 placeholder=""
                 icon={Lock}
                 showPasswordToggle
-                value={currentPassword}
+                value={newPassword}
                 onChange={(e) => {
-                  setCurrentPassword(e.target.value);
-                  if (fieldErrors.currentPassword) {
-                    setFieldErrors((prev) => ({ ...prev, currentPassword: '' }));
+                  setNewPassword(e.target.value);
+                  if (fieldErrors.newPassword) {
+                    setFieldErrors((prev) => ({ ...prev, newPassword: '' }));
                   }
                 }}
-                error={fieldErrors.currentPassword}
+                error={fieldErrors.newPassword}
+                helperText={user?.role === 'officer' ? 'Minimum 8 characters' : 'Minimum 6 characters'}
                 required
-                autoComplete="current-password"
+                autoComplete="new-password"
               />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <Input
-                  label="New Password"
-                  id="newPassword"
-                  name="newPassword"
-                  type="password"
-                  placeholder=""
-                  icon={Lock}
-                  showPasswordToggle
-                  value={newPassword}
-                  onChange={(e) => {
-                    setNewPassword(e.target.value);
-                    if (fieldErrors.newPassword) {
-                      setFieldErrors((prev) => ({ ...prev, newPassword: '' }));
-                    }
-                  }}
-                  error={fieldErrors.newPassword}
-                  helperText={user?.role === 'officer' ? 'Minimum 8 characters' : 'Minimum 6 characters'}
-                  required
-                  autoComplete="new-password"
-                />
-
-                <Input
-                  label="Confirm New Password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  placeholder=""
-                  icon={Lock}
-                  showPasswordToggle
-                  value={confirmPassword}
-                  onChange={(e) => {
-                    setConfirmPassword(e.target.value);
-                    if (fieldErrors.confirmPassword) {
-                      setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
-                    }
-                  }}
-                  error={fieldErrors.confirmPassword}
-                  required
-                  autoComplete="new-password"
-                />
-              </div>
+              <Input
+                label="Confirm New Password"
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                placeholder=""
+                icon={Lock}
+                showPasswordToggle
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (fieldErrors.confirmPassword) {
+                    setFieldErrors((prev) => ({ ...prev, confirmPassword: '' }));
+                  }
+                }}
+                error={fieldErrors.confirmPassword}
+                required
+                autoComplete="new-password"
+              />
             </div>
 
             {/* Actions */}
@@ -438,9 +416,13 @@ const ChangePasswordModal = ({ isOpen, onClose, onSuccess }) => {
                 size="sm"
                 isLoading={loading}
                 icon={KeyRound}
-                className="bg-[#172554] hover:bg-[#0f172a] text-white shadow-xs"
+                className="bg-[#172554] hover:bg-[#0f172a] text-white shadow-xs cursor-pointer"
               >
-                {loading ? 'Verifying & Updating...' : 'Update Password'}
+                {loading
+                  ? 'Verifying Answers...'
+                  : hasQuestions
+                  ? 'Verify Answers & Change Password'
+                  : 'Save Questions & Change Password'}
               </Button>
             </div>
           </form>

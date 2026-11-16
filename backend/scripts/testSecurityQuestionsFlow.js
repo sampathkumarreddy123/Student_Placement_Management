@@ -20,6 +20,7 @@ import {
   resetPassword,
   studentLogin,
   officerLogin,
+  changePassword,
 } from '../controllers/authController.js';
 import { PREDEFINED_SECURITY_QUESTIONS } from '../constants/securityQuestions.js';
 
@@ -371,6 +372,64 @@ const runTests = async () => {
         console.log('  ✅ Passed: Account is locked even against correct answers while lockout is active.');
       } else {
         throw new Error(`Expected locked response but got: ${JSON.stringify(res.data)}`);
+      }
+    }
+
+    // -------------------------------------------------------------
+    // Test 11: Change Password via Security Questions (Authenticated Flow)
+    // -------------------------------------------------------------
+    console.log('\nTest 11: Change Password authorized by 3 security answers');
+    {
+      // Reset lockout on user
+      await User.findByIdAndUpdate(registeredUser.id, {
+        $set: { securityQuestionAttempts: 0 },
+        $unset: { securityQuestionLockUntil: 1 },
+      });
+
+      const updatedPasswordViaQuestions = 'ViaQuestionsPass123!';
+
+      // 11a: Submitting incorrect answer is rejected
+      const { req: reqBad, res: resBad, next: nextBad } = createMockReqRes({
+        newPassword: updatedPasswordViaQuestions,
+        confirmPassword: updatedPasswordViaQuestions,
+        securityAnswers: [
+          { question: validQuestions[0].question, answer: validQuestions[0].answer },
+          { question: validQuestions[1].question, answer: 'WrongChildhoodNickname' },
+          { question: validQuestions[2].question, answer: validQuestions[2].answer },
+        ],
+      });
+      reqBad.user = { id: registeredUser.id, role: 'student' };
+      await changePassword(reqBad, resBad, nextBad);
+      if (resBad.statusCode === 400 && resBad.data.message.includes('Incorrect security answers')) {
+        console.log('  ✅ Passed: Password change rejected with incorrect security answer.');
+      } else {
+        throw new Error(`Expected rejection for wrong security answer but got: ${JSON.stringify(resBad.data)}`);
+      }
+
+      // 11b: Submitting all 3 correct answers successfully changes password
+      const { req: reqGood, res: resGood, next: nextGood } = createMockReqRes({
+        newPassword: updatedPasswordViaQuestions,
+        confirmPassword: updatedPasswordViaQuestions,
+        securityAnswers: validQuestions,
+      });
+      reqGood.user = { id: registeredUser.id, role: 'student' };
+      await changePassword(reqGood, resGood, nextGood);
+      if (resGood.statusCode === 200 && resGood.data.success) {
+        console.log('  ✅ Passed: Password changed successfully via security questions authorization!');
+      } else {
+        throw new Error(`Expected success for correct security answers but got: ${JSON.stringify(resGood.data)}`);
+      }
+
+      // 11c: Verify user can log in with this new password
+      const { req: reqLogin2, res: resLogin2, next: nextLogin2 } = createMockReqRes({
+        email: testEmail,
+        password: updatedPasswordViaQuestions,
+      });
+      await studentLogin(reqLogin2, resLogin2, nextLogin2);
+      if (resLogin2.statusCode === 200 && resLogin2.data.success) {
+        console.log('  ✅ Passed: Logged in with password changed via security questions!');
+      } else {
+        throw new Error(`Login failed with new password: ${JSON.stringify(resLogin2.data)}`);
       }
     }
 

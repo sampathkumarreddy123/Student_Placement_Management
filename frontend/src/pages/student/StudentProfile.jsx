@@ -570,10 +570,10 @@ const StudentProfile = () => {
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="absolute bottom-0 right-0 p-2 bg-[#172554] hover:bg-[#0f172a] text-white rounded-full shadow-md border-2 border-white transition-all focus:outline-none focus:ring-2 focus:ring-[#172554] cursor-pointer"
+                className="absolute bottom-0 right-0 w-8 h-8 bg-[#172554] hover:bg-[#2563EB] text-white rounded-full shadow-md border-2 border-white transition-all flex items-center justify-center cursor-pointer"
                 title="Change & Crop Profile Photo"
               >
-                <Camera className="w-3.5 h-3.5" />
+                <Camera className="w-4 h-4" />
               </button>
 
               {/* Remove Photo Button */}
@@ -582,7 +582,7 @@ const StudentProfile = () => {
                   type="button"
                   onClick={handleRemoveAvatar}
                   disabled={uploadingPhoto}
-                  className="absolute top-0 right-0 p-1.5 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors cursor-pointer"
+                  className="absolute top-0 right-0 w-6 h-6 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors flex items-center justify-center cursor-pointer"
                   title="Remove Profile Photo"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -649,15 +649,6 @@ const StudentProfile = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-2.5 w-full sm:w-auto justify-center sm:justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              icon={KeyRound}
-              onClick={() => setPasswordModalOpen(true)}
-            >
-              Password
-            </Button>
             <Button
               type="button"
               variant="primary"

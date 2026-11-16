@@ -258,7 +258,7 @@ const OfficerProfile = () => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto || removingPhoto}
-              className="absolute bottom-0 right-0 p-2 bg-[#172554] hover:bg-[#0f172a] text-white rounded-full shadow-md border-2 border-white transition-all focus:outline-none focus:ring-2 focus:ring-[#172554] cursor-pointer"
+              className="absolute bottom-0 right-0 w-8 h-8 bg-[#172554] hover:bg-[#2563EB] text-white rounded-full shadow-md border-2 border-white transition-all flex items-center justify-center cursor-pointer"
               title="Upload & Crop Profile Photo"
             >
               <Camera className="w-4 h-4" />
@@ -270,7 +270,7 @@ const OfficerProfile = () => {
                 type="button"
                 onClick={handlePhotoRemove}
                 disabled={uploadingPhoto || removingPhoto}
-                className="absolute top-0 right-0 p-1.5 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors cursor-pointer"
+                className="absolute top-0 right-0 w-6 h-6 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors flex items-center justify-center cursor-pointer"
                 title="Remove Profile Photo"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -319,46 +319,6 @@ const OfficerProfile = () => {
                 </span>
               )}
             </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex flex-col gap-2 w-full sm:w-auto">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingPhoto || removingPhoto}
-              leftIcon={<Camera className="w-4 h-4 text-[#2563EB]" />}
-              className="border-[#DBEAFE] text-[#163A5F] hover:bg-[#EFF6FF] w-full"
-            >
-              {uploadingPhoto ? 'Uploading...' : 'Change Photo'}
-            </Button>
-
-            {effectivePhoto && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handlePhotoRemove}
-                disabled={uploadingPhoto || removingPhoto}
-                leftIcon={<Trash2 className="w-4 h-4 text-rose-500" />}
-                className="border-rose-200 text-rose-600 hover:bg-rose-50 w-full"
-              >
-                {removingPhoto ? 'Removing...' : 'Remove Photo'}
-              </Button>
-            )}
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setChangePasswordOpen(true)}
-              leftIcon={<KeyRound className="w-4 h-4 text-[#163A5F]" />}
-              className="border-[#DBEAFE] text-[#163A5F] hover:bg-[#EFF6FF] w-full"
-            >
-              Change Password
-            </Button>
           </div>
         </div>
       </div>

@@ -1064,13 +1064,6 @@ export const changePassword = async (req, res, next) => {
       securityQuestions,
     } = req.body;
 
-    if (!currentPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide your current password.',
-      });
-    }
-
     if (!newPassword) {
       return res.status(400).json({
         success: false,
@@ -1099,13 +1092,6 @@ export const changePassword = async (req, res, next) => {
       });
     }
 
-    if (currentPassword === newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'New password must be different from your current password.',
-      });
-    }
-
     // Retrieve user with password hash & security questions
     const user = await User.findById(req.user.id).select(
       '+password +securityQuestions +securityQuestions.answerHash +securityQuestionLockUntil +securityQuestionAttempts'
@@ -1117,26 +1103,16 @@ export const changePassword = async (req, res, next) => {
       });
     }
 
-    // Verify current password via bcrypt
-    const isMatch = await user.matchPassword(currentPassword);
-    if (!isMatch) {
-      return res.status(400).json({
-        success: false,
-        message: 'Incorrect current password. Please try again.',
-      });
-    }
+    let isAuthorized = false;
 
-    // Security Questions Check:
-    // 1. If user already has 3 security questions, require and verify answers
-    if (user.securityQuestions && user.securityQuestions.length === 3) {
-      if (!securityAnswers || !Array.isArray(securityAnswers) || securityAnswers.length !== 3) {
-        return res.status(400).json({
-          success: false,
-          requireSecurityVerification: true,
-          message: 'Please answer your 3 security questions to authorize changing your password.',
-        });
-      }
-
+    // Authorization Method A: Verification via 3 Security Question Answers
+    if (
+      user.securityQuestions &&
+      user.securityQuestions.length === 3 &&
+      securityAnswers &&
+      Array.isArray(securityAnswers) &&
+      securityAnswers.length === 3
+    ) {
       const verification = await user.verifySecurityAnswers(securityAnswers);
       if (!verification.success) {
         return res.status(verification.locked ? 423 : 400).json({
@@ -1145,8 +1121,31 @@ export const changePassword = async (req, res, next) => {
           message: verification.message,
         });
       }
-    } else if (securityQuestions && Array.isArray(securityQuestions) && securityQuestions.length === 3) {
-      // 2. If user does NOT have security questions yet, set them now
+      isAuthorized = true;
+    }
+
+    // Authorization Method B: Current Password
+    if (!isAuthorized && currentPassword) {
+      const isMatch = await user.matchPassword(currentPassword);
+      if (isMatch) {
+        isAuthorized = true;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Incorrect current password. Please try again or answer your security questions.',
+        });
+      }
+    }
+
+    // Authorization Method C: Setting up 3 security questions for the first time
+    if (
+      !isAuthorized &&
+      (!user.securityQuestions || user.securityQuestions.length !== 3) &&
+      securityQuestions &&
+      Array.isArray(securityQuestions) &&
+      securityQuestions.length === 3
+    ) {
+      const chosen = new Set();
       for (let i = 0; i < securityQuestions.length; i++) {
         const sq = securityQuestions[i];
         if (!sq.question || !isValidSecurityQuestion(sq.question)) {
@@ -1155,6 +1154,14 @@ export const changePassword = async (req, res, next) => {
             message: `Security question #${i + 1} is invalid.`,
           });
         }
+        if (chosen.has(sq.question)) {
+          return res.status(400).json({
+            success: false,
+            message: 'All 3 security questions must be unique.',
+          });
+        }
+        chosen.add(sq.question);
+
         if (!sq.answer || String(sq.answer).trim().length < 2) {
           return res.status(400).json({
             success: false,
@@ -1163,9 +1170,24 @@ export const changePassword = async (req, res, next) => {
         }
       }
       await user.setSecurityQuestions(securityQuestions);
+      isAuthorized = true;
     }
 
-    // Save new password (pre-save hook will hash it with bcryptjs)
+    if (!isAuthorized) {
+      if (user.securityQuestions && user.securityQuestions.length === 3) {
+        return res.status(400).json({
+          success: false,
+          message: 'Please answer your 3 security questions to authorize this password change.',
+        });
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: 'Please answer your security questions or provide your current password.',
+        });
+      }
+    }
+
+    // Update password
     user.password = newPassword;
     await user.save();
 
