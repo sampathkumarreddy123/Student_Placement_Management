@@ -8,11 +8,14 @@ import {
   GraduationCap,
   ArrowLeft,
   UserPlus,
+  ShieldCheck,
+  HelpCircle,
 } from 'lucide-react';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
 import { useAuth } from '../../hooks/useAuth';
+import { PREDEFINED_SECURITY_QUESTIONS } from '../../constants/securityQuestions';
 
 const DEPARTMENTS = [
   'Computer Science',
@@ -36,6 +39,13 @@ const Register = () => {
     confirmPassword: '',
   });
 
+  const [securityQuestions, setSecurityQuestions] = useState([
+    { question: '', answer: '' },
+    { question: '', answer: '' },
+    { question: '', answer: '' },
+  ]);
+  const [securityErrors, setSecurityErrors] = useState(['', '', '']);
+
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -43,6 +53,30 @@ const Register = () => {
 
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  const isQuestionTaken = (q, currentIndex) => {
+    return securityQuestions.some(
+      (item, idx) => idx !== currentIndex && item.question === q
+    );
+  };
+
+  const handleSecurityQuestionChange = (index, field, value) => {
+    setSecurityQuestions((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+
+    setSecurityErrors((prev) => {
+      const updated = [...prev];
+      updated[index] = '';
+      return updated;
+    });
+
+    if (fieldErrors.securityQuestions) {
+      setFieldErrors((prev) => ({ ...prev, securityQuestions: '' }));
+    }
+  };
 
   const validate = () => {
     const errors = {};
@@ -82,6 +116,41 @@ const Register = () => {
       errors.confirmPassword = 'Passwords do not match';
     }
 
+    // Validate 3 security questions
+    let hasSecurityError = false;
+    const newSecurityErrors = ['', '', ''];
+    const chosenQuestions = new Set();
+
+    for (let i = 0; i < securityQuestions.length; i++) {
+      const q = securityQuestions[i].question;
+      const a = securityQuestions[i].answer.trim();
+
+      if (!q) {
+        newSecurityErrors[i] = 'Please select a question';
+        hasSecurityError = true;
+      } else if (chosenQuestions.has(q)) {
+        newSecurityErrors[i] = 'Duplicate question selected';
+        hasSecurityError = true;
+      } else {
+        chosenQuestions.add(q);
+      }
+
+      if (!a) {
+        newSecurityErrors[i] = newSecurityErrors[i]
+          ? `${newSecurityErrors[i]} and provide an answer`
+          : 'Please provide an answer';
+        hasSecurityError = true;
+      } else if (a.length < 2) {
+        newSecurityErrors[i] = 'Answer must be at least 2 characters';
+        hasSecurityError = true;
+      }
+    }
+
+    setSecurityErrors(newSecurityErrors);
+    if (hasSecurityError) {
+      errors.securityQuestions = 'Please complete all 3 security questions and answers';
+    }
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -113,6 +182,10 @@ const Register = () => {
         graduationYear: Number(formData.graduationYear),
         password: formData.password,
         confirmPassword: formData.confirmPassword,
+        securityQuestions: securityQuestions.map((sq) => ({
+          question: sq.question.trim(),
+          answer: sq.answer.trim(),
+        })),
       });
 
       setSuccess('Account created successfully! Directing to student dashboard...');
@@ -314,6 +387,94 @@ const Register = () => {
             required
             autoComplete="new-password"
           />
+        </div>
+
+        {/* Security Questions Section */}
+        <div className="pt-2">
+          <div className="p-3.5 rounded-xl border border-[#DBEAFE] bg-[#EFF6FF]/60 space-y-3">
+            <div className="flex items-start gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-[#163A5F] flex items-center justify-center text-white shrink-0 mt-0.5 shadow-sm">
+                <ShieldCheck className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-xs font-bold text-[#172554]">
+                    Security Questions (Mandatory)
+                  </h3>
+                  <span className="text-[10px] font-semibold bg-[#2563EB] text-white px-1.5 py-0.2 rounded">
+                    3 Required
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#64748B] mt-0.5 leading-snug">
+                  Choose 3 distinct questions. These answers are required for account recovery if you ever forget your password. Answers are securely hashed and never shared.
+                </p>
+              </div>
+            </div>
+
+            {fieldErrors.securityQuestions && (
+              <p className="text-xs text-[#DC2626] font-medium bg-red-50 p-2 rounded-lg border border-red-100">
+                {fieldErrors.securityQuestions}
+              </p>
+            )}
+
+            <div className="space-y-3 pt-1">
+              {securityQuestions.map((sq, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 rounded-lg border border-[#DBEAFE] bg-white space-y-2 shadow-xs"
+                >
+                  <div>
+                    <label
+                      htmlFor={`security-question-${idx}`}
+                      className="block text-xs font-semibold text-[#172554] mb-1"
+                    >
+                      Question {idx + 1} <span className="text-[#DC2626]">*</span>
+                    </label>
+                    <select
+                      id={`security-question-${idx}`}
+                      value={sq.question}
+                      onChange={(e) =>
+                        handleSecurityQuestionChange(idx, 'question', e.target.value)
+                      }
+                      className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#DBEAFE] bg-white text-[#172554] ${
+                        securityErrors[idx] && !sq.question
+                          ? 'border-[#DC2626]'
+                          : 'border-[#DBEAFE]'
+                      }`}
+                    >
+                      <option value="">-- Choose Security Question {idx + 1} --</option>
+                      {PREDEFINED_SECURITY_QUESTIONS.map((q) => {
+                        const taken = isQuestionTaken(q, idx);
+                        return (
+                          <option key={q} value={q} disabled={taken}>
+                            {q} {taken ? '(Selected in another question)' : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                  </div>
+
+                  <div>
+                    <Input
+                      label={`Answer ${idx + 1}`}
+                      id={`security-answer-${idx}`}
+                      type="password"
+                      showPasswordToggle
+                      placeholder="Enter your confidential answer"
+                      value={sq.answer}
+                      onChange={(e) =>
+                        handleSecurityQuestionChange(idx, 'answer', e.target.value)
+                      }
+                      error={securityErrors[idx]}
+                      helperText="Answers are case-insensitive and trimmed"
+                      required
+                      autoComplete="off"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         <Button

@@ -40,3 +40,29 @@ export const resendVerificationLimiter = rateLimit({
     message: 'Too many verification email requests. Please wait a few minutes before requesting a new link.',
   },
 });
+
+// Rate limiter for security questions retrieval
+export const securityQuestionsLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15, // 15 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: isTestEnv,
+  message: {
+    success: false,
+    message: 'Too many recovery requests from this IP. Please wait 15 minutes before trying again.',
+  },
+});
+
+// Rate limiter for security questions verification
+export const securityVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 verification requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: isTestEnv,
+  message: {
+    success: false,
+    message: 'Too many verification attempts from this IP. Please wait 15 minutes before trying again.',
+  },
+});

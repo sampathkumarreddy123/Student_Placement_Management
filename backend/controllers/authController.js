@@ -5,6 +5,10 @@ import StudentProfile from '../models/StudentProfile.js';
 import OfficerProfile from '../models/OfficerProfile.js';
 import { generateTokenAndSetCookie, clearTokenCookie } from '../utils/generateToken.js';
 import emailService, { sendEmail } from '../services/emailService.js';
+import {
+  PREDEFINED_SECURITY_QUESTIONS,
+  isValidSecurityQuestion,
+} from '../constants/securityQuestions.js';
 
 /**
  * Dynamically resolves the frontend URL based on client request headers (Vercel, LAN, or local)
@@ -44,6 +48,7 @@ export const register = async (req, res, next) => {
       department,
       graduationYear,
       batch,
+      securityQuestions,
     } = req.body;
 
     // Reject any attempt to register as an officer publicly
@@ -121,6 +126,64 @@ export const register = async (req, res, next) => {
       });
     }
 
+    // Validation: Security Questions (Mandatory exactly 3 predefined unique questions with non-empty answers)
+    if (!Array.isArray(securityQuestions) || securityQuestions.length !== 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please select and answer exactly 3 security questions for password recovery.',
+      });
+    }
+
+    const selectedQuestionTexts = new Set();
+    for (let i = 0; i < securityQuestions.length; i++) {
+      const item = securityQuestions[i];
+      if (!item || typeof item !== 'object') {
+        return res.status(400).json({
+          success: false,
+          message: `Security question #${i + 1} is invalid.`,
+        });
+      }
+
+      const qText = (item.question || '').trim();
+      const aText = (item.answer || '').trim();
+
+      if (!qText) {
+        return res.status(400).json({
+          success: false,
+          message: `Please select security question #${i + 1}.`,
+        });
+      }
+
+      if (!isValidSecurityQuestion(qText)) {
+        return res.status(400).json({
+          success: false,
+          message: `Question #${i + 1} is not a valid predefined security question.`,
+        });
+      }
+
+      if (selectedQuestionTexts.has(qText)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Each of the 3 security questions must be unique. Duplicate questions are not allowed.',
+        });
+      }
+      selectedQuestionTexts.add(qText);
+
+      if (!aText) {
+        return res.status(400).json({
+          success: false,
+          message: `Please provide an answer for security question #${i + 1}.`,
+        });
+      }
+
+      if (aText.length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: `Answer for security question #${i + 1} must be at least 2 characters long.`,
+        });
+      }
+    }
+
     // Uniqueness Check 1: College Email
     const normalizedEmail = email.trim().toLowerCase();
     const existingUser = await User.findOne({ email: normalizedEmail });
@@ -149,6 +212,9 @@ export const register = async (req, res, next) => {
       role: 'student',
       isEmailVerified: false,
     });
+
+    // Securely hash and store the 3 security questions
+    await user.setSecurityQuestions(securityQuestions);
 
     // Generate time-limited email verification token
     const verificationToken = user.getEmailVerificationToken();
@@ -637,6 +703,172 @@ export const resendVerificationEmail = async (req, res, next) => {
       success: true,
       message: 'A fresh verification link has been sent to your email address.',
       devVerifyUrl: process.env.NODE_ENV !== 'production' ? verifyUrl : undefined,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Retrieve security questions for student password recovery
+// @route   POST /api/auth/security-questions
+// @access  Public (Subject to rate limiting)
+export const getSecurityQuestions = async (req, res, next) => {
+  try {
+    const { identifier } = req.body;
+    if (!identifier || !String(identifier).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your registered college email or roll number.',
+      });
+    }
+
+    const cleanIdentifier = String(identifier).trim();
+    let user = null;
+
+    if (cleanIdentifier.includes('@')) {
+      user = await User.findOne({
+        email: cleanIdentifier.toLowerCase(),
+      }).select('+securityQuestions +securityQuestionLockUntil +securityQuestionAttempts');
+    } else {
+      const studentProfile = await StudentProfile.findOne({
+        rollNumber: cleanIdentifier.toUpperCase(),
+      });
+      if (studentProfile) {
+        user = await User.findById(studentProfile.user).select(
+          '+securityQuestions +securityQuestionLockUntil +securityQuestionAttempts'
+        );
+      }
+    }
+
+    if (!user || user.role !== 'student') {
+      return res.status(404).json({
+        success: false,
+        message: 'No student account found with the provided college email or roll number.',
+      });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'This account has been deactivated. Please contact the placement cell.',
+      });
+    }
+
+    if (user.isSecurityRecoveryLocked()) {
+      const minutesLeft = Math.ceil(
+        (user.securityQuestionLockUntil.getTime() - Date.now()) / (60 * 1000)
+      );
+      return res.status(423).json({
+        success: false,
+        locked: true,
+        message: `Account recovery is temporarily locked due to repeated incorrect attempts. Please try again in ${minutesLeft} minute${minutesLeft > 1 ? 's' : ''}.`,
+      });
+    }
+
+    if (!user.securityQuestions || user.securityQuestions.length !== 3) {
+      return res.status(400).json({
+        success: false,
+        noSecurityQuestions: true,
+        message:
+          'Security questions were not configured for this account. For account safety, recovery via security questions is unavailable. Please contact the placement cell for password reset assistance.',
+      });
+    }
+
+    // Return question titles only - NEVER hashes or plain answers
+    const questions = user.securityQuestions.map((q) => q.question);
+
+    return res.status(200).json({
+      success: true,
+      identifier: user.email,
+      questions,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Verify security question answers and generate short-lived reset token
+// @route   POST /api/auth/verify-security-questions
+// @access  Public (Subject to rate limiting and lockout)
+export const verifySecurityQuestions = async (req, res, next) => {
+  try {
+    const { identifier, answers } = req.body;
+    if (!identifier || !String(identifier).trim()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your registered college email or roll number.',
+      });
+    }
+
+    if (!Array.isArray(answers) || answers.length !== 3) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide answers for all 3 security questions.',
+      });
+    }
+
+    for (let i = 0; i < answers.length; i++) {
+      if (!answers[i] || !answers[i].question || !answers[i].answer || !String(answers[i].answer).trim()) {
+        return res.status(400).json({
+          success: false,
+          message: `Please provide an answer for question #${i + 1}.`,
+        });
+      }
+    }
+
+    const cleanIdentifier = String(identifier).trim();
+    let user = null;
+
+    if (cleanIdentifier.includes('@')) {
+      user = await User.findOne({
+        email: cleanIdentifier.toLowerCase(),
+      }).select(
+        '+securityQuestions +securityQuestions.answerHash +securityQuestionLockUntil +securityQuestionAttempts'
+      );
+    } else {
+      const studentProfile = await StudentProfile.findOne({
+        rollNumber: cleanIdentifier.toUpperCase(),
+      });
+      if (studentProfile) {
+        user = await User.findById(studentProfile.user).select(
+          '+securityQuestions +securityQuestions.answerHash +securityQuestionLockUntil +securityQuestionAttempts'
+        );
+      }
+    }
+
+    if (!user || user.role !== 'student') {
+      return res.status(404).json({
+        success: false,
+        message: 'Student account not found or invalid recovery session.',
+      });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'This account has been deactivated. Please contact the placement cell.',
+      });
+    }
+
+    // Verify all 3 answers against stored hashes with lockout and attempt tracking
+    const verification = await user.verifySecurityAnswers(answers);
+    if (!verification.success) {
+      const statusCode = verification.locked ? 423 : 400;
+      return res.status(statusCode).json({
+        success: false,
+        locked: verification.locked || false,
+        message: verification.message,
+      });
+    }
+
+    // Generate single-use, 15-minute cryptographically secure reset token
+    const resetToken = user.getResetPasswordToken(15);
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Security questions verified successfully. Please enter your new password.',
+      resetToken,
     });
   } catch (error) {
     next(error);

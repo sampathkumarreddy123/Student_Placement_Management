@@ -1,53 +1,162 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, KeyRound, CheckCircle2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Mail,
+  Lock,
+  ArrowLeft,
+  KeyRound,
+  CheckCircle2,
+  ShieldCheck,
+  HelpCircle,
+  Hash,
+} from 'lucide-react';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
 import { authService } from '../../services/authService';
 
 const ForgotPassword = () => {
-  const [email, setEmail] = useState('');
-  const [fieldError, setFieldError] = useState('');
+  const navigate = useNavigate();
+
+  // Wizard Steps: 1 = Identifier Lookup, 2 = Security Questions, 3 = New Password, 4 = Success
+  const [step, setStep] = useState(1);
+
+  // Form State
+  const [identifier, setIdentifier] = useState('');
+  const [questions, setQuestions] = useState([]);
+  const [answers, setAnswers] = useState(['', '', '']);
+  const [resetToken, setResetToken] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  // UI State
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [devResetUrl, setDevResetUrl] = useState('');
 
-  const validate = () => {
-    if (!email.trim()) {
-      setFieldError('Email address is required');
-      return false;
-    }
-    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-    if (!emailRegex.test(email.trim())) {
-      setFieldError('Please enter a valid email format');
-      return false;
-    }
-    setFieldError('');
-    return true;
-  };
-
-  const handleSubmit = async (e) => {
+  // Step 1: Identifier Lookup
+  const handleLookup = async (e) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
 
-    if (!validate()) {
+    if (!identifier.trim()) {
+      setFieldErrors({ identifier: 'Please enter your college email or roll number' });
       return;
     }
 
     try {
       setLoading(true);
-      const res = await authService.forgotPassword(email.trim());
-      if (res?.devResetUrl) {
-        setDevResetUrl(res.devResetUrl);
+      const res = await authService.getSecurityQuestions(identifier.trim());
+
+      if (res.success && Array.isArray(res.questions) && res.questions.length === 3) {
+        setQuestions(res.questions);
+        setAnswers(['', '', '']);
+        setStep(2);
+      } else {
+        setError(res.message || 'Unable to retrieve security questions for this account.');
       }
-      setSubmitted(true);
     } catch (err) {
       setError(
         err.response?.data?.message ||
           err.message ||
-          'Failed to dispatch reset email. Please try again later.'
+          'No recovery setup found for this account. Please check your details or contact the placement cell.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2: Answer Verification
+  const handleVerifyAnswers = async (e) => {
+    e.preventDefault();
+    setError('');
+    setFieldErrors({});
+
+    const newErrors = {};
+    answers.forEach((ans, idx) => {
+      if (!ans.trim()) {
+        newErrors[`answer_${idx}`] = `Please answer question #${idx + 1}`;
+      } else if (ans.trim().length < 2) {
+        newErrors[`answer_${idx}`] = 'Answer must be at least 2 characters long';
+      }
+    });
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const answersPayload = questions.map((q, idx) => ({
+        question: q,
+        answer: answers[idx].trim(),
+      }));
+
+      const res = await authService.verifySecurityQuestions(
+        identifier.trim(),
+        answersPayload
+      );
+
+      if (res.success && res.resetToken) {
+        setResetToken(res.resetToken);
+        setStep(3);
+      } else {
+        setError(res.message || 'Incorrect security answers. Please verify and try again.');
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          'Verification failed. Please verify your answers.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 3: Password Reset
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    setFieldErrors({});
+
+    const newErrors = {};
+    if (!password) {
+      newErrors.password = 'New password is required';
+    } else if (password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters long';
+    }
+
+    if (!confirmPassword) {
+      newErrors.confirmPassword = 'Confirm your new password';
+    } else if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setFieldErrors(newErrors);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await authService.resetPassword(resetToken, {
+        password,
+        confirmPassword,
+      });
+
+      if (res.success) {
+        setStep(4);
+      } else {
+        setError(res.message || 'Failed to reset password. Please try again.');
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          'Failed to reset password. The recovery session may have expired.'
       );
     } finally {
       setLoading(false);
@@ -56,7 +165,7 @@ const ForgotPassword = () => {
 
   return (
     <div>
-      {/* Header */}
+      {/* Brand Header */}
       <div className="flex items-center justify-between pb-4 mb-4 border-b border-[#DBEAFE]">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-md bg-[#163A5F] flex items-center justify-center text-white shadow-sm">
@@ -75,101 +184,115 @@ const ForgotPassword = () => {
         </Link>
       </div>
 
-      {submitted ? (
-        <div className="space-y-4 text-center py-2">
-          <div className="w-12 h-12 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] text-[#0D9488] flex items-center justify-center mx-auto">
-            <CheckCircle2 className="w-6 h-6 text-[#0D9488]" />
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-[#172554] tracking-tight">
-              Reset Link Dispatched
-            </h2>
-            <p className="text-xs text-[#64748B] mt-1 leading-relaxed max-w-sm mx-auto">
-              If an account with <strong>{email}</strong> is registered, we have dispatched a secure password reset link to it. The link remains valid for <strong>60 minutes</strong> and can only be used once.
-            </p>
-          </div>
-
-          <div className="p-3 bg-[#EFF6FF] border border-[#DBEAFE] rounded-lg text-left text-xs text-[#64748B] space-y-1">
-            <p className="font-bold text-[#172554]">Did not receive the email in Outlook?</p>
-            <ul className="list-disc list-inside space-y-0.5 text-[#64748B]">
-              <li>Check your Junk / Spam / Quarantine folder.</li>
-              <li>Confirm you entered your registered college roll email correctly.</li>
-              <li>Password reset links are time-limited to 60 minutes for security.</li>
-            </ul>
-          </div>
-
-          {devResetUrl && (
-            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-left text-xs space-y-1.5 shadow-sm">
-              <span className="font-bold text-amber-900 block">
-                Direct Password Reset Link (Testing Fallback):
-              </span>
-              <p className="text-[11px] text-amber-700">
-                Because external SMTP is offline or port-restricted on this environment, use this direct link to complete the reset:
-              </p>
-              <a
-                href={devResetUrl}
-                className="text-[#2563EB] hover:text-[#163A5F] underline font-medium break-all block"
-              >
-                {devResetUrl}
-              </a>
+      {/* Step Progress Indicators (Steps 1 to 3) */}
+      {step < 4 && (
+        <div className="flex items-center justify-between mb-5 px-1">
+          <div className="flex items-center gap-1.5">
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                step >= 1
+                  ? 'bg-[#172554] text-white shadow-xs'
+                  : 'bg-[#EFF6FF] text-[#64748B] border border-[#DBEAFE]'
+              }`}
+            >
+              1
             </div>
-          )}
+            <span
+              className={`text-xs font-medium ${
+                step >= 1 ? 'text-[#172554] font-semibold' : 'text-[#64748B]'
+              }`}
+            >
+              Account
+            </span>
+          </div>
 
-          <div className="pt-2 flex flex-col gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setSubmitted(false);
-                setEmail('');
-              }}
-              className="w-full text-xs"
+          <div
+            className={`flex-1 h-0.5 mx-2 rounded transition-all ${
+              step >= 2 ? 'bg-[#172554]' : 'bg-[#DBEAFE]'
+            }`}
+          />
+
+          <div className="flex items-center gap-1.5">
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                step >= 2
+                  ? 'bg-[#172554] text-white shadow-xs'
+                  : 'bg-[#EFF6FF] text-[#64748B] border border-[#DBEAFE]'
+              }`}
             >
-              Try another email address
-            </Button>
-            <Link
-              to="/student/login"
-              className="text-xs font-bold text-[#2563EB] hover:text-[#163A5F] hover:underline pt-2 block"
+              2
+            </div>
+            <span
+              className={`text-xs font-medium ${
+                step >= 2 ? 'text-[#172554] font-semibold' : 'text-[#64748B]'
+              }`}
             >
-              Return to Student Login
-            </Link>
+              Security Questions
+            </span>
+          </div>
+
+          <div
+            className={`flex-1 h-0.5 mx-2 rounded transition-all ${
+              step >= 3 ? 'bg-[#172554]' : 'bg-[#DBEAFE]'
+            }`}
+          />
+
+          <div className="flex items-center gap-1.5">
+            <div
+              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                step >= 3
+                  ? 'bg-[#172554] text-white shadow-xs'
+                  : 'bg-[#EFF6FF] text-[#64748B] border border-[#DBEAFE]'
+              }`}
+            >
+              3
+            </div>
+            <span
+              className={`text-xs font-medium ${
+                step >= 3 ? 'text-[#172554] font-semibold' : 'text-[#64748B]'
+              }`}
+            >
+              New Password
+            </span>
           </div>
         </div>
-      ) : (
+      )}
+
+      {/* Global Error Banner */}
+      {error && (
+        <Alert
+          type="error"
+          message={error}
+          onClose={() => setError('')}
+          className="mb-4"
+        />
+      )}
+
+      {/* STEP 1: Look up Account */}
+      {step === 1 && (
         <>
           <div className="mb-5">
             <h2 className="text-lg font-bold text-[#172554] tracking-tight">
-              Forgot Password
+              Password Recovery
             </h2>
             <p className="text-xs text-[#64748B] mt-0.5">
-              Enter your registered MITS college email address to receive password reset instructions.
+              Enter your registered college email address or roll number to retrieve your security questions.
             </p>
           </div>
 
-          {error && (
-            <Alert
-              type="error"
-              message={error}
-              onClose={() => setError('')}
-              className="mb-4"
-            />
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
+          <form onSubmit={handleLookup} className="space-y-4" autoComplete="off">
             <Input
-              label="College Email Address"
-              id="email"
-              name="email"
-              type="email"
-              placeholder="e.g. 25695A0550@mits.ac.in"
+              label="College Email or Roll Number"
+              id="identifier"
+              name="identifier"
+              placeholder="e.g. 21691A0501 or student@mits.ac.in"
               icon={Mail}
-              value={email}
+              value={identifier}
               onChange={(e) => {
-                setEmail(e.target.value);
-                if (fieldError) setFieldError('');
+                setIdentifier(e.target.value);
+                if (fieldErrors.identifier) setFieldErrors({});
               }}
-              error={fieldError}
+              error={fieldErrors.identifier}
               required
               autoComplete="off"
             />
@@ -178,13 +301,13 @@ const ForgotPassword = () => {
               type="submit"
               className="w-full mt-2"
               isLoading={loading}
-              icon={KeyRound}
+              icon={ShieldCheck}
             >
-              {loading ? 'Sending Reset Link...' : 'Send Reset Link'}
+              {loading ? 'Verifying Account...' : 'Continue to Security Questions'}
             </Button>
           </form>
 
-          <div className="mt-5 pt-4 border-t border-[#DBEAFE] text-center text-xs space-y-1">
+          <div className="mt-5 pt-4 border-t border-[#DBEAFE] text-center text-xs">
             <p className="text-[#64748B]">
               Remembered your credentials?{' '}
               <Link
@@ -196,6 +319,180 @@ const ForgotPassword = () => {
             </p>
           </div>
         </>
+      )}
+
+      {/* STEP 2: Answer Security Questions */}
+      {step === 2 && (
+        <>
+          <div className="mb-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-[#172554] tracking-tight">
+                Security Verification
+              </h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setStep(1);
+                  setError('');
+                }}
+                className="text-xs font-semibold text-[#2563EB] hover:text-[#163A5F] hover:underline"
+              >
+                Change Account
+              </button>
+            </div>
+            <p className="text-xs text-[#64748B] mt-0.5">
+              Answer all 3 security questions selected during your registration.
+            </p>
+          </div>
+
+          <div className="mb-4 p-2.5 rounded-lg bg-[#EFF6FF] border border-[#DBEAFE] text-xs text-[#172554] flex items-center justify-between">
+            <span className="font-medium text-[#64748B]">Recovering for:</span>
+            <span className="font-bold text-[#172554]">{identifier}</span>
+          </div>
+
+          <form onSubmit={handleVerifyAnswers} className="space-y-3.5" autoComplete="off">
+            {questions.map((qText, idx) => (
+              <div
+                key={idx}
+                className="p-3.5 rounded-xl border border-[#DBEAFE] bg-[#F8FAFC] space-y-2"
+              >
+                <div className="flex items-start gap-2">
+                  <span className="w-5 h-5 rounded-full bg-[#172554] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                    {idx + 1}
+                  </span>
+                  <p className="text-xs font-semibold text-[#172554] leading-snug">
+                    {qText}
+                  </p>
+                </div>
+
+                <Input
+                  label="Your Answer"
+                  id={`answer_${idx}`}
+                  type="password"
+                  showPasswordToggle
+                  placeholder="Enter your confidential answer"
+                  value={answers[idx]}
+                  onChange={(e) => {
+                    const nextAnswers = [...answers];
+                    nextAnswers[idx] = e.target.value;
+                    setAnswers(nextAnswers);
+                    if (fieldErrors[`answer_${idx}`]) {
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        [`answer_${idx}`]: '',
+                      }));
+                    }
+                  }}
+                  error={fieldErrors[`answer_${idx}`]}
+                  helperText="Answers are case-insensitive"
+                  required
+                  autoComplete="off"
+                />
+              </div>
+            ))}
+
+            <Button
+              type="submit"
+              className="w-full mt-2"
+              isLoading={loading}
+              icon={ShieldCheck}
+            >
+              {loading ? 'Verifying Answers...' : 'Verify Answers & Continue'}
+            </Button>
+          </form>
+        </>
+      )}
+
+      {/* STEP 3: Set New Password */}
+      {step === 3 && (
+        <>
+          <div className="mb-5">
+            <h2 className="text-lg font-bold text-[#172554] tracking-tight">
+              Create New Password
+            </h2>
+            <p className="text-xs text-[#64748B] mt-0.5">
+              Identity verified! Enter and confirm your new secure password.
+            </p>
+          </div>
+
+          <form onSubmit={handleResetPassword} className="space-y-3.5" autoComplete="off">
+            <Input
+              label="New Password"
+              id="password"
+              name="password"
+              type="password"
+              placeholder=""
+              icon={Lock}
+              showPasswordToggle
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (fieldErrors.password) setFieldErrors({ ...fieldErrors, password: '' });
+              }}
+              error={fieldErrors.password}
+              helperText="Minimum 6 characters"
+              required
+              autoComplete="new-password"
+            />
+
+            <Input
+              label="Confirm New Password"
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              placeholder=""
+              icon={Lock}
+              showPasswordToggle
+              value={confirmPassword}
+              onChange={(e) => {
+                setConfirmPassword(e.target.value);
+                if (fieldErrors.confirmPassword) {
+                  setFieldErrors({ ...fieldErrors, confirmPassword: '' });
+                }
+              }}
+              error={fieldErrors.confirmPassword}
+              required
+              autoComplete="new-password"
+            />
+
+            <Button
+              type="submit"
+              className="w-full mt-2"
+              isLoading={loading}
+              icon={KeyRound}
+            >
+              {loading ? 'Updating Password...' : 'Reset Password'}
+            </Button>
+          </form>
+        </>
+      )}
+
+      {/* STEP 4: Success Confirmation */}
+      {step === 4 && (
+        <div className="space-y-4 text-center py-3">
+          <div className="w-12 h-12 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] text-[#0D9488] flex items-center justify-center mx-auto">
+            <CheckCircle2 className="w-7 h-7 text-[#0D9488]" />
+          </div>
+
+          <div>
+            <h2 className="text-lg font-bold text-[#172554] tracking-tight">
+              Password Reset Complete!
+            </h2>
+            <p className="text-xs text-[#64748B] mt-1 leading-relaxed max-w-sm mx-auto">
+              Your password has been securely updated. The temporary reset token has been invalidated. You can now sign in with your new credentials.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <Button
+              type="button"
+              className="w-full"
+              onClick={() => navigate('/student/login', { replace: true })}
+            >
+              Sign In with New Password
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   );

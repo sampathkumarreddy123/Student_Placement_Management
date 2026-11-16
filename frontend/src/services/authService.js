@@ -66,6 +66,21 @@ export const authService = {
     return response.data;
   },
 
+  getSecurityQuestions: async (identifier) => {
+    const response = await api.post('/auth/security-questions', {
+      identifier: (identifier || '').trim(),
+    });
+    return response.data;
+  },
+
+  verifySecurityQuestions: async (identifier, answers) => {
+    const response = await api.post('/auth/verify-security-questions', {
+      identifier: (identifier || '').trim(),
+      answers,
+    });
+    return response.data;
+  },
+
   forgotPassword: async (email) => {
     const response = await api.post('/auth/forgot-password', { email });
     return response.data;
