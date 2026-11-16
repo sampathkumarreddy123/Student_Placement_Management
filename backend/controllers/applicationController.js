@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url';
 import Application from '../models/Application.js';
 import PlacementDrive from '../models/PlacementDrive.js';
 import StudentProfile from '../models/StudentProfile.js';
+import { generateCandidateResumePdf } from '../utils/pdfGenerator.js';
 import { checkEligibility } from '../services/eligibilityService.js';
 import {
   notifyOnApplicationSubmitted,
@@ -340,10 +341,22 @@ export const downloadApplicantResume = async (req, res, next) => {
             if (!fs.existsSync(resumesDir)) {
               fs.mkdirSync(resumesDir, { recursive: true });
             }
-            const fallbackPdf = Buffer.from(
-              '%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n',
-              'utf-8'
-            );
+            const fallbackPdf = generateCandidateResumePdf({
+              name: candidateName,
+              rollNumber:
+                application.studentProfile?.rollNumber ||
+                application.resumeSnapshot?.studentRollNumber,
+              department:
+                application.studentProfile?.department ||
+                application.resumeSnapshot?.studentDepartment,
+              cgpa:
+                application.studentProfile?.cgpa ||
+                application.resumeSnapshot?.studentCgpa,
+              email: application.student?.email,
+              skills:
+                application.studentProfile?.skills ||
+                application.resumeSnapshot?.skills,
+            });
             fs.writeFileSync(filePath, fallbackPdf);
           } catch (writeErr) {
             console.error('Error writing fallback resume:', writeErr);

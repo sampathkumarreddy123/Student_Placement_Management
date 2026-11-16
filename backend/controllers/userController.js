@@ -7,6 +7,7 @@ import Application from '../models/Application.js';
 import PlacementDrive from '../models/PlacementDrive.js';
 import Company from '../models/Company.js';
 import OfficerProfile from '../models/OfficerProfile.js';
+import { generateCandidateResumePdf } from '../utils/pdfGenerator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -392,10 +393,15 @@ export const downloadResumeFile = async (req, res, next) => {
           if (!fs.existsSync(resumesDir)) {
             fs.mkdirSync(resumesDir, { recursive: true });
           }
-          const defaultPdf = Buffer.from(
-            '%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n',
-            'utf-8'
-          );
+          const defaultPdf = generateCandidateResumePdf({
+            name: req.user.name,
+            rollNumber: profile.rollNumber,
+            department: profile.department,
+            cgpa: profile.cgpa,
+            email: req.user.email,
+            phone: profile.phone,
+            skills: profile.skills,
+          });
           fs.writeFileSync(filePath, defaultPdf);
         } catch (e) {
           console.error('Error generating fallback resume PDF:', e);
@@ -478,10 +484,15 @@ export const getStudentResumeFile = async (req, res, next) => {
             if (!fs.existsSync(resumesDir)) {
               fs.mkdirSync(resumesDir, { recursive: true });
             }
-            const defaultPdf = Buffer.from(
-              '%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n',
-              'utf-8'
-            );
+            const defaultPdf = generateCandidateResumePdf({
+              name: studentName,
+              rollNumber: profile.rollNumber,
+              department: profile.department,
+              cgpa: profile.cgpa,
+              email: profile.user?.email || profile.email,
+              phone: profile.phone,
+              skills: profile.skills,
+            });
             fs.writeFileSync(filePath, defaultPdf);
           } catch (e) {
             console.error('Error generating fallback resume PDF:', e);

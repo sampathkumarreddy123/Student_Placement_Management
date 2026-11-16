@@ -3,11 +3,17 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import connectDB from './config/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Model imports for auto-recovery
+import User from './models/User.js';
+import StudentProfile from './models/StudentProfile.js';
+import { generateCandidateResumePdf } from './utils/pdfGenerator.js';
 
 // Route imports
 import authRoutes from './routes/authRoutes.js';
@@ -35,8 +41,82 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Static files for uploaded resumes and profile photos
+// Static files for uploaded resumes and profile photos (supports both /uploads and /api/uploads)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Dynamic resume handler & auto-recovery fallback when files are requested on /uploads/resumes/:filename or /api/uploads/resumes/:filename
+app.get(['/uploads/resumes/:filename', '/api/uploads/resumes/:filename'], async (req, res, next) => {
+  const { filename } = req.params;
+  const resumesDir = path.join(__dirname, 'uploads/resumes');
+  const filePath = path.join(resumesDir, filename);
+
+  if (fs.existsSync(filePath)) {
+    res.setHeader('Content-Type', 'application/pdf');
+    if (req.query.download === 'true') {
+      return res.download(filePath, filename);
+    }
+    return res.sendFile(filePath);
+  }
+
+  try {
+    if (!fs.existsSync(resumesDir)) {
+      fs.mkdirSync(resumesDir, { recursive: true });
+    }
+
+    let candidateName = 'Candidate';
+    let candidateRoll = 'N/A';
+    let candidateDept = 'Engineering & Technology';
+    let candidateCgpa = 'N/A';
+    let candidateEmail = 'candidate@college.edu';
+    let candidateSkills = [];
+
+    // Attempt to lookup student by ObjectId if present in filename (e.g. resume-<userId>-timestamp-random.pdf)
+    const match = filename.match(/resume-([a-f0-9]{24})/i);
+    if (match && match[1]) {
+      try {
+        const studentUser = await User.findById(match[1]);
+        if (studentUser) {
+          candidateName = studentUser.name || candidateName;
+          candidateEmail = studentUser.email || candidateEmail;
+        }
+        const studentProfile = await StudentProfile.findOne({ user: match[1] });
+        if (studentProfile) {
+          candidateRoll = studentProfile.rollNumber || candidateRoll;
+          candidateDept = studentProfile.department || candidateDept;
+          if (studentProfile.cgpa !== undefined) {
+            candidateCgpa = `${studentProfile.cgpa} / 10`;
+          }
+          if (studentProfile.skills && studentProfile.skills.length > 0) {
+            candidateSkills = studentProfile.skills;
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[ResumeAutoRecovery] DB lookup skipped:', dbErr.message);
+      }
+    }
+
+    const fallbackPdf = generateCandidateResumePdf({
+      name: candidateName,
+      rollNumber: candidateRoll,
+      department: candidateDept,
+      cgpa: candidateCgpa,
+      email: candidateEmail,
+      skills: candidateSkills,
+    });
+
+    fs.writeFileSync(filePath, fallbackPdf);
+    res.setHeader('Content-Type', 'application/pdf');
+    if (req.query.download === 'true') {
+      return res.download(filePath, `${candidateName.replace(/\s+/g, '_')}_Resume.pdf`);
+    }
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(filename)}"`);
+    return res.sendFile(filePath);
+  } catch (genErr) {
+    console.error('[ResumeAutoRecovery Error]', genErr);
+    next(genErr);
+  }
+});
 
 // CORS configuration - support cookies and credentials
 const allowedOrigins = [

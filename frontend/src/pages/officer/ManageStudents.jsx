@@ -67,9 +67,15 @@ const ManageStudents = () => {
       toast.success(`Resume downloaded for ${name}.`);
     } catch (err) {
       console.error('Download resume error', err);
+      const name = profile.user?.name || profile.rollNumber || 'Student';
       if (profile.resumeUrl) {
-        window.open(getResumeUrl(profile.resumeUrl), '_blank');
-        toast.info('Opened resume in a new tab.');
+        const link = document.createElement('a');
+        link.href = `${getResumeUrl(profile.resumeUrl)}?download=true`;
+        link.download = profile.resumeOriginalName || `${name.replace(/\s+/g, '_')}_Resume.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        toast.success(`Resume downloaded for ${name}.`);
       } else {
         toast.error('Resume document could not be retrieved.');
       }

@@ -225,9 +225,18 @@ const ManageApplications = () => {
     } catch (err) {
       console.error('Resume download error', err);
       const fallbackUrl = app.resumeSnapshot?.resumeUrl || app.studentProfile?.resumeUrl;
+      const candidateName = (app.student?.name || 'Applicant').replace(/\s+/g, '_');
       if (fallbackUrl) {
-        window.open(getResumeUrl(fallbackUrl), '_blank');
-        toast.info('Opened resume link in a new tab.');
+        const link = document.createElement('a');
+        link.href = `${getResumeUrl(fallbackUrl)}?download=true`;
+        link.download =
+          app.resumeSnapshot?.resumeOriginalName ||
+          app.studentProfile?.resumeOriginalName ||
+          `${candidateName}_Resume.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        toast.success(`Resume for ${app.student?.name || 'candidate'} downloaded.`);
       } else {
         toast.error('Resume document could not be retrieved.');
         setActionAlert({

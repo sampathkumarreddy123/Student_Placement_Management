@@ -83,9 +83,16 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Download failed', err);
-      // Fallback: if URL exists, open directly via getResumeUrl
+      // Fallback: if URL exists, download directly via getResumeUrl
       if (student?.resumeUrl) {
-        window.open(getResumeUrl(student.resumeUrl), '_blank');
+        const link = document.createElement('a');
+        link.href = `${getResumeUrl(student.resumeUrl)}?download=true`;
+        link.download =
+          student?.resumeOriginalName ||
+          `${(student?.name || 'Student').replace(/\s+/g, '_')}_Resume.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
       }
     } finally {
       setDownloading(false);
