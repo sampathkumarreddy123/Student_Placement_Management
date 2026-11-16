@@ -95,6 +95,11 @@ export const authService = {
     return response.data;
   },
 
+  getMySecurityQuestions: async () => {
+    const response = await api.get('/auth/my-security-questions');
+    return response.data;
+  },
+
   changePassword: async (passwords) => {
     const response = await api.put('/auth/change-password', passwords);
     return response.data;

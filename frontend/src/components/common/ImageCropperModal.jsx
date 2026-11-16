@@ -5,15 +5,13 @@ import {
   RotateCw,
   RefreshCw,
   Crop as CropIcon,
-  Check,
-  X,
   Move,
 } from 'lucide-react';
 import Modal from './Modal';
 import Button from './Button';
 
-const CROP_BOX_SIZE = 280; // Size of the square crop area in pixels
-const OUTPUT_SIZE = 512; // High-resolution output dimensions
+const CROP_BOX_SIZE = 280; // Size of circular crop area in viewport (pixels)
+const OUTPUT_SIZE = 512; // High-resolution output square / circle (pixels)
 
 const ImageCropperModal = ({
   isOpen,
@@ -44,7 +42,7 @@ const ImageCropperModal = ({
     img.src = imageSrc;
   }, [imageSrc]);
 
-  // Handle Mouse / Touch Dragging
+  // Handle Dragging / Panning
   const handlePointerDown = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -90,7 +88,7 @@ const ImageCropperModal = ({
 
   // Zoom controls
   const handleZoomChange = (newZoom) => {
-    setZoom(Math.min(3, Math.max(0.8, Number(newZoom))));
+    setZoom(Math.min(3, Math.max(0.7, Number(newZoom))));
   };
 
   const handleRotate = () => {
@@ -103,7 +101,14 @@ const ImageCropperModal = ({
     setPosition({ x: 0, y: 0 });
   };
 
-  // Perform Crop on Offscreen Canvas and output File
+  // Base scale calculation to fit the crop box (matches canvas drawing)
+  const baseScale = image
+    ? Math.max(CROP_BOX_SIZE / image.naturalWidth, CROP_BOX_SIZE / image.naturalHeight)
+    : 1;
+  const renderWidth = image ? image.naturalWidth * baseScale : CROP_BOX_SIZE;
+  const renderHeight = image ? image.naturalHeight * baseScale : CROP_BOX_SIZE;
+
+  // Perform Crop on Offscreen Canvas with 1:1 Pixel Match to Preview
   const handleCropAndSave = () => {
     if (!image) return;
 
@@ -116,24 +121,21 @@ const ImageCropperModal = ({
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
 
-    // Calculate base scale to fit the crop box
-    const baseScale = Math.max(
-      CROP_BOX_SIZE / image.naturalWidth,
-      CROP_BOX_SIZE / image.naturalHeight
-    );
-    const scaleFactor = (OUTPUT_SIZE / CROP_BOX_SIZE) * baseScale * zoom;
+    // Solid white background base
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
 
-    // Center of canvas
+    // Apply scale and translation matching the preview viewport exactly
+    const scaleRatio = OUTPUT_SIZE / CROP_BOX_SIZE;
+    const scaleFactor = scaleRatio * baseScale * zoom;
+
     ctx.save();
     ctx.translate(OUTPUT_SIZE / 2, OUTPUT_SIZE / 2);
-    ctx.translate(
-      position.x * (OUTPUT_SIZE / CROP_BOX_SIZE),
-      position.y * (OUTPUT_SIZE / CROP_BOX_SIZE)
-    );
+    ctx.translate(position.x * scaleRatio, position.y * scaleRatio);
     ctx.rotate((rotation * Math.PI) / 180);
     ctx.scale(scaleFactor, scaleFactor);
 
-    // Draw the image centered at translated origin
+    // Draw the image centered
     ctx.drawImage(
       image,
       -image.naturalWidth / 2,
@@ -155,7 +157,7 @@ const ImageCropperModal = ({
         }
       },
       'image/jpeg',
-      0.92
+      0.95
     );
   };
 
@@ -164,7 +166,7 @@ const ImageCropperModal = ({
       isOpen={isOpen}
       onClose={onClose}
       title="Crop Profile Picture"
-      subtitle="Drag the image to reposition and use the zoom slider to adjust framing"
+      subtitle="Drag image to position inside the circular guide, then use zoom to fit"
       maxWidth="max-w-lg"
     >
       <div className="space-y-4">
@@ -177,8 +179,10 @@ const ImageCropperModal = ({
         >
           {image && (
             <div
-              className="absolute pointer-events-none transition-transform duration-75"
+              className="absolute pointer-events-none flex items-center justify-center"
               style={{
+                width: `${renderWidth}px`,
+                height: `${renderHeight}px`,
                 transform: `translate(${position.x}px, ${position.y}px) rotate(${rotation}deg) scale(${zoom})`,
                 transformOrigin: 'center center',
               }}
@@ -186,11 +190,7 @@ const ImageCropperModal = ({
               <img
                 src={imageSrc}
                 alt="Source to crop"
-                className="max-w-none select-none pointer-events-none"
-                style={{
-                  width: `${CROP_BOX_SIZE}px`,
-                  height: 'auto',
-                }}
+                className="w-full h-full object-cover select-none pointer-events-none"
                 draggable={false}
               />
             </div>
@@ -204,8 +204,8 @@ const ImageCropperModal = ({
               height: `${CROP_BOX_SIZE}px`,
             }}
           >
-            {/* Grid Crosshairs for precision centering */}
-            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-30">
+            {/* Grid Crosshairs for centering */}
+            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-25">
               <div className="border-r border-b border-white" />
               <div className="border-r border-b border-white" />
               <div className="border-b border-white" />
@@ -218,8 +218,8 @@ const ImageCropperModal = ({
             </div>
           </div>
 
-          <div className="absolute bottom-2 left-2 px-2 py-1 rounded bg-black/50 text-white text-[11px] font-medium backdrop-blur-sm pointer-events-none flex items-center gap-1">
-            <Move className="w-3 h-3" />
+          <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded bg-black/60 text-white text-[11px] font-medium backdrop-blur-sm pointer-events-none flex items-center gap-1.5 shadow-sm">
+            <Move className="w-3 h-3 text-[#DBEAFE]" />
             <span>Drag to Reposition</span>
           </div>
         </div>
@@ -238,7 +238,7 @@ const ImageCropperModal = ({
             </button>
             <input
               type="range"
-              min="0.8"
+              min="0.7"
               max="3"
               step="0.05"
               value={zoom}
@@ -253,7 +253,7 @@ const ImageCropperModal = ({
             >
               <ZoomIn className="w-4 h-4" />
             </button>
-            <span className="text-xs font-semibold text-[#172554] w-10 text-right">
+            <span className="text-xs font-semibold text-[#172554] w-12 text-right">
               {Math.round(zoom * 100)}%
             </span>
           </div>
@@ -263,7 +263,7 @@ const ImageCropperModal = ({
             <button
               type="button"
               onClick={handleRotate}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md hover:bg-[#DBEAFE] font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md hover:bg-[#DBEAFE] font-medium transition-colors cursor-pointer"
             >
               <RotateCw className="w-3.5 h-3.5" />
               <span>Rotate 90°</span>
@@ -272,7 +272,7 @@ const ImageCropperModal = ({
             <button
               type="button"
               onClick={handleReset}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md hover:bg-[#DBEAFE] font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md hover:bg-[#DBEAFE] font-medium transition-colors cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Reset</span>

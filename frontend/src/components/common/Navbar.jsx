@@ -19,7 +19,6 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { notificationService } from '../../services/notificationService';
 import Badge from './Badge';
-import ChangePasswordModal from './ChangePasswordModal';
 import ProfilePictureModal from './ProfilePictureModal';
 import { getImageUrl } from '../../utils/imageUrl';
 
@@ -42,7 +41,6 @@ const Navbar = ({ onToggleSidebar }) => {
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showPhotoModal, setShowPhotoModal] = useState(false);
-  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
@@ -379,34 +377,6 @@ const Navbar = ({ onToggleSidebar }) => {
                       </Link>
                     )}
 
-                    <Link
-                      to="/notifications"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center justify-between px-4 py-2 text-[#172554] hover:bg-[#F0F7FF]"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Bell className="w-4 h-4 text-[#172554]" />
-                        <span>Notifications</span>
-                      </div>
-                      {unreadCount > 0 && (
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#DBEAFE] text-[#163A5F]">
-                          {unreadCount}
-                        </span>
-                      )}
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        setChangePasswordOpen(true);
-                      }}
-                      className="w-full text-left flex items-center gap-2 px-4 py-2 text-[#172554] hover:bg-[#F0F7FF]"
-                    >
-                      <KeyRound className="w-4 h-4 text-[#172554]" />
-                      <span>Change Password</span>
-                    </button>
-
                     <button
                       onClick={() => {
                         setDropdownOpen(false);
@@ -421,11 +391,6 @@ const Navbar = ({ onToggleSidebar }) => {
                 </>
               )}
             </div>
-
-            <ChangePasswordModal
-              isOpen={changePasswordOpen}
-              onClose={() => setChangePasswordOpen(false)}
-            />
 
             <ProfilePictureModal
               isOpen={showPhotoModal}

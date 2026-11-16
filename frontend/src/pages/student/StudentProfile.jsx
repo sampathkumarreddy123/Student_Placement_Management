@@ -551,14 +551,14 @@ const StudentProfile = () => {
             <div className="relative group flex-shrink-0">
               <div
                 onClick={() => setShowPhotoModal(true)}
-                className="w-24 h-24 rounded-2xl bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#172554] transition-all"
+                className="w-24 h-24 rounded-full bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#172554] transition-all"
                 title="Click to view full profile picture"
               >
                 {profile?.profilePhoto || user?.profilePhoto ? (
                   <img
                     src={getImageUrl(profile?.profilePhoto || user?.profilePhoto)}
                     alt={profile?.name || user?.name}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-full"
                   />
                 ) : (
                   <span>{(profile?.name || user?.name || 'S').charAt(0).toUpperCase()}</span>
@@ -570,7 +570,7 @@ const StudentProfile = () => {
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="absolute -bottom-1 -right-1 p-2 bg-[#172554] hover:bg-[#0f172a] text-white rounded-xl shadow-md border-2 border-white transition-all focus:outline-none focus:ring-2 focus:ring-[#172554]"
+                className="absolute bottom-0 right-0 p-2 bg-[#172554] hover:bg-[#0f172a] text-white rounded-full shadow-md border-2 border-white transition-all focus:outline-none focus:ring-2 focus:ring-[#172554] cursor-pointer"
                 title="Change & Crop Profile Photo"
               >
                 <Camera className="w-3.5 h-3.5" />
@@ -582,7 +582,7 @@ const StudentProfile = () => {
                   type="button"
                   onClick={handleRemoveAvatar}
                   disabled={uploadingPhoto}
-                  className="absolute -top-1 -right-1 p-1 bg-white hover:bg-rose-50 text-rose-500 rounded-lg shadow-sm border border-rose-200 transition-colors"
+                  className="absolute top-0 right-0 p-1.5 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors cursor-pointer"
                   title="Remove Profile Photo"
                 >
                   <Trash2 className="w-3.5 h-3.5" />

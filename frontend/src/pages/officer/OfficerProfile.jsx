@@ -239,14 +239,14 @@ const OfficerProfile = () => {
           <div className="relative group flex-shrink-0">
             <div
               onClick={() => setShowPhotoModal(true)}
-              className="w-24 h-24 rounded-2xl bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#172554] transition-all"
+              className="w-24 h-24 rounded-full bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#172554] transition-all"
               title="Click to view full profile picture"
             >
               {effectivePhoto ? (
                 <img
                   src={getImageUrl(effectivePhoto)}
                   alt={formData.name || 'Officer'}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover rounded-full"
                 />
               ) : (
                 <span>{(formData.name || user?.name || 'O').charAt(0).toUpperCase()}</span>
@@ -258,11 +258,24 @@ const OfficerProfile = () => {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploadingPhoto || removingPhoto}
-              className="absolute -bottom-1.5 -right-1.5 p-2 bg-[#172554] hover:bg-[#0f172a] text-white rounded-xl shadow-md border-2 border-white transition-all focus:outline-none focus:ring-2 focus:ring-[#172554]"
-              title="Upload New Profile Photo"
+              className="absolute bottom-0 right-0 p-2 bg-[#172554] hover:bg-[#0f172a] text-white rounded-full shadow-md border-2 border-white transition-all focus:outline-none focus:ring-2 focus:ring-[#172554] cursor-pointer"
+              title="Upload & Crop Profile Photo"
             >
               <Camera className="w-4 h-4" />
             </button>
+
+            {/* Remove Button */}
+            {effectivePhoto && (
+              <button
+                type="button"
+                onClick={handlePhotoRemove}
+                disabled={uploadingPhoto || removingPhoto}
+                className="absolute top-0 right-0 p-1.5 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors cursor-pointer"
+                title="Remove Profile Photo"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
 
             <input
               ref={fileInputRef}
@@ -547,7 +560,7 @@ const OfficerProfile = () => {
               size="sm"
               disabled={saving}
               leftIcon={<Save className="w-4 h-4 text-white" />}
-              className="bg-[#172554] hover:bg-[#0f172a] text-white px-6 shadow-sm"
+              className="bg-[#172554] hover:bg-[#0f172a] text-white px-6 shadow-sm cursor-pointer"
             >
               {saving ? 'Saving Changes...' : 'Save Profile Details'}
             </Button>
@@ -555,13 +568,45 @@ const OfficerProfile = () => {
         </Card>
       </form>
 
-      {/* 4. Password Modal */}
+      {/* 4. Account Security & Password Card */}
+      <Card
+        title="Account Security & Access"
+        subtitle="Manage administrative credentials and security recovery questions"
+      >
+        <div className="p-4 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] shadow-xs flex-shrink-0">
+              <KeyRound className="w-5 h-5 text-[#2563EB]" />
+            </div>
+            <div>
+              <h4 className="text-xs sm:text-sm font-bold text-[#172554]">
+                Administrative Account Password
+              </h4>
+              <p className="text-[11px] sm:text-xs text-[#64748B]">
+                Protected with verification questions (Minimum 8 characters)
+              </p>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            icon={KeyRound}
+            onClick={() => setChangePasswordOpen(true)}
+            className="bg-[#172554] hover:bg-[#0f172a] text-white shadow-xs shrink-0 cursor-pointer"
+          >
+            Change Password
+          </Button>
+        </div>
+      </Card>
+
+      {/* 5. Password Modal */}
       <ChangePasswordModal
         isOpen={changePasswordOpen}
         onClose={() => setChangePasswordOpen(false)}
       />
 
-      {/* 5. Profile Picture Full View Modal */}
+      {/* 6. Profile Picture Full View Modal */}
       <ProfilePictureModal
         isOpen={showPhotoModal}
         onClose={() => setShowPhotoModal(false)}

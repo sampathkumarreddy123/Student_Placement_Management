@@ -18,13 +18,13 @@ const ProfilePictureModal = ({ isOpen, onClose, user }) => {
       subtitle={`${user.name || 'User'} • ${roleName}`}
       maxWidth="max-w-md"
     >
-      <div className="flex flex-col items-center justify-center py-2 text-center">
-        <div className="w-64 h-64 sm:w-72 sm:h-72 rounded-2xl bg-[#EFF6FF] border-2 border-[#DBEAFE] overflow-hidden shadow-lg flex items-center justify-center p-1">
+      <div className="flex flex-col items-center justify-center py-3 text-center">
+        <div className="w-60 h-60 sm:w-68 sm:h-68 rounded-full bg-[#EFF6FF] border-4 border-[#DBEAFE] overflow-hidden shadow-xl flex items-center justify-center p-0.5">
           {photoSrc ? (
             <img
               src={photoSrc}
               alt={user.name || 'Profile Picture'}
-              className="w-full h-full object-cover rounded-xl"
+              className="w-full h-full object-cover rounded-full"
             />
           ) : (
             <div className="flex flex-col items-center justify-center p-6 text-[#172554]">

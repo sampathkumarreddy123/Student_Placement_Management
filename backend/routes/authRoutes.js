@@ -11,6 +11,7 @@ import {
   resendVerificationEmail,
   getSecurityQuestions,
   verifySecurityQuestions,
+  getMySecurityQuestions,
   forgotPassword,
   resetPassword,
   changePassword,
@@ -46,6 +47,7 @@ router.post('/verify-security-questions', securityVerifyLimiter, verifySecurityQ
 router.post('/forgot-password', passwordResetLimiter, forgotPassword);
 router.post('/reset-password/:token', authLimiter, resetPassword);
 router.post('/reset-password', authLimiter, resetPassword);
+router.get('/my-security-questions', protect, getMySecurityQuestions);
 router.put('/change-password', protect, changePassword);
 
 // Session verification

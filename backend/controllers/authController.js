@@ -740,10 +740,10 @@ export const getSecurityQuestions = async (req, res, next) => {
       }
     }
 
-    if (!user || user.role !== 'student') {
+    if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'No student account found with the provided college email or roll number.',
+        message: 'No account found with the provided email or roll number.',
       });
     }
 
@@ -836,10 +836,10 @@ export const verifySecurityQuestions = async (req, res, next) => {
       }
     }
 
-    if (!user || user.role !== 'student') {
+    if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'Student account not found or invalid recovery session.',
+        message: 'Account not found or invalid recovery session.',
       });
     }
 
@@ -1025,12 +1025,44 @@ export const resetPassword = async (req, res, next) => {
   }
 };
 
+// @desc    Get current authenticated user's security questions (questions only, never answer hashes)
+// @route   GET /api/auth/my-security-questions
+// @access  Private
+export const getMySecurityQuestions = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id).select('+securityQuestions');
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User session not found.',
+      });
+    }
+
+    const hasQuestions = Boolean(user.securityQuestions && user.securityQuestions.length === 3);
+    const questions = hasQuestions ? user.securityQuestions.map((q) => q.question) : [];
+
+    return res.status(200).json({
+      success: true,
+      hasSecurityQuestions: hasQuestions,
+      questions,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Change password for authenticated user (Student or Officer)
 // @route   PUT /api/auth/change-password
 // @access  Private (Both roles)
 export const changePassword = async (req, res, next) => {
   try {
-    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const {
+      currentPassword,
+      newPassword,
+      confirmPassword,
+      securityAnswers,
+      securityQuestions,
+    } = req.body;
 
     if (!currentPassword) {
       return res.status(400).json({
@@ -1074,8 +1106,10 @@ export const changePassword = async (req, res, next) => {
       });
     }
 
-    // Retrieve user with password hash
-    const user = await User.findById(req.user.id).select('+password');
+    // Retrieve user with password hash & security questions
+    const user = await User.findById(req.user.id).select(
+      '+password +securityQuestions +securityQuestions.answerHash +securityQuestionLockUntil +securityQuestionAttempts'
+    );
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -1090,6 +1124,45 @@ export const changePassword = async (req, res, next) => {
         success: false,
         message: 'Incorrect current password. Please try again.',
       });
+    }
+
+    // Security Questions Check:
+    // 1. If user already has 3 security questions, require and verify answers
+    if (user.securityQuestions && user.securityQuestions.length === 3) {
+      if (!securityAnswers || !Array.isArray(securityAnswers) || securityAnswers.length !== 3) {
+        return res.status(400).json({
+          success: false,
+          requireSecurityVerification: true,
+          message: 'Please answer your 3 security questions to authorize changing your password.',
+        });
+      }
+
+      const verification = await user.verifySecurityAnswers(securityAnswers);
+      if (!verification.success) {
+        return res.status(verification.locked ? 423 : 400).json({
+          success: false,
+          locked: verification.locked || false,
+          message: verification.message,
+        });
+      }
+    } else if (securityQuestions && Array.isArray(securityQuestions) && securityQuestions.length === 3) {
+      // 2. If user does NOT have security questions yet, set them now
+      for (let i = 0; i < securityQuestions.length; i++) {
+        const sq = securityQuestions[i];
+        if (!sq.question || !isValidSecurityQuestion(sq.question)) {
+          return res.status(400).json({
+            success: false,
+            message: `Security question #${i + 1} is invalid.`,
+          });
+        }
+        if (!sq.answer || String(sq.answer).trim().length < 2) {
+          return res.status(400).json({
+            success: false,
+            message: `Answer for security question #${i + 1} must be at least 2 characters.`,
+          });
+        }
+      }
+      await user.setSecurityQuestions(securityQuestions);
     }
 
     // Save new password (pre-save hook will hash it with bcryptjs)
