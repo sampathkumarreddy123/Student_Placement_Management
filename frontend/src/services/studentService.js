@@ -41,6 +41,21 @@ export const studentService = {
     return response;
   },
 
+  downloadStudentResume: async (studentId) => {
+    const response = await api.get(`/users/students/${studentId}/resume`, {
+      responseType: 'blob',
+    });
+    return response;
+  },
+
+  previewStudentResume: async (studentId) => {
+    const response = await api.get(`/users/students/${studentId}/resume`, {
+      params: { inline: 'true' },
+      responseType: 'blob',
+    });
+    return response;
+  },
+
   getAllStudents: async (params = {}) => {
     const response = await api.get('/users/students', { params });
     return response.data;

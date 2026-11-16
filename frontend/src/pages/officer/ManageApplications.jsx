@@ -11,6 +11,7 @@ import {
   Briefcase,
   RotateCcw,
   Users,
+  FileText,
 } from 'lucide-react';
 import { applicationService } from '../../services/applicationService';
 import { driveService } from '../../services/driveService';
@@ -28,7 +29,7 @@ import EmptyState from '../../components/common/EmptyState';
 import Pagination from '../../components/common/Pagination';
 import { useToast } from '../../context/ToastContext';
 import { formatDate, formatLPA } from '../../utils/formatters';
-import { getImageUrl } from '../../utils/imageUrl';
+import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
 
 const STATUS_OPTIONS = [
   'All',
@@ -101,6 +102,7 @@ const ManageApplications = () => {
   const [profileTarget, setProfileTarget] = useState(null);
   const [appForHistory, setAppForHistory] = useState(null);
   const [downloadingAppId, setDownloadingAppId] = useState(null);
+  const [viewingAppId, setViewingAppId] = useState(null);
 
   // 1. Fetch available placement drives
   const fetchDrives = async () => {
@@ -224,7 +226,7 @@ const ManageApplications = () => {
       console.error('Resume download error', err);
       const fallbackUrl = app.resumeSnapshot?.resumeUrl || app.studentProfile?.resumeUrl;
       if (fallbackUrl) {
-        window.open(fallbackUrl, '_blank');
+        window.open(getResumeUrl(fallbackUrl), '_blank');
         toast.info('Opened resume link in a new tab.');
       } else {
         toast.error('Resume document could not be retrieved.');
@@ -235,6 +237,33 @@ const ManageApplications = () => {
       }
     } finally {
       setDownloadingAppId(null);
+    }
+  };
+
+  // View / Show candidate resume
+  const handleViewResume = async (app) => {
+    try {
+      setViewingAppId(app._id);
+      const response = await applicationService.previewApplicantResume(app._id);
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      toast.info(`Opened resume for ${app.student?.name || 'candidate'}.`);
+    } catch (err) {
+      console.error('Resume preview error', err);
+      const fallbackUrl = app.resumeSnapshot?.resumeUrl || app.studentProfile?.resumeUrl;
+      if (fallbackUrl) {
+        window.open(getResumeUrl(fallbackUrl), '_blank');
+        toast.info('Opened resume link in a new tab.');
+      } else {
+        toast.error('Resume document could not be retrieved.');
+        setActionAlert({
+          type: 'error',
+          text: 'Resume document could not be retrieved.',
+        });
+      }
+    } finally {
+      setViewingAppId(null);
     }
   };
 
@@ -615,6 +644,17 @@ const ManageApplications = () => {
                             title="View Complete Academic Profile"
                           >
                             <Eye className="w-4 h-4" />
+                          </button>
+
+                          {/* Show / Preview Resume Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleViewResume(app)}
+                            disabled={viewingAppId === app._id}
+                            className="p-1.5 rounded-lg text-[#2563EB] hover:text-[#163A5F] hover:bg-[#EFF6FF] transition-colors disabled:opacity-50"
+                            title="Show / Preview Candidate Resume"
+                          >
+                            <FileText className="w-4 h-4" />
                           </button>
 
                           {/* Download Resume Button */}

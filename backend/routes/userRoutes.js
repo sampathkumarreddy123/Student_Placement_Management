@@ -10,6 +10,7 @@ import {
   updateOfficerProfile,
   getAllStudents,
   getStudentById,
+  getStudentResumeFile,
   getPlacementStats,
   getOfficerDashboardData,
 } from '../controllers/userController.js';
@@ -46,6 +47,7 @@ router.put('/officer/profile', protect, authorize('officer'), updateOfficerProfi
 
 // Officer Management routes
 router.get('/students', protect, authorize('officer'), getAllStudents);
+router.get('/students/:id/resume', protect, authorize('officer'), getStudentResumeFile);
 router.get('/students/:id', protect, authorize('officer'), getStudentById);
 router.get('/stats', protect, authorize('officer'), getPlacementStats);
 router.get('/officer/dashboard', protect, authorize('officer'), getOfficerDashboardData);

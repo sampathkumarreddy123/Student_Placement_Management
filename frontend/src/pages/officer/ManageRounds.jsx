@@ -13,6 +13,7 @@ import {
   Check,
   X,
   FileText,
+  Download,
 } from 'lucide-react';
 import { roundService } from '../../services/roundService';
 import { driveService } from '../../services/driveService';
@@ -27,6 +28,7 @@ import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import { useToast } from '../../context/ToastContext';
 import { formatDate, formatLPA } from '../../utils/formatters';
+import { getResumeUrl } from '../../utils/imageUrl';
 
 const ROUND_PRESETS = [
   'Online Assessment',
@@ -744,14 +746,25 @@ const ManageRounds = () => {
                       {/* Resume */}
                       <td className="py-2.5 px-3">
                         {cand.student?.resumeUrl ? (
-                          <a
-                            href={cand.student.resumeUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2563EB] hover:underline"
-                          >
-                            <FileText className="w-3.5 h-3.5" /> PDF
-                          </a>
+                          <div className="inline-flex items-center gap-1.5">
+                            <a
+                              href={getResumeUrl(cand.student.resumeUrl)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#2563EB] hover:underline"
+                              title="Show / Preview Resume"
+                            >
+                              <FileText className="w-3.5 h-3.5" /> PDF
+                            </a>
+                            <a
+                              href={getResumeUrl(cand.student.resumeUrl)}
+                              download={`${(cand.student?.name || 'Candidate').replace(/\s+/g, '_')}_Resume.pdf`}
+                              className="text-[#0D9488] hover:text-[#0f172a] p-0.5 rounded transition-colors"
+                              title="Download Candidate Resume"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
                         ) : (
                           <span className="text-[11px] text-[#64748B]">None</span>
                         )}

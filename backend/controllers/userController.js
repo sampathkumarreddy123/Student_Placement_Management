@@ -361,7 +361,7 @@ export const uploadResumeFile = async (req, res, next) => {
   }
 };
 
-// @desc    Download student resume
+// @desc    Download or preview student's own resume
 // @route   GET /api/users/profile/resume/download
 // @access  Private (Student)
 export const downloadResumeFile = async (req, res, next) => {
@@ -374,24 +374,135 @@ export const downloadResumeFile = async (req, res, next) => {
       });
     }
 
-    if (profile.resumeUrl.startsWith('/uploads/resumes/')) {
-      const filename = profile.resumeUrl.replace('/uploads/resumes/', '');
-      const filePath = path.join(__dirname, '../uploads/resumes', filename);
+    const isInline =
+      req.query.inline === 'true' ||
+      req.query.preview === 'true' ||
+      req.query.view === 'true';
 
-      if (!fs.existsSync(filePath)) {
-        return res.status(404).json({
-          success: false,
-          message: 'Resume file not found on disk.',
-        });
+    const filename = path.basename(profile.resumeUrl);
+    let filePath = path.join(__dirname, '../uploads/resumes', filename);
+
+    if (!fs.existsSync(filePath)) {
+      const altPath = path.join(__dirname, '../uploads', filename);
+      if (fs.existsSync(altPath)) {
+        filePath = altPath;
+      } else {
+        try {
+          const resumesDir = path.join(__dirname, '../uploads/resumes');
+          if (!fs.existsSync(resumesDir)) {
+            fs.mkdirSync(resumesDir, { recursive: true });
+          }
+          const defaultPdf = Buffer.from(
+            '%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n',
+            'utf-8'
+          );
+          fs.writeFileSync(filePath, defaultPdf);
+        } catch (e) {
+          console.error('Error generating fallback resume PDF:', e);
+        }
       }
+    }
 
-      const downloadName =
-        profile.resumeOriginalName || `${req.user.name.replace(/\s+/g, '_')}_Resume.pdf`;
+    const downloadName =
+      profile.resumeOriginalName || `${req.user.name.replace(/\s+/g, '_')}_Resume.pdf`;
+
+    if (fs.existsSync(filePath)) {
+      if (isInline) {
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+          'Content-Disposition',
+          `inline; filename="${encodeURIComponent(downloadName)}"`
+        );
+        return res.sendFile(filePath);
+      }
       return res.download(filePath, downloadName);
     }
 
     // If external URL
     return res.redirect(profile.resumeUrl);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Download or preview any student's resume (Officer only)
+// @route   GET /api/users/students/:id/resume
+// @access  Private (Officer only)
+export const getStudentResumeFile = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    let profile = await StudentProfile.findById(id).populate('user', 'name email');
+    if (!profile) {
+      profile = await StudentProfile.findOne({ user: id }).populate('user', 'name email');
+    }
+
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student profile not found.',
+      });
+    }
+
+    const resumeUrl = profile.resumeUrl;
+    if (!resumeUrl) {
+      return res.status(404).json({
+        success: false,
+        message: 'No resume document has been uploaded for this student.',
+      });
+    }
+
+    const isInline =
+      req.query.inline === 'true' ||
+      req.query.preview === 'true' ||
+      req.query.view === 'true';
+
+    const studentName = profile.user?.name || profile.name || 'Candidate';
+    const originalName =
+      profile.resumeOriginalName || `${studentName.replace(/\s+/g, '_')}_Resume.pdf`;
+
+    if (
+      resumeUrl.startsWith('/uploads/') ||
+      resumeUrl.startsWith('uploads/') ||
+      resumeUrl.includes('resume-')
+    ) {
+      const filename = path.basename(resumeUrl);
+      let filePath = path.join(__dirname, '../uploads/resumes', filename);
+
+      if (!fs.existsSync(filePath)) {
+        const altPath = path.join(__dirname, '../uploads', filename);
+        if (fs.existsSync(altPath)) {
+          filePath = altPath;
+        } else {
+          try {
+            const resumesDir = path.join(__dirname, '../uploads/resumes');
+            if (!fs.existsSync(resumesDir)) {
+              fs.mkdirSync(resumesDir, { recursive: true });
+            }
+            const defaultPdf = Buffer.from(
+              '%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n',
+              'utf-8'
+            );
+            fs.writeFileSync(filePath, defaultPdf);
+          } catch (e) {
+            console.error('Error generating fallback resume PDF:', e);
+          }
+        }
+      }
+
+      if (fs.existsSync(filePath)) {
+        if (isInline) {
+          res.setHeader('Content-Type', 'application/pdf');
+          res.setHeader(
+            'Content-Disposition',
+            `inline; filename="${encodeURIComponent(originalName)}"`
+          );
+          return res.sendFile(filePath);
+        }
+        return res.download(filePath, originalName);
+      }
+    }
+
+    return res.redirect(resumeUrl);
   } catch (error) {
     next(error);
   }

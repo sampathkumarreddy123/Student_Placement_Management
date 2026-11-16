@@ -6,8 +6,10 @@ import {
   ExternalLink,
   Eye,
   RotateCcw,
+  Download,
 } from 'lucide-react';
 import { studentService } from '../../services/studentService';
+import { useToast } from '../../context/ToastContext';
 import Card from '../../components/common/Card';
 import Badge from '../../components/common/Badge';
 import Input from '../../components/common/Input';
@@ -17,7 +19,7 @@ import PageHeader from '../../components/common/PageHeader';
 import EmptyState from '../../components/common/EmptyState';
 import Pagination from '../../components/common/Pagination';
 import StudentProfileModal from '../../components/officer/StudentProfileModal';
-import { getImageUrl } from '../../utils/imageUrl';
+import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
 
 const DEPARTMENTS = [
   'All Departments',
@@ -42,6 +44,39 @@ const ManageStudents = () => {
   // Student Profile Inspection Modal
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
+  const toast = useToast();
+
+  const handleDownloadResume = async (profile) => {
+    const studentId = profile._id || profile.user?._id || profile.user;
+    if (!studentId) return;
+
+    try {
+      setDownloadingId(studentId);
+      const res = await studentService.downloadStudentResume(studentId);
+      const blob = new Blob([res.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const name = profile.user?.name || profile.rollNumber || 'Student';
+      link.download = profile.resumeOriginalName || `${name.replace(/\s+/g, '_')}_Resume.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success(`Resume downloaded for ${name}.`);
+    } catch (err) {
+      console.error('Download resume error', err);
+      if (profile.resumeUrl) {
+        window.open(getResumeUrl(profile.resumeUrl), '_blank');
+        toast.info('Opened resume in a new tab.');
+      } else {
+        toast.error('Resume document could not be retrieved.');
+      }
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const fetchStudents = async () => {
     try {
@@ -295,15 +330,26 @@ const ManageStudents = () => {
                           Profile
                         </Button>
                         {profile.resumeUrl && (
-                          <a
-                            href={profile.resumeUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#EFF6FF] text-[#163A5F] font-semibold hover:bg-[#DBEAFE] border border-[#DBEAFE] transition-colors text-xs"
-                            title="Download Resume"
-                          >
-                            CV <ExternalLink className="w-3 h-3 text-[#2563EB]" />
-                          </a>
+                          <>
+                            <a
+                              href={getResumeUrl(profile.resumeUrl)}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#EFF6FF] text-[#163A5F] font-semibold hover:bg-[#DBEAFE] border border-[#DBEAFE] transition-colors text-xs"
+                              title="Show / Preview Resume in new tab"
+                            >
+                              CV <ExternalLink className="w-3 h-3 text-[#2563EB]" />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadResume(profile)}
+                              disabled={downloadingId === (profile._id || profile.user?._id || profile.user)}
+                              className="p-1.5 rounded-lg text-[#0D9488] hover:text-[#0D9488] hover:bg-[#0D9488]/10 transition-colors disabled:opacity-50"
+                              title="Download Candidate Resume"
+                            >
+                              <Download className="w-4 h-4" />
+                            </button>
+                          </>
                         )}
                       </div>
                     </td>

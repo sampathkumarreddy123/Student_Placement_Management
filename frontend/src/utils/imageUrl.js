@@ -38,4 +38,7 @@ export const getImageUrl = (url) => {
   return `${backendOrigin}${cleanPath}`;
 };
 
+export const getFileUrl = getImageUrl;
+export const getResumeUrl = getImageUrl;
+
 export default getImageUrl;

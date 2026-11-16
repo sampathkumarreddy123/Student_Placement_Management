@@ -41,7 +41,7 @@ import ChangePasswordModal from '../../components/common/ChangePasswordModal';
 import ProfilePictureModal from '../../components/common/ProfilePictureModal';
 import ImageCropperModal from '../../components/common/ImageCropperModal';
 import { useToast } from '../../context/ToastContext';
-import { getImageUrl } from '../../utils/imageUrl';
+import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
 
 const DEPARTMENTS = [
   'Computer Science',
@@ -822,7 +822,7 @@ const StudentProfile = () => {
                   </Button>
 
                   <a
-                    href={profile.resumeUrl}
+                    href={getResumeUrl(profile.resumeUrl)}
                     target="_blank"
                     rel="noreferrer"
                     className="inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-[#DBEAFE] text-xs font-semibold text-[#172554] hover:bg-white gap-1 transition-colors"

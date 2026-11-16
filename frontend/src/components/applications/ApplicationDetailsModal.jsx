@@ -21,7 +21,7 @@ import Modal from '../common/Modal';
 import Badge from '../common/Badge';
 import Button from '../common/Button';
 import { formatDate, formatLPA } from '../../utils/formatters';
-import { getImageUrl } from '../../utils/imageUrl';
+import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
 
 const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
   if (!application) return null;
@@ -273,16 +273,27 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
             </div>
 
             {resume.resumeUrl && (
-              <a
-                href={resume.resumeUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="flex-shrink-0 ml-2"
-              >
-                <Button variant="outline" size="sm" icon={ExternalLink}>
-                  View Resume
-                </Button>
-              </a>
+              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                <a
+                  href={getResumeUrl(resume.resumeUrl)}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Show / Preview Resume in new tab"
+                >
+                  <Button variant="outline" size="sm" icon={ExternalLink}>
+                    View Resume
+                  </Button>
+                </a>
+                <a
+                  href={getResumeUrl(resume.resumeUrl)}
+                  download={resume.resumeOriginalName || 'Candidate_Resume.pdf'}
+                  title="Download Candidate Resume"
+                >
+                  <Button variant="primary" size="sm" icon={Download}>
+                    Download
+                  </Button>
+                </a>
+              </div>
             )}
           </div>
         </div>

@@ -22,12 +22,13 @@ import LoadingSpinner from '../common/LoadingSpinner';
 import { studentService } from '../../services/studentService';
 import { applicationService } from '../../services/applicationService';
 import { formatDate, formatLPA } from '../../utils/formatters';
-import { getImageUrl } from '../../utils/imageUrl';
+import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
 
 const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
+  const [viewing, setViewing] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -58,14 +59,14 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
   const applications = data?.applications || [];
 
   const handleDownloadResume = async () => {
-    if (!applicationId && !student?._id) return;
+    if (!applicationId && !student?._id && !studentId) return;
     try {
       setDownloading(true);
       let response;
       if (applicationId) {
         response = await applicationService.downloadApplicantResume(applicationId);
       } else {
-        response = await studentService.downloadResume();
+        response = await studentService.downloadStudentResume(student?._id || studentId);
       }
 
       // Create blob download
@@ -73,19 +74,45 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = student?.resumeOriginalName || `${(student?.name || 'Student').replace(/\s+/g, '_')}_Resume.pdf`;
+      link.download =
+        student?.resumeOriginalName ||
+        `${(student?.name || 'Student').replace(/\s+/g, '_')}_Resume.pdf`;
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('Download failed', err);
-      // Fallback: if URL exists, open directly
+      // Fallback: if URL exists, open directly via getResumeUrl
       if (student?.resumeUrl) {
-        window.open(student.resumeUrl, '_blank');
+        window.open(getResumeUrl(student.resumeUrl), '_blank');
       }
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const handleViewResume = async () => {
+    if (!applicationId && !student?._id && !studentId && !student?.resumeUrl) return;
+    try {
+      setViewing(true);
+      let response;
+      if (applicationId) {
+        response = await applicationService.previewApplicantResume(applicationId);
+      } else {
+        response = await studentService.previewStudentResume(student?._id || studentId);
+      }
+
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('Resume preview failed', err);
+      if (student?.resumeUrl) {
+        window.open(getResumeUrl(student.resumeUrl), '_blank');
+      }
+    } finally {
+      setViewing(false);
     }
   };
 
@@ -275,15 +302,28 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
               </div>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              icon={Download}
-              isLoading={downloading}
-              onClick={handleDownloadResume}
-            >
-              Download Resume
-            </Button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                variant="outline"
+                size="sm"
+                icon={ExternalLink}
+                isLoading={viewing}
+                onClick={handleViewResume}
+                title="Preview candidate resume in a new browser tab"
+              >
+                Preview
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={Download}
+                isLoading={downloading}
+                onClick={handleDownloadResume}
+                title="Download candidate resume file"
+              >
+                Download
+              </Button>
+            </div>
           </div>
 
           {/* Past Drive Applications History */}

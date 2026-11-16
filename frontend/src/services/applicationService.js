@@ -31,6 +31,14 @@ export const applicationService = {
     return response;
   },
 
+  previewApplicantResume: async (applicationId) => {
+    const response = await api.get(`/applications/${applicationId}/resume`, {
+      params: { inline: 'true' },
+      responseType: 'blob',
+    });
+    return response;
+  },
+
   getAllApplications: async (params = {}) => {
     const response = await api.get('/applications', { params });
     return response.data;
