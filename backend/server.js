@@ -161,6 +161,8 @@ app.get(['/api/health', '/health'], (req, res) => {
 // Mount API routes (support both /api/* and root /* endpoints)
 app.use('/api/auth', authRoutes);
 app.use('/auth', authRoutes);
+app.use('/api', authRoutes); // Fallback router alias for direct auth routes (e.g. /api/security-questions)
+app.use('/', authRoutes); // Root fallback router alias
 
 app.use('/api/users', userRoutes);
 app.use('/users', userRoutes);
@@ -193,4 +195,7 @@ app.listen(PORT, () => {
   console.log(`[Server] Placement Management Server running on port ${PORT}`);
   console.log(`[Server] Health check: http://localhost:${PORT}/api/health`);
 });
+
+export default app;
+export { app };
 

@@ -710,28 +710,30 @@ export const resendVerificationEmail = async (req, res, next) => {
 };
 
 // @desc    Retrieve security questions for student password recovery
-// @route   POST /api/auth/security-questions
+// @route   POST /api/auth/security-questions or GET /api/auth/security-questions?identifier=...
 // @access  Public (Subject to rate limiting)
 export const getSecurityQuestions = async (req, res, next) => {
   try {
-    const { identifier } = req.body;
-    if (!identifier || !String(identifier).trim()) {
+    const rawIdentifier = req.body?.identifier || req.query?.identifier;
+    if (!rawIdentifier || !String(rawIdentifier).trim()) {
       return res.status(400).json({
         success: false,
         message: 'Please provide your registered college email or roll number.',
       });
     }
 
-    const cleanIdentifier = String(identifier).trim();
+    const cleanIdentifier = String(rawIdentifier).trim();
     let user = null;
 
     if (cleanIdentifier.includes('@')) {
+      const emailRegex = new RegExp(`^${cleanIdentifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
       user = await User.findOne({
-        email: cleanIdentifier.toLowerCase(),
+        email: emailRegex,
       }).select('+securityQuestions +securityQuestionLockUntil +securityQuestionAttempts');
     } else {
+      const rollRegex = new RegExp(`^${cleanIdentifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
       const studentProfile = await StudentProfile.findOne({
-        rollNumber: cleanIdentifier.toUpperCase(),
+        rollNumber: rollRegex,
       });
       if (studentProfile) {
         user = await User.findById(studentProfile.user).select(
@@ -820,14 +822,16 @@ export const verifySecurityQuestions = async (req, res, next) => {
     let user = null;
 
     if (cleanIdentifier.includes('@')) {
+      const emailRegex = new RegExp(`^${cleanIdentifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
       user = await User.findOne({
-        email: cleanIdentifier.toLowerCase(),
+        email: emailRegex,
       }).select(
         '+securityQuestions +securityQuestions.answerHash +securityQuestionLockUntil +securityQuestionAttempts'
       );
     } else {
+      const rollRegex = new RegExp(`^${cleanIdentifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i');
       const studentProfile = await StudentProfile.findOne({
-        rollNumber: cleanIdentifier.toUpperCase(),
+        rollNumber: rollRegex,
       });
       if (studentProfile) {
         user = await User.findById(studentProfile.user).select(

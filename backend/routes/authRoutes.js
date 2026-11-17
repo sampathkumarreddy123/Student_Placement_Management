@@ -40,8 +40,20 @@ router.get('/verify-email/:token', verifyEmail);
 router.post('/resend-verification', resendVerificationLimiter, resendVerificationEmail);
 
 // Security questions password recovery
-router.post('/security-questions', securityQuestionsLimiter, getSecurityQuestions);
-router.post('/verify-security-questions', securityVerifyLimiter, verifySecurityQuestions);
+router
+  .route('/security-questions')
+  .post(securityQuestionsLimiter, getSecurityQuestions)
+  .get(securityQuestionsLimiter, getSecurityQuestions);
+
+router
+  .route('/verify-security-questions')
+  .post(securityVerifyLimiter, verifySecurityQuestions)
+  .get((req, res) => {
+    res.status(405).json({
+      success: false,
+      message: 'Verification requires a POST request with answers payload.',
+    });
+  });
 
 // Password recovery & management
 router.post('/forgot-password', passwordResetLimiter, forgotPassword);

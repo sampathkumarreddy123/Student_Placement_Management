@@ -67,18 +67,43 @@ export const authService = {
   },
 
   getSecurityQuestions: async (identifier) => {
-    const response = await api.post('/auth/security-questions', {
-      identifier: (identifier || '').trim(),
-    });
-    return response.data;
+    const cleanId = (identifier || '').trim();
+    try {
+      const response = await api.post('/auth/security-questions', {
+        identifier: cleanId,
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        // Fallback for direct mounting without /auth prefix
+        const fallbackRes = await api.post('/security-questions', {
+          identifier: cleanId,
+        });
+        return fallbackRes.data;
+      }
+      throw error;
+    }
   },
 
   verifySecurityQuestions: async (identifier, answers) => {
-    const response = await api.post('/auth/verify-security-questions', {
-      identifier: (identifier || '').trim(),
-      answers,
-    });
-    return response.data;
+    const cleanId = (identifier || '').trim();
+    try {
+      const response = await api.post('/auth/verify-security-questions', {
+        identifier: cleanId,
+        answers,
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        // Fallback for direct mounting without /auth prefix
+        const fallbackRes = await api.post('/verify-security-questions', {
+          identifier: cleanId,
+          answers,
+        });
+        return fallbackRes.data;
+      }
+      throw error;
+    }
   },
 
   forgotPassword: async (email) => {
@@ -96,8 +121,16 @@ export const authService = {
   },
 
   getMySecurityQuestions: async () => {
-    const response = await api.get('/auth/my-security-questions');
-    return response.data;
+    try {
+      const response = await api.get('/auth/my-security-questions');
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        const fallbackRes = await api.get('/my-security-questions');
+        return fallbackRes.data;
+      }
+      throw error;
+    }
   },
 
   changePassword: async (passwords) => {

@@ -57,11 +57,17 @@ const ForgotPassword = () => {
         setError(res.message || 'Unable to retrieve security questions for this account.');
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          'No recovery setup found for this account. Please check your details or contact the placement cell.'
-      );
+      if (err.response?.status === 404 && err.response?.data?.message?.includes('Resource not found')) {
+        setError(
+          'The security recovery endpoint is not accessible. Please ensure the backend server has been restarted with the latest code (cd backend; npm.cmd run dev).'
+        );
+      } else {
+        setError(
+          err.response?.data?.message ||
+            err.message ||
+            'No recovery setup found for this account. Please check your details or contact the placement cell.'
+        );
+      }
     } finally {
       setLoading(false);
     }
