@@ -92,19 +92,11 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
   const hasDepartment = Boolean(department);
   const hasCgpa = cgpa !== undefined && cgpa !== null && Number(cgpa) > 0;
   const isProfileComplete = hasResume && hasRollNumber && hasDepartment && hasCgpa;
-  const isEmailVerified = Boolean(
-    profile?.isEmailVerified !== undefined
-      ? profile.isEmailVerified
-      : user?.isEmailVerified !== undefined
-      ? user.isEmailVerified
-      : true
-  );
 
   const canSubmit =
     !loadingProfile &&
     profile &&
     isProfileComplete &&
-    isEmailVerified &&
     drive.isEligible !== false &&
     !deadline.isClosed &&
     !isClosedStatus &&
@@ -141,25 +133,6 @@ const ApplyConfirmModal = ({ isOpen, onClose, drive, onSuccess }) => {
       <div className="space-y-5">
         {errorMsg && (
           <Alert type="error" message={errorMsg} onClose={() => setErrorMsg('')} />
-        )}
-
-        {/* Email Verification Required Banner */}
-        {!isEmailVerified && (
-          <div className="p-3.5 rounded-xl border border-[#DBEAFE] bg-[#EFF6FF] text-xs text-[#172554] flex items-start gap-2.5 shadow-sm">
-            <AlertTriangle className="w-4 h-4 text-[#D97706] flex-shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-semibold text-[#172554]">Email Verification Required</p>
-              <p className="mt-0.5 text-[#64748B] leading-relaxed">
-                Your college email is not verified yet. Verification is required before you can apply for placement drives.
-              </p>
-              <Link
-                to="/student/profile"
-                className="inline-flex items-center gap-1 font-semibold text-[#2563EB] hover:text-[#163A5F] underline mt-1.5"
-              >
-                Go to Profile to Verify Email &rarr;
-              </Link>
-            </div>
-          </div>
         )}
 
         {/* Drive Overview Summary Box */}

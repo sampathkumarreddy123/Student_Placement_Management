@@ -21,16 +21,6 @@ export const applyForDrive = async (req, res, next) => {
   try {
     const { driveId } = req.params;
 
-    // 0. Verify email verification requirement
-    if (req.user.role === 'student' && !req.user.isEmailVerified) {
-      return res.status(403).json({
-        success: false,
-        message:
-          'Email verification required: You must verify your college email address before applying for placement drives. Please check your inbox or visit your profile to resend the verification link.',
-        isEmailVerified: false,
-      });
-    }
-
     // 1. Fetch placement drive and verify existence
     const drive = await PlacementDrive.findById(driveId).populate('company');
     if (!drive) {

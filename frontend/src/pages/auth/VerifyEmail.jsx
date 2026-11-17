@@ -1,114 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import {
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  ArrowRight,
-  Mail,
-  GraduationCap,
-} from 'lucide-react';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { CheckCircle2, ArrowRight, GraduationCap } from 'lucide-react';
 import Button from '../../components/common/Button';
-import Input from '../../components/common/Input';
-import Alert from '../../components/common/Alert';
-import { authService } from '../../services/authService';
 import { useAuth } from '../../hooks/useAuth';
 
 const VerifyEmail = () => {
-  const { token } = useParams();
-  const { user, checkAuth } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-
-  const [loading, setLoading] = useState(true);
-  const [success, setSuccess] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-
-  // Resend state
-  const [resendEmail, setResendEmail] = useState('');
-  const [resendLoading, setResendLoading] = useState(false);
-  const [resendSuccess, setResendSuccess] = useState('');
-  const [resendError, setResendError] = useState('');
-  const [devVerifyUrl, setDevVerifyUrl] = useState('');
-
-  const verifiedRef = useRef(false);
-
-  useEffect(() => {
-    const cleanToken = (token || '').trim();
-    if (!cleanToken) {
-      setErrorMessage('Verification token is missing from the link.');
-      setLoading(false);
-      return;
-    }
-
-    if (verifiedRef.current) return;
-    verifiedRef.current = true;
-
-    let isMounted = true;
-
-    const performVerification = async () => {
-      try {
-        setLoading(true);
-        await authService.verifyEmail(cleanToken);
-        if (isMounted) {
-          setSuccess(true);
-          setErrorMessage('');
-          if (checkAuth) {
-            checkAuth();
-          }
-        }
-      } catch (err) {
-        if (isMounted) {
-          setErrorMessage(
-            err.response?.data?.message ||
-              err.message ||
-              'Invalid or expired email verification link.'
-          );
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    performVerification();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [token]);
-
-  const handleResend = async (e) => {
-    e.preventDefault();
-    const targetEmail = resendEmail.trim() || user?.email;
-
-    if (!targetEmail) {
-      setResendError('Please enter your registered college email.');
-      return;
-    }
-
-    try {
-      setResendLoading(true);
-      setResendError('');
-      setResendSuccess('');
-      setDevVerifyUrl('');
-      const res = await authService.resendVerification(targetEmail);
-      if (res?.devVerifyUrl) {
-        setDevVerifyUrl(res.devVerifyUrl);
-      }
-      setResendSuccess(
-        res.message || 'A fresh verification email has been sent. Please check your inbox.'
-      );
-    } catch (err) {
-      setResendError(
-        err.response?.data?.message ||
-          err.message ||
-          'Failed to resend verification link. Please try again later.'
-      );
-    } finally {
-      setResendLoading(false);
-    }
-  };
 
   return (
     <div>
@@ -130,124 +28,42 @@ const VerifyEmail = () => {
         </Link>
       </div>
 
-      {loading ? (
-        <div className="py-8 text-center space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#2563EB] mx-auto" />
-          <h2 className="text-base font-bold text-[#172554]">
-            Verifying Your College Email
+      <div className="py-4 text-center space-y-4">
+        <div className="w-12 h-12 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] text-[#0D9488] flex items-center justify-center mx-auto shadow-sm">
+          <CheckCircle2 className="w-6 h-6 text-[#0D9488]" />
+        </div>
+
+        <div>
+          <h2 className="text-lg font-bold text-[#172554] tracking-tight">
+            Account Active & Verified
           </h2>
-          <p className="text-xs text-[#64748B]">
-            Please wait while we validate your security verification token...
+          <p className="text-xs text-[#64748B] mt-1.5 leading-relaxed max-w-sm mx-auto">
+            Email verification is no longer required. All student accounts are automatically verified and active immediately upon registration.
           </p>
         </div>
-      ) : success ? (
-        <div className="py-3 text-center space-y-4">
-          <div className="w-12 h-12 rounded-xl bg-[#EFF6FF] border border-[#DBEAFE] text-[#0D9488] flex items-center justify-center mx-auto">
-            <CheckCircle2 className="w-6 h-6 text-[#0D9488]" />
-          </div>
 
-          <div>
-            <h2 className="text-lg font-bold text-[#172554] tracking-tight">
-              Email Verified Successfully!
-            </h2>
-            <p className="text-xs text-[#64748B] mt-1 leading-relaxed max-w-sm mx-auto">
-              Your college email address has been confirmed. You are now eligible to apply for all active campus placement drives and receive notifications.
-            </p>
-          </div>
-
-          <div className="pt-3">
-            {user ? (
-              <Button
-                variant="primary"
-                onClick={() => navigate('/student/drives')}
-                className="w-full text-xs"
-                icon={ArrowRight}
-              >
-                Browse Placement Drives
-              </Button>
-            ) : (
-              <Button
-                variant="primary"
-                onClick={() => navigate('/student/login')}
-                className="w-full text-xs"
-                icon={ArrowRight}
-              >
-                Sign In to Student Account
-              </Button>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="py-2 space-y-4">
-          <div className="text-center space-y-2">
-            <div className="w-12 h-12 rounded-xl bg-[#DC2626]/10 border border-[#DC2626]/20 text-[#DC2626] flex items-center justify-center mx-auto">
-              <XCircle className="w-6 h-6 text-[#DC2626]" />
-            </div>
-            <h2 className="text-lg font-bold text-[#172554] tracking-tight">
-              Verification Link Expired or Invalid
-            </h2>
-            <p className="text-xs text-[#64748B] leading-relaxed max-w-sm mx-auto">
-              {errorMessage ||
-                'This email verification token has expired or has already been used. Please request a new link below.'}
-            </p>
-          </div>
-
-          {resendSuccess && (
-            <Alert type="success" message={resendSuccess} className="text-xs" />
-          )}
-
-          {devVerifyUrl && (
-            <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-left text-xs space-y-1.5 shadow-sm">
-              <span className="font-bold text-amber-900 block">
-                Direct Verification Link:
-              </span>
-              <a
-                href={devVerifyUrl}
-                className="text-[#2563EB] hover:text-[#163A5F] underline font-medium break-all block"
-              >
-                {devVerifyUrl}
-              </a>
-            </div>
-          )}
-
-          {resendError && (
-            <Alert type="error" message={resendError} className="text-xs" />
-          )}
-
-          <form onSubmit={handleResend} className="space-y-3 pt-2">
-            <Input
-              label="Enter Your Registered College Email"
-              id="resendEmail"
-              name="resendEmail"
-              type="email"
-              placeholder=""
-              icon={Mail}
-              value={resendEmail || (user?.email || '')}
-              onChange={(e) => setResendEmail(e.target.value)}
-              required
-            />
-
+        <div className="pt-3">
+          {user ? (
             <Button
-              type="submit"
               variant="primary"
+              onClick={() => navigate('/student/drives')}
               className="w-full text-xs"
-              isLoading={resendLoading}
-              icon={Mail}
+              icon={ArrowRight}
             >
-              {resendLoading ? 'Sending Fresh Link...' : 'Resend Verification Link'}
+              Browse Placement Drives
             </Button>
-          </form>
-
-          <div className="pt-2 text-center">
-            <Link
-              to="/student/login"
-              className="text-xs font-bold text-[#2563EB] hover:text-[#163A5F] hover:underline"
+          ) : (
+            <Button
+              variant="primary"
+              onClick={() => navigate('/student/login')}
+              className="w-full text-xs"
+              icon={ArrowRight}
             >
-              Back to Sign In
-            </Link>
-          </div>
+              Sign In to Student Account
+            </Button>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

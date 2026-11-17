@@ -204,20 +204,17 @@ export const register = async (req, res, next) => {
       });
     }
 
-    // Create User (strictly student role)
+    // Create User (strictly student role, auto-verified)
     const user = new User({
       name: name.trim(),
       email: normalizedEmail,
       password, // Pre-save hook hashes with bcryptjs
       role: 'student',
-      isEmailVerified: false,
+      isEmailVerified: true,
     });
 
     // Securely hash and store the 3 security questions
     await user.setSecurityQuestions(securityQuestions);
-
-    // Generate time-limited email verification token
-    const verificationToken = user.getEmailVerificationToken();
     await user.save();
 
     // Create Associated Student Profile (no fake default scores or numbers)
@@ -231,26 +228,12 @@ export const register = async (req, res, next) => {
       backlogs: req.body.backlogs !== undefined ? Number(req.body.backlogs) : 0,
     });
 
-    // Send verification email via centralized sender
-    const frontendUrl = getFrontendBaseUrl(req);
-    const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
-
-    try {
-      await emailService.sendVerificationEmail({
-        to: user.email,
-        name: user.name,
-        verifyUrl,
-      });
-    } catch (emailErr) {
-      console.error('[Email] Failed to send registration verification email:', emailErr.message);
-    }
-
     // Generate JWT and set HTTP-only cookie
     const token = generateTokenAndSetCookie(res, user._id, user.role);
 
     res.status(201).json({
       success: true,
-      message: 'Student account registered successfully! A verification email has been sent to your email address.',
+      message: 'Student account registered successfully! You can now apply for placement drives.',
       token,
       user: {
         _id: user._id,
@@ -258,7 +241,7 @@ export const register = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        isEmailVerified: false,
+        isEmailVerified: true,
         profile,
       },
     });
@@ -580,129 +563,28 @@ export const getMe = async (req, res, next) => {
   }
 };
 
-// @desc    Verify student email using time-limited token
+// @desc    Verify student email (Email verification no longer required)
 // @route   GET /api/auth/verify-email/:token
 // @access  Public
 export const verifyEmail = async (req, res, next) => {
   try {
-    const rawToken = (req.params.token || req.query.token || '').trim();
-    if (!rawToken) {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid verification link: missing token.',
-      });
-    }
-
-    const hashedToken = crypto.createHash('sha256').update(rawToken).digest('hex');
-
-    // 1. Check if token matches an active, unexpired verification request
-    let user = await User.findOne({
-      emailVerificationToken: hashedToken,
-      emailVerificationExpire: { $gt: Date.now() },
-    });
-
-    if (!user) {
-      // 2. Fallback: Check if user with this token is ALREADY verified (handles repeat clicks, SafeLinks scans, React Strict Mode)
-      const alreadyVerifiedUser = await User.findOne({
-        emailVerificationToken: hashedToken,
-      });
-
-      if (alreadyVerifiedUser && alreadyVerifiedUser.isEmailVerified) {
-        return res.status(200).json({
-          success: true,
-          message: 'Your college email address is verified! You can apply for placement drives.',
-          user: {
-            id: alreadyVerifiedUser._id,
-            email: alreadyVerifiedUser.email,
-            isEmailVerified: true,
-          },
-        });
-      }
-
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid or expired email verification link. Please request a new verification link.',
-      });
-    }
-
-    user.isEmailVerified = true;
-    await user.save({ validateBeforeSave: false });
-
     return res.status(200).json({
       success: true,
-      message: 'Your email address has been successfully verified! You can now apply for placement drives.',
-      user: {
-        id: user._id,
-        email: user.email,
-        isEmailVerified: true,
-      },
+      message: 'Email verification is no longer required. Your account is already verified and active!',
     });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Resend email verification link
+// @desc    Resend email verification link (Email verification no longer required)
 // @route   POST /api/auth/resend-verification
 // @access  Public / Private
 export const resendVerificationEmail = async (req, res, next) => {
   try {
-    const email = req.body?.email || req.user?.email;
-    if (!email || !email.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide your registered college email address.',
-      });
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = await User.findOne({ email: normalizedEmail });
-
-    // Protect against email enumeration
-    if (!user) {
-      return res.status(200).json({
-        success: true,
-        message: 'If an account with this email exists and is unverified, a new verification link has been sent.',
-      });
-    }
-
-    if (user.isEmailVerified) {
-      return res.status(400).json({
-        success: false,
-        message: 'This email address is already verified.',
-      });
-    }
-
-    const verificationToken = user.getEmailVerificationToken();
-    await user.save({ validateBeforeSave: false });
-
-    const frontendUrl = getFrontendBaseUrl(req);
-    const verifyUrl = `${frontendUrl}/verify-email/${verificationToken}`;
-
-    try {
-      await emailService.sendVerificationEmail({
-        to: user.email,
-        name: user.name,
-        verifyUrl,
-      });
-    } catch (emailErr) {
-      console.error('[Email] Failed to resend verification email via SMTP:', emailErr.message);
-      console.log('\n============================================================');
-      console.log('🔗 [VERIFICATION FALLBACK LINK] (SMTP server unreachable):');
-      console.log(verifyUrl);
-      console.log('============================================================\n');
-
-      return res.status(200).json({
-        success: true,
-        message: 'A fresh verification link has been sent to your email address.',
-        devVerifyUrl: verifyUrl,
-      });
-    }
-
     return res.status(200).json({
       success: true,
-      message: 'A fresh verification link has been sent to your email address.',
-      devVerifyUrl: process.env.NODE_ENV !== 'production' ? verifyUrl : undefined,
+      message: 'Email verification is no longer required. All student accounts are automatically active and verified.',
     });
   } catch (error) {
     next(error);

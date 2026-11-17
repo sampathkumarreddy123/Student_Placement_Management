@@ -116,7 +116,6 @@ const StudentProfile = () => {
 
   const [newSkill, setNewSkill] = useState('');
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
-  const [resendingVerification, setResendingVerification] = useState(false);
   const resumeInputRef = useRef(null);
   const photoInputRef = useRef(null);
 
@@ -137,22 +136,6 @@ const StudentProfile = () => {
     });
     setErrors({});
     setIsEditModalOpen(true);
-  };
-
-  const handleResendVerification = async () => {
-    try {
-      setResendingVerification(true);
-      const res = await authService.resendVerification(profile?.email || user?.email);
-      toast.success(res.message || 'Verification link sent to your college email.');
-    } catch (err) {
-      toast.error(
-        err.response?.data?.message ||
-          err.message ||
-          'Failed to dispatch verification link.'
-      );
-    } finally {
-      setResendingVerification(false);
-    }
   };
 
   const fetchProfileData = async () => {
@@ -517,32 +500,6 @@ const StudentProfile = () => {
         />
       )}
 
-      {/* Unverified Email Warning Banner */}
-      {!(profile?.isEmailVerified || user?.isEmailVerified) && (
-        <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div>
-              <h4 className="text-xs font-bold text-[#172554]">College Email Verification Required</h4>
-              <p className="text-xs text-[#64748B] mt-0.5 leading-relaxed">
-                Your college email (<strong>{profile?.email || user?.email}</strong>) is not yet verified. Accounts must be verified to apply for campus placement drives.
-              </p>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="text-xs border-amber-300 text-[#172554] hover:bg-white flex-shrink-0"
-            isLoading={resendingVerification}
-            onClick={handleResendVerification}
-            icon={Mail}
-          >
-            {resendingVerification ? 'Sending...' : 'Resend Verification Link'}
-          </Button>
-        </div>
-      )}
-
       {/* 2. Executive Hero Profile Card */}
       <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm p-6 relative overflow-hidden">
         <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
@@ -632,17 +589,10 @@ const StudentProfile = () => {
                     {profile.phone}
                   </span>
                 )}
-                {profile?.isEmailVerified || user?.isEmailVerified ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/25">
-                    <CheckCircle2 className="w-3 h-3 text-[#0D9488]" />
-                    Verified
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-500/10 text-amber-700 border border-amber-500/30">
-                    <AlertTriangle className="w-3 h-3 text-amber-600" />
-                    Unverified
-                  </span>
-                )}
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/25">
+                  <CheckCircle2 className="w-3 h-3 text-[#0D9488]" />
+                  Verified
+                </span>
               </div>
             </div>
           </div>
