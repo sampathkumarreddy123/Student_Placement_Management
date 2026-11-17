@@ -66,6 +66,11 @@ export const studentService = {
     return response.data;
   },
 
+  deleteStudent: async (id) => {
+    const response = await api.delete(`/users/students/${id}`);
+    return response.data;
+  },
+
   getStats: async () => {
     const response = await api.get('/users/stats');
     return response.data;

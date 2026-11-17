@@ -7,6 +7,7 @@ import Application from '../models/Application.js';
 import PlacementDrive from '../models/PlacementDrive.js';
 import Company from '../models/Company.js';
 import OfficerProfile from '../models/OfficerProfile.js';
+import Notification from '../models/Notification.js';
 import { generateCandidateResumePdf } from '../utils/pdfGenerator.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -806,6 +807,112 @@ export const getStudentById = async (req, res, next) => {
       },
       applications,
       completion,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Permanently delete a student account and all related data (Placement Officer only)
+// @route   DELETE /api/users/students/:id
+// @access  Private (Placement Officer only)
+export const deleteStudentAccount = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Search by student profile ID or User ID
+    let profile = await StudentProfile.findById(id);
+    let user = null;
+
+    if (profile) {
+      user = await User.findById(profile.user);
+    } else {
+      user = await User.findById(id);
+      if (user) {
+        profile = await StudentProfile.findOne({ user: user._id });
+      }
+    }
+
+    if (!user && !profile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student account record not found.',
+      });
+    }
+
+    // Safety check: Placement Officer accounts cannot be deleted through this endpoint
+    if (user && user.role !== 'student') {
+      return res.status(403).json({
+        success: false,
+        message: 'Action denied: Placement Officer accounts cannot be deleted here.',
+      });
+    }
+
+    const targetUserId = user?._id || profile?.user;
+    const targetProfileId = profile?._id;
+    const studentName = user?.name || profile?.rollNumber || 'Student';
+    const studentRoll = profile?.rollNumber || 'N/A';
+    const studentEmail = user?.email || 'N/A';
+
+    // 1. Delete physical resume file from disk if present
+    if (profile?.resumeUrl && typeof profile.resumeUrl === 'string') {
+      try {
+        const cleanPath = profile.resumeUrl.replace(/^\/?(api\/)?uploads\//, '');
+        const resumeDiskPath = path.join(__dirname, '..', 'uploads', cleanPath);
+        if (fs.existsSync(resumeDiskPath)) {
+          fs.unlinkSync(resumeDiskPath);
+        }
+      } catch (fileErr) {
+        console.warn('[DeleteStudent] Could not remove resume file:', fileErr.message);
+      }
+    }
+
+    // 2. Delete physical avatar file from disk if present
+    const photoUrl = user?.profilePhoto || profile?.profilePhoto;
+    if (photoUrl && typeof photoUrl === 'string' && photoUrl.includes('uploads/avatars')) {
+      try {
+        const cleanPath = photoUrl.replace(/^\/?(api\/)?uploads\//, '');
+        const avatarDiskPath = path.join(__dirname, '..', 'uploads', cleanPath);
+        if (fs.existsSync(avatarDiskPath)) {
+          fs.unlinkSync(avatarDiskPath);
+        }
+      } catch (fileErr) {
+        console.warn('[DeleteStudent] Could not remove avatar file:', fileErr.message);
+      }
+    }
+
+    // 3. Delete all applications submitted by this student
+    if (targetUserId || targetProfileId) {
+      const deleteAppFilter = {
+        $or: [
+          ...(targetUserId ? [{ student: targetUserId }] : []),
+          ...(targetProfileId ? [{ studentProfile: targetProfileId }] : []),
+        ],
+      };
+      await Application.deleteMany(deleteAppFilter);
+    }
+
+    // 4. Delete notifications sent to this student
+    if (targetUserId) {
+      await Notification.deleteMany({ recipient: targetUserId });
+    }
+
+    // 5. Delete StudentProfile
+    if (targetProfileId) {
+      await StudentProfile.findByIdAndDelete(targetProfileId);
+    } else if (targetUserId) {
+      await StudentProfile.findOneAndDelete({ user: targetUserId });
+    }
+
+    // 6. Delete User authentication record
+    if (targetUserId) {
+      await User.findByIdAndDelete(targetUserId);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Student account for ${studentName} (${studentRoll} • ${studentEmail}) and all associated records have been permanently deleted.`,
+      deletedStudentId: targetUserId || targetProfileId,
     });
   } catch (error) {
     next(error);

@@ -7,6 +7,8 @@ import {
   Eye,
   RotateCcw,
   Download,
+  Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { studentService } from '../../services/studentService';
 import { useToast } from '../../context/ToastContext';
@@ -51,9 +53,32 @@ const ManageStudents = () => {
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
+  const [previewingId, setPreviewingId] = useState(null);
+
+  // Student Deletion state
+  const [studentToDelete, setStudentToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const toast = useToast();
 
-  const [previewingId, setPreviewingId] = useState(null);
+  const handleDeleteStudent = async () => {
+    if (!studentToDelete) return;
+    const studentId = studentToDelete._id || studentToDelete.user?._id || studentToDelete.user;
+    const name = studentToDelete.user?.name || studentToDelete.rollNumber || 'Student';
+
+    try {
+      setIsDeleting(true);
+      const res = await studentService.deleteStudent(studentId);
+      toast.success(res.message || `Student account for ${name} deleted successfully.`);
+      setStudentToDelete(null);
+      fetchStudents();
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || err.message || 'Failed to delete student account.'
+      );
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const handlePreviewResume = async (profile) => {
     const studentId = profile._id || profile.user?._id || profile.user;
@@ -399,6 +424,14 @@ const ManageStudents = () => {
                             </button>
                           </>
                         )}
+                        <button
+                          type="button"
+                          onClick={() => setStudentToDelete(profile)}
+                          className="p-1.5 rounded-lg text-[#DC2626] hover:text-[#B91C1C] hover:bg-[#DC2626]/10 transition-colors"
+                          title="Delete Student Account"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -426,7 +459,76 @@ const ManageStudents = () => {
           setSelectedStudentId(null);
         }}
         studentId={selectedStudentId}
+        onDelete={(studentProfile) => setStudentToDelete(studentProfile)}
       />
+
+      {/* Delete Student Confirmation Modal */}
+      {studentToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#163A5F]/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0"
+            onClick={() => !isDeleting && setStudentToDelete(null)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl border border-[#DBEAFE] w-full max-w-md p-6 z-10 space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#DC2626]/10 text-[#DC2626] flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-[#172554]">
+                  Delete Student Account
+                </h3>
+                <p className="text-xs text-[#64748B] mt-0.5">
+                  Permanent removal from placement portal
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#F8FAFC] border border-[#DBEAFE] space-y-1.5 text-xs text-[#172554]">
+              <div className="flex justify-between">
+                <span className="text-[#64748B]">Student Name:</span>
+                <span className="font-bold">{studentToDelete.user?.name || studentToDelete.name || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#64748B]">Roll Number:</span>
+                <span className="font-mono font-bold text-[#163A5F]">{studentToDelete.rollNumber || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#64748B]">Department:</span>
+                <span className="font-medium">{studentToDelete.department || 'N/A'}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-[#64748B]">Email Address:</span>
+                <span className="font-medium truncate max-w-[200px]">{studentToDelete.user?.email || studentToDelete.email || 'N/A'}</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#DC2626] bg-[#DC2626]/5 p-2.5 rounded-lg border border-[#DC2626]/20 leading-relaxed">
+              ⚠️ <strong>Warning:</strong> This action cannot be undone. All associated records (student profile, job applications, round submissions, and uploaded resumes) will be permanently deleted.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#DBEAFE]">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setStudentToDelete(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                size="sm"
+                icon={Trash2}
+                isLoading={isDeleting}
+                onClick={handleDeleteStudent}
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Student Account'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

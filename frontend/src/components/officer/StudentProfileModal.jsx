@@ -14,6 +14,7 @@ import {
   Building2,
   CheckCircle2,
   XCircle,
+  Trash2,
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Badge from '../common/Badge';
@@ -30,7 +31,7 @@ import {
   isJsonErrorBlob,
 } from '../../utils/clientPdfGenerator';
 
-const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
+const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId, onDelete }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
@@ -388,7 +389,22 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId }) => {
           </div>
 
           {/* Modal Footer */}
-          <div className="flex justify-end pt-3 border-t border-[#DBEAFE]">
+          <div className="flex items-center justify-between pt-3 border-t border-[#DBEAFE]">
+            {onDelete && student ? (
+              <Button
+                variant="danger"
+                size="sm"
+                icon={Trash2}
+                onClick={() => {
+                  onClose();
+                  onDelete(student);
+                }}
+              >
+                Delete Student Account
+              </Button>
+            ) : (
+              <div />
+            )}
             <Button variant="primary" size="sm" onClick={onClose}>
               Close Profile
             </Button>
