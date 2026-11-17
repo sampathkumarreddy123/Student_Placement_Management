@@ -391,7 +391,7 @@ const ManageRounds = () => {
               size="sm"
               onClick={() => handleOpenRoundModal()}
             >
-              Add Recruitment Round
+              Add Recruitment Round {rounds.length > 0 ? `(Round ${Math.max(...rounds.map((r) => r.roundNumber)) + 1})` : ''}
             </Button>
           )
         }
@@ -589,11 +589,27 @@ const ManageRounds = () => {
       <Modal
         isOpen={isRoundModalOpen}
         onClose={() => setIsRoundModalOpen(false)}
-        title={editingRound ? `Edit Round ${editingRound.roundNumber}` : 'Create Recruitment Round'}
+        title={
+          editingRound
+            ? `Edit Round ${editingRound.roundNumber}: ${editingRound.name}`
+            : `Create Round #${roundFormData.roundNumber || (rounds.length > 0 ? Math.max(...rounds.map((r) => r.roundNumber)) + 1 : 1)}`
+        }
         subtitle="Define assessment format, schedule, and stage requirements"
         maxWidth="max-w-xl"
       >
         <form onSubmit={handleSaveRound} className="space-y-4">
+          {editingRound && (
+            <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between">
+              <span>Editing existing <strong>Round {editingRound.roundNumber} ({editingRound.name})</strong>.</span>
+              <button
+                type="button"
+                onClick={() => handleOpenRoundModal()}
+                className="font-bold underline text-[#2563EB] hover:text-[#163A5F]"
+              >
+                Switch to Add Next Round &rarr;
+              </button>
+            </div>
+          )}
           {/* Quick Presets */}
           <div>
             <label className="block text-xs font-bold text-[#172554] mb-1.5">

@@ -184,8 +184,22 @@ export const createRound = async (req, res, next) => {
             remarks: round.description || '',
             evaluatedAt: new Date(),
           });
-          await app.save();
         }
+
+        // Advance qualified students who cleared the previous round to this newly created round
+        if (round.roundNumber > 1 && app.status !== 'Rejected') {
+          const clearedPrevious = app.roundResults?.some(
+            (r) => r.roundNumber === round.roundNumber - 1 && r.status === 'Passed'
+          );
+          if (clearedPrevious) {
+            app.currentRound = round.roundNumber;
+            if (app.status !== 'Selected') {
+              app.status = 'Shortlisted';
+            }
+          }
+        }
+
+        await app.save();
       }
 
       notifyStudentsOnRoundAnnounced(drive, round).catch((err) =>
@@ -511,7 +525,16 @@ export const evaluateCandidate = async (req, res, next) => {
         application.selectionRemarks = remarks || `Cleared final round: ${round.name}. Offered placement.`;
       } else {
         newAppStatus = 'Shortlisted';
-        application.officerNotes = `Cleared Round ${round.roundNumber} (${round.name}). Qualified for next round.`;
+        const nextRound = await RecruitmentRound.findOne({
+          drive: round.drive,
+          roundNumber: round.roundNumber + 1,
+        });
+        if (nextRound) {
+          application.currentRound = nextRound.roundNumber;
+          application.officerNotes = `Cleared Round ${round.roundNumber} (${round.name}). Qualified for Round ${nextRound.roundNumber} (${nextRound.name}).`;
+        } else {
+          application.officerNotes = `Cleared Round ${round.roundNumber} (${round.name}). Qualified for next round.`;
+        }
       }
     } else if (status === 'Pending') {
       if (application.status === 'Rejected' || application.status === 'Selected') {
