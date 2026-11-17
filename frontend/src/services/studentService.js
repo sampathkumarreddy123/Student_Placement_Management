@@ -67,8 +67,18 @@ export const studentService = {
   },
 
   deleteStudent: async (id) => {
-    const response = await api.delete(`/users/students/${id}`);
-    return response.data;
+    try {
+      const response = await api.delete(`/users/students/${id}`);
+      return response.data;
+    } catch (err) {
+      const status = err.status || err.response?.status;
+      if (status === 404) {
+        // Fallback for environments where DELETE method is filtered or route is aliased
+        const fallback = await api.post(`/users/students/${id}/delete`);
+        return fallback.data;
+      }
+      throw err;
+    }
   },
 
   getStats: async () => {

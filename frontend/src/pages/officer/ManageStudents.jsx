@@ -72,9 +72,14 @@ const ManageStudents = () => {
       setStudentToDelete(null);
       fetchStudents();
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || err.message || 'Failed to delete student account.'
-      );
+      const msg = err.response?.data?.message || err.message || '';
+      if (msg.includes('Resource not found')) {
+        toast.error(
+          'Cloud deployment is still building. Please wait 1-2 minutes for Render to finish deploying the latest commit.'
+        );
+      } else {
+        toast.error(msg || 'Failed to delete student account.');
+      }
     } finally {
       setIsDeleting(false);
     }
