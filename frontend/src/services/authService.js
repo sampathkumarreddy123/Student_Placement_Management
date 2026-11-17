@@ -74,7 +74,8 @@ export const authService = {
       });
       return response.data;
     } catch (error) {
-      if (error.response?.status === 404) {
+      const status = error.status || error.response?.status;
+      if (status === 404) {
         // Fallback for direct mounting without /auth prefix
         const fallbackRes = await api.post('/security-questions', {
           identifier: cleanId,
@@ -94,7 +95,8 @@ export const authService = {
       });
       return response.data;
     } catch (error) {
-      if (error.response?.status === 404) {
+      const status = error.status || error.response?.status;
+      if (status === 404) {
         // Fallback for direct mounting without /auth prefix
         const fallbackRes = await api.post('/verify-security-questions', {
           identifier: cleanId,

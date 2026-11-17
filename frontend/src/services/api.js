@@ -52,6 +52,7 @@ api.interceptors.response.use(
       message,
       errors: error.response?.data?.errors || null,
       reasons: error.response?.data?.reasons || null,
+      response: error.response,
     };
     return Promise.reject(customError);
   }

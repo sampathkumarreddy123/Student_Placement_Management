@@ -57,14 +57,15 @@ const ForgotPassword = () => {
         setError(res.message || 'Unable to retrieve security questions for this account.');
       }
     } catch (err) {
-      if (err.response?.status === 404 && err.response?.data?.message?.includes('Resource not found')) {
+      const status = err.status || err.response?.status;
+      const msg = err.response?.data?.message || err.message || '';
+      if (status === 404 && msg.includes('Resource not found')) {
         setError(
-          'The security recovery endpoint is not accessible. Please ensure the backend server has been restarted with the latest code (cd backend; npm.cmd run dev).'
+          'The password recovery endpoint was not found on the backend server. If using the deployed portal (Render/Vercel), please trigger "Manual Deploy" -> "Deploy latest commit" on the Render backend dashboard so the latest code is live.'
         );
       } else {
         setError(
-          err.response?.data?.message ||
-            err.message ||
+          msg ||
             'No recovery setup found for this account. Please check your details or contact the placement cell.'
         );
       }

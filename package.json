@@ -2,7 +2,12 @@
   "name": "student-placement-management-portal",
   "version": "1.0.0",
   "description": "Full-stack Student Placement Management Portal for Colleges",
+  "main": "backend/server.js",
+  "type": "module",
   "scripts": {
+    "start": "node backend/server.js",
+    "postinstall": "cd backend && npm install",
+    "build": "cd backend && npm install",
     "server": "npm --prefix backend run dev",
     "client": "npm --prefix frontend run dev",
     "seed": "npm --prefix backend run seed",
