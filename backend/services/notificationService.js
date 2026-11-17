@@ -2,6 +2,7 @@ import Notification from '../models/Notification.js';
 import User from '../models/User.js';
 import Company from '../models/Company.js';
 import PlacementDrive from '../models/PlacementDrive.js';
+import Application from '../models/Application.js';
 import emailService from './emailService.js';
 
 /**
@@ -323,6 +324,137 @@ export const notifyOnApplicationStatusChange = async (
     });
   } catch (err) {
     console.error('[Notification Service Error] notifyOnApplicationStatusChange:', err.message);
+  }
+};
+
+/**
+ * 4. Notify Students when an officer adds/schedules a round to a drive
+ */
+export const notifyStudentsOnRoundAnnounced = async (drive, round) => {
+  try {
+    if (!drive || !round) return;
+
+    let companyName = drive.company?.name;
+    if (!companyName && drive.company) {
+      const comp = await Company.findById(drive.company).select('name');
+      companyName = comp?.name || 'Company';
+    } else if (!companyName) {
+      companyName = 'Company';
+    }
+
+    const jobRole = drive.jobRole || 'Placement Drive';
+
+    // Find all applications for this drive
+    const applications = await Application.find({ drive: drive._id })
+      .populate('student', '_id name email');
+
+    if (!applications || applications.length === 0) return;
+
+    const roundNum = round.roundNumber || 1;
+    const roundName = round.name || round.roundName || 'Online Assessment';
+    const mode = round.mode || 'Online';
+    const formattedDate = round.date
+      ? ` on ${new Date(round.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+      : '';
+    const venueText = round.venue ? ` • Venue: ${round.venue}` : '';
+    const descText = round.description ? ` • Instructions: ${round.description}` : '';
+
+    const title = `Round ${roundNum} Scheduled: ${roundName}`;
+    const message = `Round ${roundNum} (${roundName}) has been scheduled for "${jobRole}" at ${companyName}. Mode: ${mode}${formattedDate}${venueText}${descText}`;
+
+    for (const app of applications) {
+      if (!app.student?._id) continue;
+
+      const eventKey = `ROUND_ANNOUNCE_${round._id || roundNum}_${app.student._id}`;
+      await createNotification({
+        recipient: app.student._id,
+        recipientRole: 'student',
+        type: 'APPLICATION_STATUS_CHANGED',
+        title,
+        message,
+        link: '/student/applications',
+        relatedId: app._id,
+        relatedModel: 'Application',
+        eventKey,
+        metadata: {
+          driveId: drive._id,
+          applicationId: app._id,
+          roundNumber: roundNum,
+          roundName,
+          mode,
+          date: round.date,
+          companyName,
+          jobRole,
+        },
+      });
+    }
+  } catch (err) {
+    console.error('[Notification Service Error] notifyStudentsOnRoundAnnounced:', err.message);
+  }
+};
+
+/**
+ * 5. Notify Students when an officer updates an existing round's schedule/details
+ */
+export const notifyStudentsOnRoundUpdated = async (drive, round) => {
+  try {
+    if (!drive || !round) return;
+
+    let companyName = drive.company?.name;
+    if (!companyName && drive.company) {
+      const comp = await Company.findById(drive.company).select('name');
+      companyName = comp?.name || 'Company';
+    } else if (!companyName) {
+      companyName = 'Company';
+    }
+
+    const jobRole = drive.jobRole || 'Placement Drive';
+
+    const applications = await Application.find({ drive: drive._id })
+      .populate('student', '_id name email');
+
+    if (!applications || applications.length === 0) return;
+
+    const roundNum = round.roundNumber || 1;
+    const roundName = round.name || round.roundName || 'Online Assessment';
+    const mode = round.mode || 'Online';
+    const formattedDate = round.date
+      ? ` on ${new Date(round.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+      : '';
+    const venueText = round.venue ? ` • Venue: ${round.venue}` : '';
+    const descText = round.description ? ` • Instructions: ${round.description}` : '';
+
+    const title = `Round ${roundNum} Updated: ${roundName}`;
+    const message = `Schedule update for Round ${roundNum} (${roundName}) - "${jobRole}" at ${companyName}: Mode: ${mode}${formattedDate}${venueText}${descText}`;
+
+    for (const app of applications) {
+      if (!app.student?._id) continue;
+
+      const eventKey = `ROUND_UPDATE_${round._id || roundNum}_${Date.now()}_${app.student._id}`;
+      await createNotification({
+        recipient: app.student._id,
+        recipientRole: 'student',
+        type: 'APPLICATION_STATUS_CHANGED',
+        title,
+        message,
+        link: '/student/applications',
+        relatedId: app._id,
+        relatedModel: 'Application',
+        eventKey,
+        metadata: {
+          driveId: drive._id,
+          applicationId: app._id,
+          roundNumber: roundNum,
+          roundName,
+          mode,
+          date: round.date,
+          companyName,
+          jobRole,
+        },
+      });
+    }
+  } catch (err) {
+    console.error('[Notification Service Error] notifyStudentsOnRoundUpdated:', err.message);
   }
 };
 

@@ -6,6 +6,8 @@ import User from '../models/User.js';
 import {
   notifyOnApplicationStatusChange,
   createNotification,
+  notifyStudentsOnRoundAnnounced,
+  notifyStudentsOnRoundUpdated,
 } from '../services/notificationService.js';
 import emailService from '../services/emailService.js';
 
@@ -165,6 +167,34 @@ export const createRound = async (req, res, next) => {
     });
     await drive.save({ validateBeforeSave: false });
 
+    // Synchronize round into applications for this drive and notify all applicants
+    try {
+      const driveApplications = await Application.find({ drive: driveId });
+      for (const app of driveApplications) {
+        const hasRound = app.roundResults?.some(
+          (r) => String(r.round) === String(round._id) || r.roundNumber === round.roundNumber
+        );
+        if (!hasRound) {
+          app.roundResults = app.roundResults || [];
+          app.roundResults.push({
+            round: round._id,
+            roundNumber: round.roundNumber,
+            roundName: round.name,
+            status: 'Pending',
+            remarks: round.description || '',
+            evaluatedAt: new Date(),
+          });
+          await app.save();
+        }
+      }
+
+      notifyStudentsOnRoundAnnounced(drive, round).catch((err) =>
+        console.error('Failed to dispatch round announcement notification:', err.message)
+      );
+    } catch (syncErr) {
+      console.warn('Applicant round sync warning:', syncErr.message);
+    }
+
     res.status(201).json({
       success: true,
       message: `Recruitment Round ${round.roundNumber} ("${round.name}") created successfully.`,
@@ -221,6 +251,24 @@ export const updateRound = async (req, res, next) => {
         drive.rounds[idx].date = round.date;
       }
       await drive.save({ validateBeforeSave: false });
+
+      // Sync into applications and notify applicants of the update
+      try {
+        await Application.updateMany(
+          { drive: round.drive, 'roundResults.roundNumber': round.roundNumber },
+          {
+            $set: {
+              'roundResults.$.roundName': round.name,
+              'roundResults.$.remarks': round.description || '',
+            },
+          }
+        );
+        notifyStudentsOnRoundUpdated(drive, round).catch((err) =>
+          console.error('Failed to dispatch round update notification:', err.message)
+        );
+      } catch (syncErr) {
+        console.warn('Applicant round update sync warning:', syncErr.message);
+      }
     }
 
     res.status(200).json({

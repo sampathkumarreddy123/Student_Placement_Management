@@ -278,17 +278,31 @@ const DriveDetails = () => {
                       )}
                     </div>
                     <div className="pb-3 flex-1">
-                      <h4 className="text-xs font-semibold text-[#172554]">
-                        {round.roundName}
-                      </h4>
-                      <p className="text-[11px] text-[#64748B] mt-0.5">
-                        {round.description || 'Evaluation round'}
-                      </p>
-                      {round.date && (
-                        <span className="text-[10px] text-[#64748B] mt-1 inline-block">
-                          Date: {formatDate(round.date)}
-                        </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-xs font-semibold text-[#172554]">
+                          {round.roundName || round.name || `Round ${round.roundNumber || idx + 1}`}
+                        </h4>
+                        {round.mode && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-[#EFF6FF] text-[#163A5F] border border-[#DBEAFE]">
+                            {round.mode}
+                          </span>
+                        )}
+                      </div>
+                      {round.description && (
+                        <p className="text-[11px] text-[#64748B] mt-0.5">
+                          {round.description}
+                        </p>
                       )}
+                      <div className="flex items-center gap-3 mt-1 flex-wrap text-[10px] text-[#64748B]">
+                        {round.date && (
+                          <span className="font-medium text-[#2563EB]">
+                            📅 Date: {formatDate(round.date)}
+                          </span>
+                        )}
+                        {round.venue && (
+                          <span>📍 Venue: {round.venue}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import PlacementDrive from '../models/PlacementDrive.js';
+import RecruitmentRound from '../models/RecruitmentRound.js';
 import Company from '../models/Company.js';
 import StudentProfile from '../models/StudentProfile.js';
 import Application from '../models/Application.js';
@@ -141,6 +142,22 @@ export const getDriveById = async (req, res, next) => {
     }
 
     let responseData = drive.toObject();
+
+    const recruitmentRounds = await RecruitmentRound.find({ drive: drive._id }).sort({ roundNumber: 1 });
+    if (recruitmentRounds.length > 0) {
+      responseData.rounds = recruitmentRounds.map((r) => ({
+        _id: r._id,
+        roundNumber: r.roundNumber,
+        roundName: r.name,
+        name: r.name,
+        description: r.description,
+        date: r.date,
+        mode: r.mode,
+        venue: r.venue,
+        isFinalRound: r.isFinalRound,
+        status: r.status,
+      }));
+    }
 
     if (req.user.role === 'student') {
       const profile = await StudentProfile.findOne({ user: req.user._id });

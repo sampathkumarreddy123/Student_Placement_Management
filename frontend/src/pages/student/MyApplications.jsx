@@ -295,11 +295,17 @@ const MyApplications = () => {
                       {/* Application Status */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
                         <Badge status={app.status} size="sm" />
-                        {app.currentRound > 1 && (
-                          <span className="text-[11px] text-[#163A5F] block mt-0.5 font-medium">
-                            Round {app.currentRound}
-                          </span>
-                        )}
+                        {(() => {
+                          const roundObj =
+                            app.roundResults?.find((r) => r.roundNumber === (app.currentRound || 1)) ||
+                            app.drive?.rounds?.find((r) => r.roundNumber === (app.currentRound || 1));
+                          const roundName = roundObj?.roundName || roundObj?.name;
+                          return (
+                            <span className="text-[11px] text-[#2563EB] block mt-0.5 font-semibold">
+                              Round {app.currentRound || 1}{roundName ? `: ${roundName}` : ''}
+                            </span>
+                          );
+                        })()}
                       </td>
 
                       {/* Actions */}

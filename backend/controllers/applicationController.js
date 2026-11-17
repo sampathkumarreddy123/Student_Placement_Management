@@ -3,6 +3,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import Application from '../models/Application.js';
 import PlacementDrive from '../models/PlacementDrive.js';
+import RecruitmentRound from '../models/RecruitmentRound.js';
 import StudentProfile from '../models/StudentProfile.js';
 import { generateCandidateResumePdf } from '../utils/pdfGenerator.js';
 import { checkEligibility } from '../services/eligibilityService.js';
@@ -125,6 +126,16 @@ export const applyForDrive = async (req, res, next) => {
     }
 
     // 8. Capture resume and student snapshot at submission time
+    const existingRounds = await RecruitmentRound.find({ drive: drive._id }).sort({ roundNumber: 1 });
+    const initialRoundResults = existingRounds.map((r) => ({
+      round: r._id,
+      roundNumber: r.roundNumber,
+      roundName: r.name,
+      status: 'Pending',
+      remarks: r.description || '',
+      evaluatedAt: new Date(),
+    }));
+
     const application = await Application.create({
       student: req.user._id,
       company: drive.company?._id || drive.company,
@@ -133,6 +144,7 @@ export const applyForDrive = async (req, res, next) => {
       appliedAt: new Date(),
       status: 'Applied',
       currentRound: 1,
+      roundResults: initialRoundResults,
       resumeSnapshot: {
         resumeUrl: resumeUrl,
         resumeOriginalName: profile.resumeOriginalName || profile.resume?.originalName || 'Resume.pdf',
@@ -228,18 +240,6 @@ export const getApplicationById = async (req, res, next) => {
       return res.status(403).json({
         success: false,
         message: 'Access denied: You can only view your own applications.',
-      });
-    }
-
-    // Security rule: Officers can only view applications belonging to their drives
-    if (
-      req.user.role === 'officer' &&
-      application.drive?.createdBy &&
-      application.drive.createdBy.toString() !== req.user._id.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied: You can only view applicants for drives you manage.',
       });
     }
 
@@ -510,14 +510,6 @@ export const getDriveApplicants = async (req, res, next) => {
       });
     }
 
-    // Security rule: Officer can only manage applicants belonging to drives they manage/created
-    if (drive.createdBy && drive.createdBy.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied: You can only view applicants for drives you created or manage.',
-      });
-    }
-
     const applications = await Application.find({ drive: driveId })
       .populate('student', 'name email profilePhoto phone')
       .populate('studentProfile')
@@ -557,29 +549,13 @@ export const getAllApplications = async (req, res, next) => {
   try {
     const { driveId, companyId } = req.query;
 
-    // Scope to officer's own drives if assigned
-    const officerDrives = await PlacementDrive.find({ createdBy: req.user._id }).select('_id');
-    const officerDriveIds = officerDrives.map((d) => d._id);
-
     const filter = {};
     if (driveId) {
-      // Validate drive ownership if specified
-      const targetDrive = await PlacementDrive.findById(driveId);
-      if (
-        targetDrive?.createdBy &&
-        targetDrive.createdBy.toString() !== req.user._id.toString()
-      ) {
-        return res.status(403).json({
-          success: false,
-          message: 'Access denied: You can only view applications for drives you created.',
-        });
-      }
       filter.drive = driveId;
-    } else if (officerDriveIds.length > 0) {
-      filter.drive = { $in: officerDriveIds };
     }
-
-    if (companyId) filter.company = companyId;
+    if (companyId) {
+      filter.company = companyId;
+    }
 
     const applications = await Application.find(filter)
       .populate('student', 'name email profilePhoto phone')
@@ -622,17 +598,6 @@ export const updateApplicationStatus = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: 'Application record not found.',
-      });
-    }
-
-    // Security rule: Officers can only manage applicants belonging to their drives
-    if (
-      application.drive?.createdBy &&
-      application.drive.createdBy.toString() !== req.user._id.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied: You can only update applicant statuses for drives you created or manage.',
       });
     }
 

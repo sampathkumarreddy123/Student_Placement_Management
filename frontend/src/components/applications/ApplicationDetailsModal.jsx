@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Building2,
@@ -36,6 +36,44 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
   const company = application.company || application.drive?.company;
   const drive = application.drive;
   const resume = application.resumeSnapshot || {};
+
+  const combinedRounds = useMemo(() => {
+    const driveRounds = Array.isArray(application.drive?.rounds) ? application.drive.rounds : [];
+    const results = Array.isArray(application.roundResults) ? application.roundResults : [];
+
+    if (driveRounds.length > 0) {
+      return driveRounds.map((dr, idx) => {
+        const roundNum = dr.roundNumber || idx + 1;
+        const matchingResult = results.find(
+          (r) => r.roundNumber === roundNum || String(r.round) === String(dr._id)
+        );
+
+        let status = 'Pending';
+        let remarks = dr.description || '';
+
+        if (matchingResult) {
+          status = matchingResult.status;
+          remarks = matchingResult.remarks || dr.description || '';
+        } else if (application.currentRound > roundNum) {
+          status = 'Passed';
+        } else if (application.status === 'Rejected' && application.currentRound === roundNum) {
+          status = 'Failed';
+        }
+
+        return {
+          roundNumber: roundNum,
+          roundName: dr.roundName || dr.name || `Round ${roundNum}`,
+          status,
+          remarks,
+          date: dr.date,
+          mode: dr.mode,
+          venue: dr.venue,
+        };
+      });
+    }
+
+    return results;
+  }, [application]);
 
   const handleDownloadResume = async () => {
     const candidateName = (application.student?.name || 'Applicant').replace(/\s+/g, '_');
@@ -193,8 +231,8 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
           </div>
 
           <div className="space-y-2">
-            {application.roundResults && application.roundResults.length > 0 ? (
-              application.roundResults.map((r, i) => (
+            {combinedRounds && combinedRounds.length > 0 ? (
+              combinedRounds.map((r, i) => (
                 <div
                   key={i}
                   className={`p-3 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs transition-all ${
@@ -218,12 +256,29 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                       {r.roundNumber}
                     </div>
                     <div>
-                      <span className="font-bold text-[#172554] block">
-                        {r.roundName}
-                      </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-bold text-[#172554]">
+                          {r.roundName}
+                        </span>
+                        {r.mode && (
+                          <span className="px-2 py-0.5 rounded text-[10px] bg-white border border-[#DBEAFE] text-[#163A5F] font-medium">
+                            Mode: {r.mode}
+                          </span>
+                        )}
+                      </div>
+                      {r.date && (
+                        <p className="text-[11px] text-[#2563EB] font-medium mt-0.5">
+                          📅 Scheduled: {formatDate(r.date)}
+                        </p>
+                      )}
+                      {r.venue && (
+                        <p className="text-[11px] text-[#64748B] mt-0.5">
+                          📍 Venue: {r.venue}
+                        </p>
+                      )}
                       {r.remarks && (
                         <p className="text-[11px] text-[#64748B] mt-0.5 italic">
-                          Feedback: "{r.remarks}"
+                          "{r.remarks}"
                         </p>
                       )}
                     </div>
@@ -241,7 +296,7 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                     >
                       {r.status === 'Passed' && '✓ Passed'}
                       {r.status === 'Failed' && '✗ Not Cleared'}
-                      {r.status === 'Pending' && '⏳ In Evaluation'}
+                      {r.status === 'Pending' && '⏳ In Progress / Scheduled'}
                       {r.status === 'Absent' && 'Absent'}
                     </span>
                   </div>
