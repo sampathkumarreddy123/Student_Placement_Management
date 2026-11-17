@@ -6,6 +6,11 @@ export const driveService = {
     return response.data;
   },
 
+  getDrives: async (params = {}) => {
+    const response = await api.get('/drives', { params });
+    return response.data;
+  },
+
   getDriveById: async (id) => {
     const response = await api.get(`/drives/${id}`);
     return response.data;

@@ -95,7 +95,7 @@ const ManageRounds = () => {
     const fetchDrives = async () => {
       try {
         setLoading(true);
-        const res = await driveService.getDrives({ limit: 100 });
+        const res = await driveService.getAllDrives({ limit: 100 });
         const driveList = res.drives || [];
         setDrives(driveList);
 
@@ -103,7 +103,10 @@ const ManageRounds = () => {
           setSelectedDriveId(driveList[0]._id);
         }
       } catch (err) {
-        toast.error('Failed to load placement drives.');
+        console.error('Failed to load placement drives:', err);
+        toast.error(
+          err.response?.data?.message || err.message || 'Failed to load placement drives.'
+        );
       } finally {
         setLoading(false);
       }
