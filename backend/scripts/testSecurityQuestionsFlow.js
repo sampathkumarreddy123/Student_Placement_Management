@@ -434,11 +434,74 @@ const runTests = async () => {
     }
 
     // -------------------------------------------------------------
+    console.log('\nTest 12: Account without security questions requests recovery -> setupRequired: true');
+    const legacyEmail = `legacy_${Date.now()}@mits.ac.in`;
+    const legacyUser = await User.create({
+      name: 'Legacy Student',
+      email: legacyEmail,
+      password: 'LegacyPassword123!',
+      role: 'student',
+      isEmailVerified: true,
+      securityQuestions: [],
+    });
+
+    {
+      const { req, res, next } = createMockReqRes({ identifier: legacyEmail });
+      await getSecurityQuestions(req, res, next);
+      if (res.statusCode === 200 && res.data.setupRequired && res.data.availableQuestions?.length === 10) {
+        console.log('  ✅ Passed: Retrieved setupRequired: true and 10 available questions.');
+      } else {
+        throw new Error(`Expected setupRequired: true but got: ${JSON.stringify(res.data)}`);
+      }
+    }
+
+    console.log('\nTest 13: First-time security setup on legacy account via verify-security-questions');
+    const legacyChosenQuestions = [
+      { question: PREDEFINED_SECURITY_QUESTIONS[4], answer: 'CricketGame' },
+      { question: PREDEFINED_SECURITY_QUESTIONS[5], answer: 'HarryPotter' },
+      { question: PREDEFINED_SECURITY_QUESTIONS[6], answer: 'Pokemon' },
+    ];
+    let legacyResetToken = '';
+    {
+      const { req, res, next } = createMockReqRes({
+        identifier: legacyEmail,
+        answers: legacyChosenQuestions,
+      });
+      await verifySecurityQuestions(req, res, next);
+      if (res.statusCode === 200 && res.data.resetToken) {
+        legacyResetToken = res.data.resetToken;
+        console.log(`  ✅ Passed: Legacy user set up questions and received resetToken: ${legacyResetToken.slice(0, 12)}...`);
+      } else {
+        throw new Error(`Expected reset token but got: ${JSON.stringify(res.data)}`);
+      }
+
+      // Check DB to verify questions were persisted
+      const reloadedUser = await User.findById(legacyUser._id).select('+securityQuestions');
+      if (reloadedUser.securityQuestions?.length === 3) {
+        console.log('  ✅ Passed: 3 security questions successfully saved and hashed in DB for legacy account.');
+      } else {
+        throw new Error('Questions were not persisted to DB!');
+      }
+    }
+
+    console.log('\nTest 14: Subsequent recovery on this account now returns the exact 3 saved questions');
+    {
+      const { req, res, next } = createMockReqRes({ identifier: legacyEmail });
+      await getSecurityQuestions(req, res, next);
+      if (res.statusCode === 200 && !res.data.setupRequired && res.data.questions?.length === 3) {
+        console.log('  ✅ Passed: Subsequent lookup returned setupRequired: false and the 3 saved questions:', res.data.questions);
+      } else {
+        throw new Error(`Expected 3 saved questions but got: ${JSON.stringify(res.data)}`);
+      }
+    }
+
+    // -------------------------------------------------------------
     // Cleanup test data
     // -------------------------------------------------------------
     console.log('\nCleaning up test records...');
     await User.deleteOne({ email: testEmail });
     await StudentProfile.deleteOne({ rollNumber: testRoll });
+    await User.deleteOne({ email: legacyEmail });
     console.log('  ✅ Test data cleaned up.');
 
     console.log('\n🎉 ALL 10 SECURITY QUESTION & PASSWORD RECOVERY TESTS PASSED SUCCESSFULLY!\n');

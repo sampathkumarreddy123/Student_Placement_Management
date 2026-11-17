@@ -14,6 +14,7 @@ import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
 import Alert from '../../components/common/Alert';
 import { authService } from '../../services/authService';
+import { PREDEFINED_SECURITY_QUESTIONS } from '../../constants/securityQuestions';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -23,8 +24,14 @@ const ForgotPassword = () => {
 
   // Form State
   const [identifier, setIdentifier] = useState('');
+  const [setupRequired, setSetupRequired] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState(['', '', '']);
+  const [setupQuestions, setSetupQuestions] = useState([
+    { question: '', answer: '' },
+    { question: '', answer: '' },
+    { question: '', answer: '' },
+  ]);
   const [resetToken, setResetToken] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,6 +40,27 @@ const ForgotPassword = () => {
   const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const isQuestionTaken = (q, currentIndex) => {
+    return setupQuestions.some(
+      (item, idx) => idx !== currentIndex && item.question === q
+    );
+  };
+
+  const handleSetupQuestionChange = (index, field, value) => {
+    setSetupQuestions((prev) => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+    if (fieldErrors[`setup_q_${index}`] || fieldErrors[`setup_a_${index}`]) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        [`setup_q_${index}`]: '',
+        [`setup_a_${index}`]: '',
+      }));
+    }
+  };
 
   // Step 1: Identifier Lookup
   const handleLookup = async (e) => {
@@ -49,7 +77,19 @@ const ForgotPassword = () => {
       setLoading(true);
       const res = await authService.getSecurityQuestions(identifier.trim());
 
-      if (res.success && Array.isArray(res.questions) && res.questions.length === 3) {
+      if (res.setupRequired || !res.hasQuestions || (Array.isArray(res.questions) && res.questions.length === 0)) {
+        // User account exists, but needs 3 security questions configured
+        setSetupRequired(true);
+        setSetupQuestions([
+          { question: '', answer: '' },
+          { question: '', answer: '' },
+          { question: '', answer: '' },
+        ]);
+        setQuestions([]);
+        setAnswers(['', '', '']);
+        setStep(2);
+      } else if (res.success && Array.isArray(res.questions) && res.questions.length === 3) {
+        setSetupRequired(false);
         setQuestions(res.questions);
         setAnswers(['', '', '']);
         setStep(2);
@@ -74,20 +114,40 @@ const ForgotPassword = () => {
     }
   };
 
-  // Step 2: Answer Verification
+  // Step 2: Answer Verification or First-time Setup
   const handleVerifyAnswers = async (e) => {
     e.preventDefault();
     setError('');
     setFieldErrors({});
 
     const newErrors = {};
-    answers.forEach((ans, idx) => {
-      if (!ans.trim()) {
-        newErrors[`answer_${idx}`] = `Please answer question #${idx + 1}`;
-      } else if (ans.trim().length < 2) {
-        newErrors[`answer_${idx}`] = 'Answer must be at least 2 characters long';
-      }
-    });
+
+    if (setupRequired) {
+      const chosen = new Set();
+      setupQuestions.forEach((sq, idx) => {
+        if (!sq.question) {
+          newErrors[`setup_q_${idx}`] = `Please select Question #${idx + 1}`;
+        } else if (chosen.has(sq.question)) {
+          newErrors[`setup_q_${idx}`] = 'Each question must be unique';
+        } else {
+          chosen.add(sq.question);
+        }
+
+        if (!sq.answer.trim()) {
+          newErrors[`setup_a_${idx}`] = `Please answer Question #${idx + 1}`;
+        } else if (sq.answer.trim().length < 2) {
+          newErrors[`setup_a_${idx}`] = 'Answer must be at least 2 characters';
+        }
+      });
+    } else {
+      answers.forEach((ans, idx) => {
+        if (!ans.trim()) {
+          newErrors[`answer_${idx}`] = `Please answer question #${idx + 1}`;
+        } else if (ans.trim().length < 2) {
+          newErrors[`answer_${idx}`] = 'Answer must be at least 2 characters long';
+        }
+      });
+    }
 
     if (Object.keys(newErrors).length > 0) {
       setFieldErrors(newErrors);
@@ -96,10 +156,15 @@ const ForgotPassword = () => {
 
     try {
       setLoading(true);
-      const answersPayload = questions.map((q, idx) => ({
-        question: q,
-        answer: answers[idx].trim(),
-      }));
+      const answersPayload = setupRequired
+        ? setupQuestions.map((sq) => ({
+            question: sq.question.trim(),
+            answer: sq.answer.trim(),
+          }))
+        : questions.map((q, idx) => ({
+            question: q,
+            answer: answers[idx].trim(),
+          }));
 
       const res = await authService.verifySecurityQuestions(
         identifier.trim(),
@@ -328,13 +393,13 @@ const ForgotPassword = () => {
         </>
       )}
 
-      {/* STEP 2: Answer Security Questions */}
+      {/* STEP 2: Answer Security Questions or Initial Setup */}
       {step === 2 && (
         <>
           <div className="mb-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-bold text-[#172554] tracking-tight">
-                Security Verification
+                {setupRequired ? 'Set Up Security Questions' : 'Security Verification'}
               </h2>
               <button
                 type="button"
@@ -348,7 +413,9 @@ const ForgotPassword = () => {
               </button>
             </div>
             <p className="text-xs text-[#64748B] mt-0.5">
-              Answer all 3 security questions selected during your registration.
+              {setupRequired
+                ? 'Choose 3 distinct questions and confidential answers to establish your account security and reset your password.'
+                : 'Answer all 3 security questions selected during your registration.'}
             </p>
           </div>
 
@@ -358,45 +425,110 @@ const ForgotPassword = () => {
           </div>
 
           <form onSubmit={handleVerifyAnswers} className="space-y-3.5" autoComplete="off">
-            {questions.map((qText, idx) => (
-              <div
-                key={idx}
-                className="p-3.5 rounded-xl border border-[#DBEAFE] bg-[#F8FAFC] space-y-2"
-              >
-                <div className="flex items-start gap-2">
-                  <span className="w-5 h-5 rounded-full bg-[#172554] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
-                    {idx + 1}
-                  </span>
-                  <p className="text-xs font-semibold text-[#172554] leading-snug">
-                    {qText}
-                  </p>
-                </div>
+            {setupRequired ? (
+              // 3 Question Selectors for Accounts configuring questions for the first time
+              setupQuestions.map((sq, idx) => (
+                <div
+                  key={idx}
+                  className="p-3.5 rounded-xl border border-[#DBEAFE] bg-[#F8FAFC] space-y-2.5 shadow-xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-[#172554] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </span>
+                    <label
+                      htmlFor={`setup_q_${idx}`}
+                      className="text-xs font-semibold text-[#172554]"
+                    >
+                      Question {idx + 1} <span className="text-[#DC2626]">*</span>
+                    </label>
+                  </div>
 
-                <Input
-                  label="Your Answer"
-                  id={`answer_${idx}`}
-                  type="password"
-                  showPasswordToggle
-                  placeholder="Enter your confidential answer"
-                  value={answers[idx]}
-                  onChange={(e) => {
-                    const nextAnswers = [...answers];
-                    nextAnswers[idx] = e.target.value;
-                    setAnswers(nextAnswers);
-                    if (fieldErrors[`answer_${idx}`]) {
-                      setFieldErrors((prev) => ({
-                        ...prev,
-                        [`answer_${idx}`]: '',
-                      }));
-                    }
-                  }}
-                  error={fieldErrors[`answer_${idx}`]}
-                  helperText="Answers are case-insensitive"
-                  required
-                  autoComplete="off"
-                />
-              </div>
-            ))}
+                  <div>
+                    <select
+                      id={`setup_q_${idx}`}
+                      value={sq.question}
+                      onChange={(e) => handleSetupQuestionChange(idx, 'question', e.target.value)}
+                      className={`block w-full rounded-lg border text-xs py-2 px-3 focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#DBEAFE] bg-white text-[#172554] ${
+                        fieldErrors[`setup_q_${idx}`] ? 'border-[#DC2626]' : 'border-[#DBEAFE]'
+                      }`}
+                    >
+                      <option value="">-- Choose Security Question {idx + 1} --</option>
+                      {PREDEFINED_SECURITY_QUESTIONS.map((q) => {
+                        const taken = isQuestionTaken(q, idx);
+                        return (
+                          <option key={q} value={q} disabled={taken}>
+                            {q} {taken ? '(Selected in another question)' : ''}
+                          </option>
+                        );
+                      })}
+                    </select>
+                    {fieldErrors[`setup_q_${idx}`] && (
+                      <p className="text-[11px] text-[#DC2626] font-medium mt-1">
+                        {fieldErrors[`setup_q_${idx}`]}
+                      </p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Input
+                      label={`Answer ${idx + 1}`}
+                      id={`setup_a_${idx}`}
+                      type="password"
+                      showPasswordToggle
+                      placeholder="Enter your confidential answer"
+                      value={sq.answer}
+                      onChange={(e) => handleSetupQuestionChange(idx, 'answer', e.target.value)}
+                      error={fieldErrors[`setup_a_${idx}`]}
+                      helperText="Answers are case-insensitive and trimmed"
+                      required
+                      autoComplete="off"
+                    />
+                  </div>
+                </div>
+              ))
+            ) : (
+              // Read-only question prompts for accounts that already have questions configured
+              questions.map((qText, idx) => (
+                <div
+                  key={idx}
+                  className="p-3.5 rounded-xl border border-[#DBEAFE] bg-[#F8FAFC] space-y-2"
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="w-5 h-5 rounded-full bg-[#172554] text-white text-[11px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+                      {idx + 1}
+                    </span>
+                    <p className="text-xs font-semibold text-[#172554] leading-snug">
+                      {qText}
+                    </p>
+                  </div>
+
+                  <Input
+                    label="Your Answer"
+                    id={`answer_${idx}`}
+                    type="password"
+                    showPasswordToggle
+                    placeholder="Enter your confidential answer"
+                    value={answers[idx]}
+                    onChange={(e) => {
+                      const nextAnswers = [...answers];
+                      nextAnswers[idx] = e.target.value;
+                      setAnswers(nextAnswers);
+                      if (fieldErrors[`answer_${idx}`]) {
+                        setFieldErrors((prev) => ({
+                          ...prev,
+                          [`answer_${idx}`]: '',
+                        }));
+                      }
+                    }}
+                    error={fieldErrors[`answer_${idx}`]}
+                    helperText="Answers are case-insensitive"
+                    required
+                    autoComplete="off"
+                  />
+                </div>
+              ))
+            )}
 
             <Button
               type="submit"
@@ -404,7 +536,13 @@ const ForgotPassword = () => {
               isLoading={loading}
               icon={ShieldCheck}
             >
-              {loading ? 'Verifying Answers...' : 'Verify Answers & Continue'}
+              {loading
+                ? setupRequired
+                  ? 'Saving Questions...'
+                  : 'Verifying Answers...'
+                : setupRequired
+                ? 'Save Questions & Continue'
+                : 'Verify Answers & Continue'}
             </Button>
           </form>
         </>

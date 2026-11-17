@@ -768,11 +768,15 @@ export const getSecurityQuestions = async (req, res, next) => {
     }
 
     if (!user.securityQuestions || user.securityQuestions.length !== 3) {
-      return res.status(400).json({
-        success: false,
-        noSecurityQuestions: true,
+      return res.status(200).json({
+        success: true,
+        identifier: user.email,
+        setupRequired: true,
+        hasQuestions: false,
+        questions: [],
+        availableQuestions: PREDEFINED_SECURITY_QUESTIONS,
         message:
-          'Security questions were not configured for this account. For account safety, recovery via security questions is unavailable. Please contact the placement cell for password reset assistance.',
+          'Security recovery questions have not been configured for this account yet. Please select 3 questions and provide answers to establish recovery and reset your password.',
       });
     }
 
@@ -782,6 +786,8 @@ export const getSecurityQuestions = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       identifier: user.email,
+      setupRequired: false,
+      hasQuestions: true,
       questions,
     });
   } catch (error) {
@@ -854,15 +860,46 @@ export const verifySecurityQuestions = async (req, res, next) => {
       });
     }
 
-    // Verify all 3 answers against stored hashes with lockout and attempt tracking
-    const verification = await user.verifySecurityAnswers(answers);
-    if (!verification.success) {
-      const statusCode = verification.locked ? 423 : 400;
-      return res.status(statusCode).json({
-        success: false,
-        locked: verification.locked || false,
-        message: verification.message,
-      });
+    // Verify existing security questions OR setup questions for first time
+    if (user.securityQuestions && user.securityQuestions.length === 3) {
+      const verification = await user.verifySecurityAnswers(answers);
+      if (!verification.success) {
+        const statusCode = verification.locked ? 423 : 400;
+        return res.status(statusCode).json({
+          success: false,
+          locked: verification.locked || false,
+          message: verification.message,
+        });
+      }
+    } else {
+      // First-time setup during password recovery
+      const selectedQuestions = answers.map((a) => a.question);
+      const uniqueQuestions = new Set(selectedQuestions);
+      if (uniqueQuestions.size !== 3) {
+        return res.status(400).json({
+          success: false,
+          message: 'Each of the 3 security questions must be unique. Duplicate questions are not allowed.',
+        });
+      }
+
+      for (let i = 0; i < answers.length; i++) {
+        if (!PREDEFINED_SECURITY_QUESTIONS.includes(answers[i].question)) {
+          return res.status(400).json({
+            success: false,
+            message: `Security question #${i + 1} is not a valid predefined question.`,
+          });
+        }
+        if (!answers[i].answer || String(answers[i].answer).trim().length < 2) {
+          return res.status(400).json({
+            success: false,
+            message: `Please provide an answer for question #${i + 1} (at least 2 characters).`,
+          });
+        }
+      }
+
+      await user.setSecurityQuestions(answers);
+      user.securityQuestionAttempts = 0;
+      user.securityQuestionLockUntil = null;
     }
 
     // Generate single-use, 15-minute cryptographically secure reset token
