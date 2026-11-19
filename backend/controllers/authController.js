@@ -1028,14 +1028,31 @@ export const changePassword = async (req, res, next) => {
 
     let isAuthorized = false;
 
-    // Authorization Method A: Verification via 3 Security Question Answers
+    // Method 1: Verification via Current Password (Standard Flow - No Security Questions Needed)
+    if (currentPassword) {
+      const isMatch = await user.matchPassword(currentPassword);
+      if (!isMatch) {
+        return res.status(400).json({
+          success: false,
+          message: 'Incorrect current password. Please enter your existing password correctly.',
+        });
+      }
+      isAuthorized = true;
+    }
+
+    // Method 2: Fallback Verification via Security Questions (If current password not provided)
     if (
-      user.securityQuestions &&
-      user.securityQuestions.length === 3 &&
+      !isAuthorized &&
       securityAnswers &&
       Array.isArray(securityAnswers) &&
       securityAnswers.length === 3
     ) {
+      if (!user.securityQuestions || user.securityQuestions.length !== 3) {
+        return res.status(400).json({
+          success: false,
+          message: 'Security questions are not configured on this account. Please provide your current password.',
+        });
+      }
       const verification = await user.verifySecurityAnswers(securityAnswers);
       if (!verification.success) {
         return res.status(verification.locked ? 423 : 400).json({
@@ -1047,59 +1064,10 @@ export const changePassword = async (req, res, next) => {
       isAuthorized = true;
     }
 
-    // Authorization Method B: Current Password
-    if (!isAuthorized && currentPassword) {
-      const isMatch = await user.matchPassword(currentPassword);
-      if (isMatch) {
-        isAuthorized = true;
-      } else {
-        return res.status(400).json({
-          success: false,
-          message: 'Incorrect current password. Please enter your existing password correctly.',
-        });
-      }
-    }
-
-    // Authorization Method C: Setting up 3 security questions for the first time
-    if (
-      !isAuthorized &&
-      (!user.securityQuestions || user.securityQuestions.length !== 3) &&
-      securityQuestions &&
-      Array.isArray(securityQuestions) &&
-      securityQuestions.length === 3
-    ) {
-      const chosen = new Set();
-      for (let i = 0; i < securityQuestions.length; i++) {
-        const sq = securityQuestions[i];
-        if (!sq.question || !isValidSecurityQuestion(sq.question)) {
-          return res.status(400).json({
-            success: false,
-            message: `Security question #${i + 1} is invalid.`,
-          });
-        }
-        if (chosen.has(sq.question)) {
-          return res.status(400).json({
-            success: false,
-            message: 'All 3 security questions must be unique.',
-          });
-        }
-        chosen.add(sq.question);
-
-        if (!sq.answer || String(sq.answer).trim().length < 2) {
-          return res.status(400).json({
-            success: false,
-            message: `Answer for security question #${i + 1} must be at least 2 characters.`,
-          });
-        }
-      }
-      await user.setSecurityQuestions(securityQuestions);
-      isAuthorized = true;
-    }
-
     if (!isAuthorized) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide your current password to authorize this password change.',
+        message: 'Please enter your current password to authorize this password change.',
       });
     }
 
