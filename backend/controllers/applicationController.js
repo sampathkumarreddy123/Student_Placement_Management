@@ -793,6 +793,19 @@ export const screenSingleApplicationWithAI = async (req, res, next) => {
       });
     }
 
+    // Permission check: Officers can screen any applicant. Students can only evaluate their own application.
+    if (
+      req.user &&
+      req.user.role === 'student' &&
+      application.student &&
+      application.student._id.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You can only screen your own application.',
+      });
+    }
+
     const drive = application.drive;
     if (!drive) {
       return res.status(400).json({

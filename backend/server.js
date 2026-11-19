@@ -169,6 +169,8 @@ app.use('/drives', driveRoutes);
 
 app.use('/api/applications', applicationRoutes);
 app.use('/applications', applicationRoutes);
+app.use('/api/application', applicationRoutes);
+app.use('/application', applicationRoutes);
 
 app.use('/api/notifications', notificationRoutes);
 app.use('/notifications', notificationRoutes);

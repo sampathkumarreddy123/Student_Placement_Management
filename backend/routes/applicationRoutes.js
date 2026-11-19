@@ -22,7 +22,9 @@ router.post('/apply/:driveId', authorize('student'), applyForDrive);
 router.get('/my', authorize('student'), getMyApplications);
 router.get('/my-applications', authorize('student'), getMyApplications);
 router.get('/drive/:driveId', authorize('officer'), getDriveApplicants);
-router.post('/drive/:driveId/ai-screen', authorize('officer'), screenDriveApplicantsWithAI);
+router.route('/drive/:driveId/ai-screen')
+  .post(authorize('officer'), screenDriveApplicantsWithAI)
+  .get(authorize('officer'), screenDriveApplicantsWithAI);
 router.get('/officer/all', authorize('officer'), getAllApplications);
 router.get('/', authorize('officer'), getAllApplications);
 
@@ -30,7 +32,15 @@ router.get('/', authorize('officer'), getAllApplications);
 router.get('/:id', getApplicationById);
 router.get('/:id/resume', downloadApplicantResume);
 router.get('/:id/history', getApplicationStatusHistory);
-router.post('/:id/ai-screen', authorize('officer'), screenSingleApplicationWithAI);
+router.route('/:id/ai-screen')
+  .post(screenSingleApplicationWithAI)
+  .get(screenSingleApplicationWithAI);
+router.route('/:id/screen')
+  .post(screenSingleApplicationWithAI)
+  .get(screenSingleApplicationWithAI);
+router.route('/ai-screen/:id')
+  .post(screenSingleApplicationWithAI)
+  .get(screenSingleApplicationWithAI);
 router.patch('/:id/status', authorize('officer'), updateApplicationStatus);
 
 export default router;
