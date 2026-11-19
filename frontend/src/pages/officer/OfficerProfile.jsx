@@ -13,6 +13,12 @@ import {
   Save,
   KeyRound,
   ShieldCheck,
+  CheckCircle2,
+  Lock,
+  Copy,
+  Check,
+  ExternalLink,
+  Sparkles,
 } from 'lucide-react';
 import { officerService } from '../../services/officerService';
 import Card from '../../components/common/Card';
@@ -56,6 +62,7 @@ const OfficerProfile = () => {
   const [removingPhoto, setRemovingPhoto] = useState(false);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [copiedId, setCopiedId] = useState(false);
 
   // Fetch Officer Profile on mount
   useEffect(() => {
@@ -94,6 +101,15 @@ const OfficerProfile = () => {
     fetchOfficerProfile();
   }, [user?.email, user?.name, user?.profilePhoto, updateUserData, toast]);
 
+  const handleCopyId = () => {
+    if (formData.employeeId) {
+      navigator.clipboard.writeText(formData.employeeId);
+      setCopiedId(true);
+      toast.showSuccess('Staff ID copied to clipboard');
+      setTimeout(() => setCopiedId(false), 2000);
+    }
+  };
+
   // Handle Form Change
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -118,7 +134,7 @@ const OfficerProfile = () => {
 
   // Save Officer Profile Changes
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!validateForm()) {
       toast.showError('Please correct the validation errors before saving.');
       return;
@@ -148,14 +164,12 @@ const OfficerProfile = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.showError('Image file is too large. Please select a photo under 5MB.');
       e.target.value = '';
       return;
     }
 
-    // Validate type
     const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
     if (!validTypes.includes(file.type)) {
       toast.showError('Invalid file format. Please upload a JPG, PNG, or WebP image.');
@@ -225,348 +239,451 @@ const OfficerProfile = () => {
   const effectivePhoto = formData.profilePhoto || user?.profilePhoto || '';
 
   return (
-    <div className="space-y-6 pb-12 max-w-5xl mx-auto">
+    <div className="space-y-6 pb-12 max-w-6xl mx-auto">
       {/* 1. Page Header */}
       <PageHeader
+        category="Placement Cell"
         title="Placement Officer Profile"
-        subtitle="Manage your administrative credentials, institutional contact details, designation and official profile picture."
+        subtitle="Manage administrative credentials, institutional contact details, designation, and official profile picture."
       />
 
-      {/* 2. Top Identity Card */}
-      <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm p-6 relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
-          {/* Avatar with Camera Overlay */}
-          <div className="relative group flex-shrink-0">
-            <div
-              onClick={() => setShowPhotoModal(true)}
-              className="w-24 h-24 rounded-full bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#172554] transition-all"
-              title="Click to view full profile picture"
-            >
-              {effectivePhoto ? (
-                <img
-                  src={getImageUrl(effectivePhoto)}
-                  alt={formData.name || 'Officer'}
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : (
-                <span>{(formData.name || user?.name || 'O').charAt(0).toUpperCase()}</span>
-              )}
-            </div>
+      {/* 2. LINKEDIN/PORTAL STYLE PROFILE HEADER CARD */}
+      <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm overflow-hidden relative">
+        {/* Subtle decorative cover banner */}
+        <div className="h-28 sm:h-36 bg-gradient-to-r from-[#163A5F] via-[#1E4E79] to-[#2563EB] relative">
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
+          <div className="absolute top-4 right-4 hidden sm:flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-white text-xs font-medium">
+            <Building className="w-3.5 h-3.5" />
+            <span>Placement Cell Administration</span>
+          </div>
+        </div>
 
-            {/* Upload Button */}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploadingPhoto || removingPhoto}
-              className="absolute bottom-0 right-0 w-8 h-8 bg-[#172554] hover:bg-[#2563EB] text-white rounded-full shadow-md border-2 border-white transition-all flex items-center justify-center cursor-pointer"
-              title="Upload & Crop Profile Photo"
-            >
-              <Camera className="w-4 h-4" />
-            </button>
+        {/* Identity & Actions Container */}
+        <div className="px-6 pb-6 pt-0 relative">
+          <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-5 -mt-14 sm:-mt-16 mb-4">
+            {/* Circular Avatar with Camera overlay */}
+            <div className="relative group flex-shrink-0">
+              <div
+                onClick={() => setShowPhotoModal(true)}
+                className="w-28 h-28 rounded-full bg-[#EFF6FF] border-4 border-white shadow-md flex items-center justify-center text-[#163A5F] font-bold text-3xl overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#2563EB] transition-all"
+                title="Click to view full photo"
+              >
+                {effectivePhoto ? (
+                  <img
+                    src={getImageUrl(effectivePhoto)}
+                    alt={formData.name || user?.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{(formData.name || user?.name || 'O').charAt(0).toUpperCase()}</span>
+                )}
+              </div>
 
-            {/* Remove Button */}
-            {effectivePhoto && (
+              {/* Upload & Crop Photo Button */}
               <button
                 type="button"
-                onClick={handlePhotoRemove}
+                onClick={() => fileInputRef.current?.click()}
                 disabled={uploadingPhoto || removingPhoto}
-                className="absolute top-0 right-0 w-6 h-6 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors flex items-center justify-center cursor-pointer"
-                title="Remove Profile Photo"
+                className="absolute bottom-1 right-1 w-8 h-8 bg-[#163A5F] hover:bg-[#2563EB] text-white rounded-full shadow-md border-2 border-white transition-all flex items-center justify-center cursor-pointer"
+                title="Upload & Crop Photo"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Camera className="w-4 h-4" />
               </button>
-            )}
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={handlePhotoUpload}
-            />
+              {/* Remove Photo Button */}
+              {effectivePhoto && (
+                <button
+                  type="button"
+                  onClick={handlePhotoRemove}
+                  disabled={uploadingPhoto || removingPhoto}
+                  className="absolute top-1 right-1 w-6 h-6 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors flex items-center justify-center cursor-pointer"
+                  title="Remove Photo"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handlePhotoUpload}
+              />
+            </div>
+
+            {/* Quick Action CTAs */}
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2.5 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                icon={KeyRound}
+                onClick={() => setChangePasswordOpen(true)}
+              >
+                Change Password
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                icon={Save}
+                isLoading={saving}
+                onClick={handleSubmit}
+              >
+                Save Changes
+              </Button>
+            </div>
           </div>
 
-          {/* Details & Role Info */}
-          <div className="flex-1 text-center sm:text-left space-y-2">
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-              <h2 className="text-xl font-bold text-[#172554] tracking-tight">
+          {/* Name & Academic Meta */}
+          <div className="space-y-2 text-center sm:text-left">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+              <h1 className="text-2xl font-bold text-[#172554] tracking-tight">
                 {formData.name || user?.name}
-              </h2>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/30 inline-flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" />
-                Authorized Officer
+              </h1>
+
+              <Badge variant="primary" size="sm">
+                {formData.designation || 'Placement Officer'}
+              </Badge>
+
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/25">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                Authorized Placement Officer
               </span>
             </div>
 
-            <p className="text-sm font-semibold text-[#2563EB]">{formData.designation}</p>
-            <p className="text-xs text-gray-500">{formData.department}</p>
+            {/* Sub-identity row */}
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs text-[#64748B]">
+              {formData.employeeId ? (
+                <div className="inline-flex items-center gap-1.5 bg-[#EFF6FF] text-[#163A5F] px-2.5 py-1 rounded-md border border-[#DBEAFE] font-mono font-bold">
+                  <span>ID: {formData.employeeId}</span>
+                  <button
+                    type="button"
+                    onClick={handleCopyId}
+                    className="text-[#2563EB] hover:text-[#163A5F] transition-colors p-0.5 ml-0.5"
+                    title="Copy Staff ID"
+                  >
+                    {copiedId ? <Check className="w-3.5 h-3.5 text-[#0D9488]" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              ) : null}
 
-            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-xs text-gray-600 pt-1">
-              <span className="inline-flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5 text-gray-400" />
-                {formData.email}
-              </span>
-              {formData.phone && (
-                <span className="inline-flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-gray-400" />
-                  {formData.phone}
-                </span>
-              )}
+              <span className="font-medium text-[#172554]">• {formData.department}</span>
+
               {formData.officeLocation && (
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-gray-400" />
-                  {formData.officeLocation}
-                </span>
+                <span className="font-medium text-[#64748B]">• {formData.officeLocation}</span>
               )}
+
+              <span className="font-medium text-[#64748B] hidden md:inline">
+                • {formData.email}
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 3. Main Edit Form */}
+      {/* 3. STRUCTURED PROFILE SECTIONS */}
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card className="border-[#DBEAFE] bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between border-b border-[#EFF6FF] pb-4 mb-6">
-            <div>
-              <h3 className="text-base font-bold text-[#163A5F]">
-                Institutional & Contact Details
-              </h3>
-              <p className="text-xs text-gray-500">
-                Update your administrative title, official cabin location and contact credentials
-              </p>
-            </div>
-            <span className="text-xs text-gray-400">All fields are editable</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Full Name */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Full Name <span className="text-rose-500">*</span>
-              </label>
-              <div className="relative">
-                <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="e.g. Dr. K. Sampath Kumar"
-                  className={`w-full text-xs rounded-xl border pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 ${
-                    formErrors.name
-                      ? 'border-rose-400 focus:ring-rose-400'
-                      : 'border-[#DBEAFE] focus:ring-[#2563EB]'
-                  }`}
-                  required
-                />
-              </div>
-              {formErrors.name && (
-                <p className="text-[11px] text-rose-500 mt-1">{formErrors.name}</p>
-              )}
-            </div>
-
-            {/* Official College Email (Read-Only) */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Official College Email <span className="text-gray-400 font-normal">(Primary Identifier)</span>
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="email"
-                  value={formData.email}
-                  disabled
-                  className="w-full text-xs rounded-xl border border-gray-200 bg-gray-50/80 pl-9 pr-3 py-2.5 text-gray-500 cursor-not-allowed"
-                />
-              </div>
-            </div>
-
-            {/* Official Designation */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Designation / Title
-              </label>
-              <div className="relative">
-                <Briefcase className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  name="designation"
-                  value={formData.designation}
-                  onChange={handleChange}
-                  placeholder="e.g. Head - Training & Placement"
-                  className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
-                />
-              </div>
-            </div>
-
-            {/* Department */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Department / Placement Cell
-              </label>
-              <div className="relative">
-                <Building className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  name="department"
-                  value={formData.department}
-                  onChange={handleChange}
-                  placeholder="e.g. Training & Placement Cell"
-                  className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
-                />
-              </div>
-            </div>
-
-            {/* Employee ID */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Staff / Employee ID
-              </label>
-              <div className="relative">
-                <IdCard className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  name="employeeId"
-                  value={formData.employeeId}
-                  onChange={handleChange}
-                  placeholder="e.g. MITS-TPO-01"
-                  className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
-                />
-              </div>
-            </div>
-
-            {/* Contact Phone */}
-            <div>
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Contact Phone / Extension
-              </label>
-              <div className="relative">
-                <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="e.g. +91 9876543210"
-                  className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
-                />
-              </div>
-            </div>
-
-            {/* Office Location / Cabin */}
-            <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                Office Location / Cabin Room
-              </label>
-              <div className="relative">
-                <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  name="officeLocation"
-                  value={formData.officeLocation}
-                  onChange={handleChange}
-                  placeholder="e.g. Training & Placement Office, Ground Floor, Admin Block"
-                  className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
-                />
-              </div>
-            </div>
-
-            {/* LinkedIn Profile URL */}
-            <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                LinkedIn Profile URL
-              </label>
-              <div className="relative">
-                <Linkedin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="url"
-                  name="linkedinUrl"
-                  value={formData.linkedinUrl}
-                  onChange={handleChange}
-                  placeholder="https://www.linkedin.com/in/placement-officer"
-                  className={`w-full text-xs rounded-xl border pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 ${
-                    formErrors.linkedinUrl
-                      ? 'border-rose-400 focus:ring-rose-400'
-                      : 'border-[#DBEAFE] focus:ring-[#2563EB]'
-                  }`}
-                />
-              </div>
-              {formErrors.linkedinUrl && (
-                <p className="text-[11px] text-rose-500 mt-1">{formErrors.linkedinUrl}</p>
-              )}
-            </div>
-
-            {/* Bio / Message */}
-            <div className="md:col-span-2">
-              <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                About / Message to Students & Corporate Recruiters
-              </label>
-              <textarea
-                name="bio"
-                rows={3}
-                value={formData.bio}
-                onChange={handleChange}
-                placeholder="Brief summary of placement guidelines, department vision, or welcome note..."
-                className="w-full text-xs rounded-xl border border-[#DBEAFE] p-3 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
-              />
-            </div>
-          </div>
-
-          {/* Form Actions */}
-          <div className="mt-6 pt-4 border-t border-[#EFF6FF] flex items-center justify-end gap-3">
-            <Button
-              type="submit"
-              variant="primary"
-              size="sm"
-              disabled={saving}
-              leftIcon={<Save className="w-4 h-4 text-white" />}
-              className="bg-[#172554] hover:bg-[#0f172a] text-white px-6 shadow-sm cursor-pointer"
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column (Administrative & Contact Details: 7 cols) */}
+          <div className="lg:col-span-7 space-y-6">
+            {/* CARD 1: Personal & Administrative Information */}
+            <Card
+              title="1. Personal & Administrative Information"
+              subtitle="Official officer designation and institutional placement cell credentials"
             >
-              {saving ? 'Saving Changes...' : 'Save Profile Details'}
-            </Button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Full Name */}
+                <div>
+                  <label className="block text-xs font-semibold text-[#172554] mb-1.5">
+                    Full Legal Name <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="e.g. Dr. K. Sampath Kumar"
+                      className={`w-full text-xs rounded-xl border pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 ${
+                        formErrors.name
+                          ? 'border-rose-400 focus:ring-rose-400'
+                          : 'border-[#DBEAFE] focus:ring-[#2563EB]'
+                      }`}
+                      required
+                    />
+                  </div>
+                  {formErrors.name && (
+                    <p className="text-[11px] text-rose-500 mt-1">{formErrors.name}</p>
+                  )}
+                </div>
+
+                {/* Staff ID */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-[#172554]">
+                      Staff / Employee ID
+                    </label>
+                    <span className="text-[10px] text-[#64748B] flex items-center gap-1 font-medium bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#DBEAFE]">
+                      <Lock className="w-2.5 h-2.5 text-[#2563EB]" /> Institutional
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <IdCard className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="employeeId"
+                      value={formData.employeeId}
+                      onChange={handleChange}
+                      placeholder="e.g. MITS-TPO-01"
+                      className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                    />
+                  </div>
+                </div>
+
+                {/* Designation */}
+                <div>
+                  <label className="block text-xs font-semibold text-[#172554] mb-1.5">
+                    Designation / Title
+                  </label>
+                  <div className="relative">
+                    <Briefcase className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="designation"
+                      value={formData.designation}
+                      onChange={handleChange}
+                      placeholder="e.g. Head - Training & Placement"
+                      className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                    />
+                  </div>
+                </div>
+
+                {/* Department */}
+                <div>
+                  <label className="block text-xs font-semibold text-[#172554] mb-1.5">
+                    Department / Placement Cell
+                  </label>
+                  <div className="relative">
+                    <Building className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="department"
+                      value={formData.department}
+                      onChange={handleChange}
+                      placeholder="e.g. Training & Placement Cell"
+                      className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* CARD 2: Institutional Contact & Office Location */}
+            <Card
+              title="2. Contact Information & Office Location"
+              subtitle="Direct channels for student inquiries, university coordination, and corporate recruiters"
+            >
+              <div className="space-y-4">
+                {/* Official Email */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-[#172554]">
+                      Official College Email <span className="text-gray-400 font-normal">(Primary Identifier)</span>
+                    </label>
+                    <span className="text-[10px] text-[#64748B] flex items-center gap-1 font-medium bg-[#EFF6FF] px-1.5 py-0.5 rounded border border-[#DBEAFE]">
+                      <Lock className="w-2.5 h-2.5 text-[#2563EB]" /> Locked
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="email"
+                      value={formData.email}
+                      disabled
+                      className="w-full text-xs rounded-xl border border-gray-200 bg-gray-50/80 pl-9 pr-3 py-2.5 text-gray-500 cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                {/* Phone & Cabin */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#172554] mb-1.5">
+                      Contact Phone / Extension
+                    </label>
+                    <div className="relative">
+                      <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        placeholder="e.g. +91 9876543210"
+                        className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-[#172554] mb-1.5">
+                      Office Cabin / Room Location
+                    </label>
+                    <div className="relative">
+                      <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        name="officeLocation"
+                        value={formData.officeLocation}
+                        onChange={handleChange}
+                        placeholder="e.g. Admin Block, Ground Floor"
+                        className="w-full text-xs rounded-xl border border-[#DBEAFE] pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
-        </Card>
+
+          {/* Right Column (Bio, Social & Security: 5 cols) */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* CARD 3: Professional Background & Bio */}
+            <Card
+              title="3. Professional Bio & Message"
+              subtitle="Welcome note and guidelines presented to students and corporate recruiters"
+            >
+              <div className="space-y-4">
+                {/* LinkedIn Profile */}
+                <div>
+                  <label className="block text-xs font-semibold text-[#172554] mb-1.5">
+                    LinkedIn Profile URL
+                  </label>
+                  <div className="relative">
+                    <Linkedin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#2563EB]" />
+                    <input
+                      type="url"
+                      name="linkedinUrl"
+                      value={formData.linkedinUrl}
+                      onChange={handleChange}
+                      placeholder="https://www.linkedin.com/in/username"
+                      className={`w-full text-xs rounded-xl border pl-9 pr-3 py-2.5 focus:outline-none focus:ring-1 ${
+                        formErrors.linkedinUrl
+                          ? 'border-rose-400 focus:ring-rose-400'
+                          : 'border-[#DBEAFE] focus:ring-[#2563EB]'
+                      }`}
+                    />
+                  </div>
+                  {formErrors.linkedinUrl && (
+                    <p className="text-[11px] text-rose-500 mt-1">{formErrors.linkedinUrl}</p>
+                  )}
+                </div>
+
+                {/* Bio Textarea */}
+                <div>
+                  <label className="block text-xs font-semibold text-[#172554] mb-1.5">
+                    Placement Objectives / Department Vision
+                  </label>
+                  <textarea
+                    name="bio"
+                    rows={4}
+                    value={formData.bio}
+                    onChange={handleChange}
+                    placeholder="Brief summary of placement guidelines, department vision, or welcome note to recruiters and students..."
+                    className="w-full text-xs rounded-xl border border-[#DBEAFE] p-3 focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                  />
+                </div>
+              </div>
+            </Card>
+
+            {/* CARD 4: Account Security & Access Settings */}
+            <Card
+              title="4. Security & Access Settings"
+              subtitle="Administrative credential management and authorization status"
+            >
+              <div className="space-y-3">
+                {/* Password Setting Tile */}
+                <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] shadow-xs flex-shrink-0">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-[#172554]">Account Password</h4>
+                      <p className="text-[11px] text-[#64748B]">Protected with verification questions</p>
+                    </div>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    icon={KeyRound}
+                    onClick={() => setChangePasswordOpen(true)}
+                  >
+                    Change
+                  </Button>
+                </div>
+
+                {/* Security Questions Recovery Status */}
+                <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#0D9488] shadow-xs flex-shrink-0">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-[#172554]">Security Questions</h4>
+                      <p className="text-[11px] text-[#64748B]">Configured for account recovery</p>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#0D9488] bg-[#0D9488]/10 px-2 py-0.5 rounded border border-[#0D9488]/20">
+                    Active
+                  </span>
+                </div>
+
+                {/* Session / Role Access */}
+                <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] shadow-xs flex-shrink-0">
+                      <CheckCircle2 className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-[#172554]">System Role</h4>
+                      <p className="text-[11px] text-[#64748B]">Full Placement Cell Administration</p>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-semibold text-[#0D9488]">
+                    Authorized
+                  </span>
+                </div>
+              </div>
+            </Card>
+
+            {/* Save Profile Button */}
+            <div className="pt-2">
+              <Button
+                type="submit"
+                variant="primary"
+                size="md"
+                isLoading={saving}
+                icon={Save}
+                className="w-full justify-center"
+              >
+                Save Officer Profile Details
+              </Button>
+            </div>
+          </div>
+        </div>
       </form>
 
-      {/* 4. Account Security & Password Card */}
-      <Card
-        title="Account Security & Access"
-        subtitle="Manage administrative credentials and security recovery questions"
-      >
-        <div className="p-4 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] shadow-xs flex-shrink-0">
-              <KeyRound className="w-5 h-5 text-[#2563EB]" />
-            </div>
-            <div>
-              <h4 className="text-xs sm:text-sm font-bold text-[#172554]">
-                Administrative Account Password
-              </h4>
-              <p className="text-[11px] sm:text-xs text-[#64748B]">
-                Protected with verification questions (Minimum 8 characters)
-              </p>
-            </div>
-          </div>
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            icon={KeyRound}
-            onClick={() => setChangePasswordOpen(true)}
-            className="bg-[#172554] hover:bg-[#0f172a] text-white shadow-xs shrink-0 cursor-pointer"
-          >
-            Change Password
-          </Button>
-        </div>
-      </Card>
-
-      {/* 5. Password Modal */}
+      {/* Change Password Modal */}
       <ChangePasswordModal
         isOpen={changePasswordOpen}
         onClose={() => setChangePasswordOpen(false)}
       />
 
-      {/* 6. Profile Picture Full View Modal */}
+      {/* Profile Picture Full View Modal */}
       <ProfilePictureModal
         isOpen={showPhotoModal}
         onClose={() => setShowPhotoModal(false)}
@@ -578,7 +695,7 @@ const OfficerProfile = () => {
         }}
       />
 
-      {/* 6. Profile Picture Cropper Modal */}
+      {/* Profile Picture Cropper Modal */}
       <ImageCropperModal
         isOpen={isCropModalOpen}
         onClose={() => {

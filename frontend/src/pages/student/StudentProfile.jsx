@@ -25,10 +25,13 @@ import {
   Award,
   KeyRound,
   ShieldCheck,
+  Copy,
+  Check,
+  Calendar,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/studentService';
-import { authService } from '../../services/authService';
 import Card from '../../components/common/Card';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
@@ -41,7 +44,7 @@ import ChangePasswordModal from '../../components/common/ChangePasswordModal';
 import ProfilePictureModal from '../../components/common/ProfilePictureModal';
 import ImageCropperModal from '../../components/common/ImageCropperModal';
 import { useToast } from '../../context/ToastContext';
-import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
+import { getImageUrl } from '../../utils/imageUrl';
 import {
   generateCandidateResumeBlob,
   downloadBlobFile,
@@ -90,6 +93,7 @@ const StudentProfile = () => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [cropImageSrc, setCropImageSrc] = useState('');
   const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [copiedRoll, setCopiedRoll] = useState(false);
 
   const [notification, setNotification] = useState(null);
   const [errors, setErrors] = useState({});
@@ -98,7 +102,7 @@ const StudentProfile = () => {
   const [profile, setProfile] = useState(null);
   const [completion, setCompletion] = useState({ percentage: 0, items: [] });
 
-  // Editable Form Data (no pre-filled dummy credentials or phone numbers)
+  // Editable Form Data
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -174,10 +178,19 @@ const StudentProfile = () => {
     fetchProfileData();
   }, []);
 
+  const handleCopyRoll = () => {
+    if (profile?.rollNumber) {
+      navigator.clipboard.writeText(profile.rollNumber);
+      setCopiedRoll(true);
+      toast.success('Roll number copied to clipboard');
+      setTimeout(() => setCopiedRoll(false), 2000);
+    }
+  };
+
   const validateForm = () => {
     const errs = {};
     if (!formData.name.trim()) {
-      errs.name = 'Full name is required';
+      errs.name = 'Full legal name is required';
     }
 
     const numCgpa = Number(formData.cgpa);
@@ -274,10 +287,10 @@ const StudentProfile = () => {
       setCompletion(res.completion);
       updateUserProfile(res.profile);
       setIsEditModalOpen(false);
-      toast.success('Academic and personal records saved successfully!');
+      toast.success('Academic and personal profile updated successfully!');
       setNotification({
         type: 'success',
-        text: 'Academic and personal records saved successfully!',
+        text: 'Academic and personal profile updated successfully!',
       });
     } catch (err) {
       toast.error(err.message || 'Failed to update profile.');
@@ -386,7 +399,7 @@ const StudentProfile = () => {
       setProfile((prev) => ({ ...prev, profilePhoto: updatedPhoto }));
       if (updateUserData) updateUserData({ profilePhoto: updatedPhoto });
       if (updateUserProfile) updateUserProfile({ ...profile, profilePhoto: updatedPhoto });
-      toast.success('Profile photo cropped and updated successfully!');
+      toast.success('Profile photo updated successfully!');
       setIsCropModalOpen(false);
       setCropImageSrc('');
     } catch (err) {
@@ -481,14 +494,15 @@ const StudentProfile = () => {
   }
 
   const isPlaced = profile?.placementStatus === 'Placed';
+  const effectivePhoto = profile?.profilePhoto || user?.profilePhoto;
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       {/* 1. Page Header */}
       <PageHeader
         category="Student Portal"
-        title="Student Academic Profile"
-        subtitle="Manage verified academic records, placement eligibility criteria, resume document, and technical portfolio."
+        title="Student Profile"
+        subtitle="Manage verified academic records, placement eligibility credentials, resume document, and technical portfolio."
       />
 
       {/* Top Notification */}
@@ -500,22 +514,32 @@ const StudentProfile = () => {
         />
       )}
 
-      {/* 2. Executive Hero Profile Card */}
-      <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm p-6 relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
-          {/* Avatar & Core Identity */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+      {/* 2. LINKEDIN/PORTAL STYLE PROFILE HEADER CARD */}
+      <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm overflow-hidden relative">
+        {/* Subtle decorative cover banner */}
+        <div className="h-28 sm:h-36 bg-gradient-to-r from-[#163A5F] via-[#1E4E79] to-[#2563EB] relative">
+          <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px]" />
+          <div className="absolute top-4 right-4 hidden sm:flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-white text-xs font-medium">
+            <GraduationCap className="w-3.5 h-3.5" />
+            <span>Placement Session 2026</span>
+          </div>
+        </div>
+
+        {/* Identity & Actions Container */}
+        <div className="px-6 pb-6 pt-0 relative">
+          <div className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-5 -mt-14 sm:-mt-16 mb-4">
+            {/* Circular Avatar with Camera overlay */}
             <div className="relative group flex-shrink-0">
               <div
                 onClick={() => setShowPhotoModal(true)}
-                className="w-24 h-24 rounded-full bg-[#EFF6FF] border-2 border-[#DBEAFE] flex items-center justify-center text-[#163A5F] font-bold text-3xl shadow-sm overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#172554] transition-all"
-                title="Click to view full profile picture"
+                className="w-28 h-28 rounded-full bg-[#EFF6FF] border-4 border-white shadow-md flex items-center justify-center text-[#163A5F] font-bold text-3xl overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#2563EB] transition-all"
+                title="Click to view full photo"
               >
-                {profile?.profilePhoto || user?.profilePhoto ? (
+                {effectivePhoto ? (
                   <img
-                    src={getImageUrl(profile?.profilePhoto || user?.profilePhoto)}
+                    src={getImageUrl(effectivePhoto)}
                     alt={profile?.name || user?.name}
-                    className="w-full h-full object-cover rounded-full"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <span>{(profile?.name || user?.name || 'S').charAt(0).toUpperCase()}</span>
@@ -527,20 +551,20 @@ const StudentProfile = () => {
                 type="button"
                 onClick={() => photoInputRef.current?.click()}
                 disabled={uploadingPhoto}
-                className="absolute bottom-0 right-0 w-8 h-8 bg-[#172554] hover:bg-[#2563EB] text-white rounded-full shadow-md border-2 border-white transition-all flex items-center justify-center cursor-pointer"
-                title="Change & Crop Profile Photo"
+                className="absolute bottom-1 right-1 w-8 h-8 bg-[#163A5F] hover:bg-[#2563EB] text-white rounded-full shadow-md border-2 border-white transition-all flex items-center justify-center cursor-pointer"
+                title="Upload & Crop Photo"
               >
                 <Camera className="w-4 h-4" />
               </button>
 
               {/* Remove Photo Button */}
-              {(profile?.profilePhoto || user?.profilePhoto) && (
+              {effectivePhoto && (
                 <button
                   type="button"
                   onClick={handleRemoveAvatar}
                   disabled={uploadingPhoto}
-                  className="absolute top-0 right-0 w-6 h-6 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors flex items-center justify-center cursor-pointer"
-                  title="Remove Profile Photo"
+                  className="absolute top-1 right-1 w-6 h-6 bg-white hover:bg-rose-50 text-rose-500 rounded-full shadow-sm border border-rose-200 transition-colors flex items-center justify-center cursor-pointer"
+                  title="Remove Photo"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
@@ -555,185 +579,348 @@ const StudentProfile = () => {
               />
             </div>
 
-            {/* Details */}
-            <div className="space-y-1.5">
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold text-[#172554]">
-                  {profile?.name || user?.name}
-                </h1>
-                <Badge variant={isPlaced ? 'success' : 'secondary'} size="sm">
-                  {isPlaced ? `Placed at ${profile?.placedCompany?.name || 'Company'}` : 'Seeking Placement'}
-                </Badge>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs">
-                <span className="font-mono font-bold text-[#163A5F] bg-[#EFF6FF] px-2.5 py-0.5 rounded-md border border-[#DBEAFE]">
-                  {profile?.rollNumber || 'Roll No. Pending'}
-                </span>
-                {profile?.department && (
-                  <span className="text-[#64748B] font-medium">• {profile.department}</span>
-                )}
-                {profile?.batch && (
-                  <span className="text-[#64748B] font-medium">• Class of {profile.batch}</span>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 pt-1 text-xs text-[#64748B]">
-                <span className="inline-flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-[#2563EB]" />
-                  {profile?.email || user?.email}
-                </span>
-                {profile?.phone && (
-                  <span className="inline-flex items-center gap-1.5">
-                    <Phone className="w-3.5 h-3.5 text-[#2563EB]" />
-                    {profile.phone}
-                  </span>
-                )}
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/25">
-                  <CheckCircle2 className="w-3 h-3 text-[#0D9488]" />
-                  Verified
-                </span>
-              </div>
+            {/* Quick Action CTAs */}
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2.5 w-full sm:w-auto">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                icon={KeyRound}
+                onClick={() => setPasswordModalOpen(true)}
+              >
+                Change Password
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                icon={Edit3}
+                onClick={handleOpenEditModal}
+              >
+                Edit Profile
+              </Button>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2.5 w-full sm:w-auto justify-center sm:justify-end">
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              icon={Edit3}
-              onClick={handleOpenEditModal}
-            >
-              Edit Profile
-            </Button>
-          </div>
-        </div>
+          {/* Name & Academic Meta */}
+          <div className="space-y-2 text-center sm:text-left">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+              <h1 className="text-2xl font-bold text-[#172554] tracking-tight">
+                {profile?.name || user?.name}
+              </h1>
 
-        {/* Profile Completion Bar */}
-        <div className="mt-6 pt-5 border-t border-[#EFF6FF]">
-          <div className="flex items-center justify-between text-xs mb-2">
-            <span className="font-semibold text-[#172554] flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#0D9488]" />
-              Profile Completion Status
-            </span>
-            <span className="font-bold text-[#172554]">
-              {completion.percentage}% Complete
-            </span>
+              <Badge variant={isPlaced ? 'success' : 'secondary'} size="sm">
+                {isPlaced ? `Placed at ${profile?.placedCompany?.name || 'Company'}` : 'Seeking Placement'}
+              </Badge>
+
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/25">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                Active • Verified Student
+              </span>
+            </div>
+
+            {/* Sub-identity row with copyable Roll Number */}
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 text-xs text-[#64748B]">
+              <div className="inline-flex items-center gap-1.5 bg-[#EFF6FF] text-[#163A5F] px-2.5 py-1 rounded-md border border-[#DBEAFE] font-mono font-bold">
+                <span>{profile?.rollNumber || 'Roll No. Pending'}</span>
+                {profile?.rollNumber && (
+                  <button
+                    type="button"
+                    onClick={handleCopyRoll}
+                    className="text-[#2563EB] hover:text-[#163A5F] transition-colors p-0.5 ml-0.5"
+                    title="Copy Roll Number"
+                  >
+                    {copiedRoll ? <Check className="w-3.5 h-3.5 text-[#0D9488]" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                )}
+              </div>
+
+              {profile?.department && (
+                <span className="font-medium text-[#172554]">• {profile.department}</span>
+              )}
+
+              {profile?.batch && (
+                <span className="font-medium text-[#64748B]">• Class of {profile.batch}</span>
+              )}
+
+              <span className="font-medium text-[#64748B] hidden md:inline">
+                • {profile?.email || user?.email}
+              </span>
+            </div>
           </div>
 
-          <div className="w-full bg-[#EFF6FF] rounded-full h-2 overflow-hidden border border-[#DBEAFE]">
-            <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                completion.percentage === 100
-                  ? 'bg-[#0D9488]'
-                  : completion.percentage >= 70
-                  ? 'bg-[#2563EB]'
-                  : 'bg-[#172554]'
-              }`}
-              style={{ width: `${completion.percentage}%` }}
-            />
-          </div>
+          {/* Profile Completeness Checklist Bar */}
+          <div className="mt-5 pt-4 border-t border-[#EFF6FF]">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="font-semibold text-[#172554] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
+                Profile Completeness Score
+              </span>
+              <span className="font-bold text-[#163A5F]">
+                {completion.percentage}% Complete
+              </span>
+            </div>
 
-          {completion.percentage < 100 && (
-            <p className="text-[11px] text-[#64748B] mt-2">
-              Complete your contact information, academic scores, and upload a verified PDF resume to maximize eligibility across campus drives.
-            </p>
-          )}
+            <div className="w-full bg-[#EFF6FF] rounded-full h-2 overflow-hidden border border-[#DBEAFE]">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  completion.percentage === 100
+                    ? 'bg-[#0D9488]'
+                    : completion.percentage >= 70
+                    ? 'bg-[#2563EB]'
+                    : 'bg-[#163A5F]'
+                }`}
+                style={{ width: `${completion.percentage}%` }}
+              />
+            </div>
+
+            {/* Checklist Chips */}
+            <div className="flex flex-wrap items-center gap-2 mt-3 pt-1">
+              <span className="text-[11px] font-semibold text-[#64748B] mr-1">Checklist:</span>
+
+              {/* Identification */}
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+                <Check className="w-3 h-3" /> Identification
+              </span>
+
+              {/* CGPA */}
+              {profile?.cgpa ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+                  <Check className="w-3 h-3" /> CGPA & Scores
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenEditModal}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors"
+                >
+                  + Add CGPA
+                </button>
+              )}
+
+              {/* Resume */}
+              {profile?.resumeUrl ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+                  <Check className="w-3 h-3" /> Resume PDF
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => resumeInputRef.current?.click()}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors"
+                >
+                  + Upload Resume
+                </button>
+              )}
+
+              {/* Skills */}
+              {profile?.skills && profile.skills.length > 0 ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+                  <Check className="w-3 h-3" /> Skills ({profile.skills.length})
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenEditModal}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors"
+                >
+                  + Add Skills
+                </button>
+              )}
+
+              {/* Contact Phone */}
+              {profile?.phone ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+                  <Check className="w-3 h-3" /> Phone
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenEditModal}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors"
+                >
+                  + Add Phone
+                </button>
+              )}
+
+              {/* Links */}
+              {profile?.githubUrl || profile?.linkedinUrl ? (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#0D9488]/10 text-[#0D9488] border border-[#0D9488]/20">
+                  <Check className="w-3 h-3" /> Profiles
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenEditModal}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200 transition-colors"
+                >
+                  + Add Links
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* 3. Main 2-Column Responsive Layout */}
+      {/* 3. THE 6 STRUCTURED SECTIONS */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column (Primary Academic & Technical Credentials: 7 cols) */}
+        {/* Left Column (Cards 1, 2, 4, 5: 7 cols) */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Academic Records Card */}
+          {/* CARD 1: Personal Information */}
           <Card
-            title="Academic Performance & Eligibility"
-            subtitle="Verified scores and standing evaluated against recruiter cutoff criteria"
+            title="1. Personal Information"
+            subtitle="Student identification and university placement registration standing"
             action={
               <button
                 type="button"
                 onClick={handleOpenEditModal}
-                className="text-xs font-semibold text-[#2563EB] hover:text-[#172554] hover:underline"
+                className="text-xs font-semibold text-[#2563EB] hover:text-[#163A5F] hover:underline"
               >
-                Update
+                Edit
+              </button>
+            }
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+                <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
+                  <User className="w-3.5 h-3.5 text-[#2563EB]" />
+                  Full Legal Name
+                </span>
+                <p className="text-xs font-bold text-[#172554]">
+                  {profile?.name || user?.name || '—'}
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5">
+                    <Hash className="w-3.5 h-3.5 text-[#2563EB]" />
+                    University Roll Number
+                  </span>
+                  <span className="text-[10px] text-[#64748B] flex items-center gap-1 font-medium bg-white px-1.5 py-0.5 rounded border border-[#DBEAFE]">
+                    <Lock className="w-2.5 h-2.5 text-[#2563EB]" /> Locked
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold font-mono text-[#163A5F]">
+                    {profile?.rollNumber || '—'}
+                  </p>
+                  {profile?.rollNumber && (
+                    <button
+                      type="button"
+                      onClick={handleCopyRoll}
+                      className="text-xs text-[#2563EB] hover:underline"
+                    >
+                      {copiedRoll ? 'Copied' : 'Copy'}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+                <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
+                  <GraduationCap className="w-3.5 h-3.5 text-[#2563EB]" />
+                  Department / Branch
+                </span>
+                <p className="text-xs font-bold text-[#172554]">
+                  {profile?.department || 'Not selected'}
+                </p>
+              </div>
+
+              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+                <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
+                  <Calendar className="w-3.5 h-3.5 text-[#2563EB]" />
+                  Graduation Batch
+                </span>
+                <p className="text-xs font-bold text-[#172554]">
+                  {profile?.batch ? `Class of ${profile.batch}` : 'Not selected'}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          {/* CARD 2: Academic Information */}
+          <Card
+            title="2. Academic Information"
+            subtitle="Verified academic scores evaluated against campus recruitment cutoff criteria"
+            action={
+              <button
+                type="button"
+                onClick={handleOpenEditModal}
+                className="text-xs font-semibold text-[#2563EB] hover:text-[#163A5F] hover:underline"
+              >
+                Update Scores
               </button>
             }
           >
             {/* Metric Tiles */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
                 <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1 mb-1">
                   <Award className="w-3.5 h-3.5 text-[#2563EB]" />
                   CGPA
                 </span>
-                <p className="text-lg font-bold text-[#163A5F]">
+                <p className="text-xl font-bold text-[#163A5F]">
                   {profile?.cgpa ? Number(profile.cgpa).toFixed(2) : '—'}
                 </p>
                 <p className="text-[10px] text-[#64748B] mt-0.5">Scale: 10.0</p>
               </div>
 
-              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
                 <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1 mb-1">
                   <BookOpen className="w-3.5 h-3.5 text-[#2563EB]" />
                   Active Backlogs
                 </span>
-                <p className="text-lg font-bold text-[#172554]">
+                <p className="text-xl font-bold text-[#172554]">
                   {profile?.activeBacklogs ?? 0}
                 </p>
                 <p className="text-[10px] text-[#64748B] mt-0.5">
-                  {(profile?.activeBacklogs ?? 0) === 0 ? 'All Clear' : `${profile?.totalBacklogs ?? profile?.activeBacklogs ?? 0} Total`}
+                  {(profile?.activeBacklogs ?? 0) === 0 ? (
+                    <span className="text-[#0D9488] font-semibold">All Clear</span>
+                  ) : (
+                    `${profile?.totalBacklogs ?? profile?.activeBacklogs ?? 0} Total Backlogs`
+                  )}
                 </p>
               </div>
 
-              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
                 <span className="text-[11px] font-medium text-[#64748B] block mb-1">
-                  10th Board
+                  10th Board Marks
                 </span>
-                <p className="text-lg font-bold text-[#172554]">
+                <p className="text-xl font-bold text-[#172554]">
                   {profile?.tenthPercentage ? `${profile.tenthPercentage}%` : '—'}
                 </p>
-                <p className="text-[10px] text-[#64748B] mt-0.5">Secondary</p>
+                <p className="text-[10px] text-[#64748B] mt-0.5">Secondary School</p>
               </div>
 
-              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
+              <div className="p-3.5 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
                 <span className="text-[11px] font-medium text-[#64748B] block mb-1">
-                  12th / Diploma
+                  12th / Diploma Marks
                 </span>
-                <p className="text-lg font-bold text-[#172554]">
+                <p className="text-xl font-bold text-[#172554]">
                   {profile?.twelfthPercentage ? `${profile.twelfthPercentage}%` : '—'}
                 </p>
-                <p className="text-[10px] text-[#64748B] mt-0.5">Higher Sec.</p>
+                <p className="text-[10px] text-[#64748B] mt-0.5">Higher Secondary</p>
               </div>
             </div>
 
-            {/* Department & Batch Detail Banner */}
-            <div className="mt-4 pt-3.5 border-t border-[#EFF6FF] flex flex-wrap items-center justify-between gap-3 text-xs text-[#64748B]">
-              <div className="flex items-center gap-2">
-                <GraduationCap className="w-4 h-4 text-[#2563EB]" />
-                <span className="font-semibold text-[#172554]">{profile?.department || 'Department Not Selected'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded-md bg-[#EFF6FF] border border-[#DBEAFE] font-medium text-[#163A5F]">
-                  {profile?.batch ? `Graduation Class of ${profile.batch}` : 'Batch Not Selected'}
-                </span>
-              </div>
+            <div className="mt-3.5 p-2.5 bg-[#EFF6FF] rounded-lg border border-[#DBEAFE] text-[11px] text-[#64748B] flex items-center justify-between">
+              <span>Academic standing is continuously synced with the placement eligibility verification engine.</span>
+              <span className="font-semibold text-[#163A5F]">Total Backlogs: {profile?.totalBacklogs ?? 0}</span>
             </div>
           </Card>
 
-          {/* Technical Skills Card */}
+          {/* CARD 4: Skills and Technical Information */}
           <Card
-            title="Technical Skills"
-            subtitle="Programming languages, developer frameworks, libraries, and tools"
+            title="4. Skills & Technical Information"
+            subtitle="Programming languages, developer frameworks, libraries, and engineering tools"
             action={
               <button
                 type="button"
                 onClick={handleOpenEditModal}
-                className="text-xs font-semibold text-[#2563EB] hover:text-[#172554] hover:underline"
+                className="text-xs font-semibold text-[#2563EB] hover:text-[#163A5F] hover:underline"
               >
-                + Add Skills
+                + Manage Skills
               </button>
             }
           >
@@ -742,7 +929,7 @@ const StudentProfile = () => {
                 {profile.skills.map((skill) => (
                   <span
                     key={skill}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F0F7FF] text-[#172554] border border-[#DBEAFE]"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#F0F7FF] text-[#172554] border border-[#DBEAFE] hover:border-[#2563EB] transition-colors"
                   >
                     <Code className="w-3.5 h-3.5 text-[#2563EB]" />
                     {skill}
@@ -767,15 +954,15 @@ const StudentProfile = () => {
             )}
           </Card>
 
-          {/* Resume Document Card */}
+          {/* CARD 5: Resume and Documents */}
           <Card
-            title="Official Placement Resume (PDF)"
-            subtitle="Verified document shared with recruiters upon application submission"
+            title="5. Resume & Documents"
+            subtitle="Official PDF resume document submitted automatically during campus drive applications"
           >
             {profile?.resumeUrl ? (
               <div className="p-4 rounded-xl border border-[#DBEAFE] bg-[#F0F7FF] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-11 h-11 rounded-xl bg-[#172554] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <div className="w-11 h-11 rounded-xl bg-[#163A5F] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div className="min-w-0">
@@ -861,47 +1048,32 @@ const StudentProfile = () => {
           </Card>
         </div>
 
-        {/* Right Column (Institutional Credentials, Social & Security: 5 cols) */}
+        {/* Right Column (Cards 3, 6: 5 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Institutional Records Card */}
+          {/* CARD 3: Contact Information */}
           <Card
-            title="Institutional & Contact Details"
-            subtitle="Verified student registration records"
+            title="3. Contact Information"
+            subtitle="Verified email, phone contact, and professional web presence"
+            action={
+              <button
+                type="button"
+                onClick={handleOpenEditModal}
+                className="text-xs font-semibold text-[#2563EB] hover:text-[#163A5F] hover:underline"
+              >
+                Edit
+              </button>
+            }
           >
             <div className="space-y-3">
-              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
-                <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
-                  <User className="w-3.5 h-3.5 text-[#2563EB]" />
-                  Full Legal Name
-                </span>
-                <p className="text-xs font-bold text-[#172554]">
-                  {profile?.name || user?.name || '—'}
-                </p>
-              </div>
-
-              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5">
-                    <Hash className="w-3.5 h-3.5 text-[#2563EB]" />
-                    University Roll Number
-                  </span>
-                  <span className="text-[10px] text-[#64748B] flex items-center gap-1 font-medium">
-                    <Lock className="w-3 h-3 text-[#2563EB]" /> Locked
-                  </span>
-                </div>
-                <p className="text-xs font-bold font-mono text-[#163A5F]">
-                  {profile?.rollNumber || '—'}
-                </p>
-              </div>
-
+              {/* College Email */}
               <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5">
                     <Mail className="w-3.5 h-3.5 text-[#2563EB]" />
                     College Email Address
                   </span>
-                  <span className="text-[10px] text-[#64748B] flex items-center gap-1 font-medium">
-                    <Lock className="w-3 h-3 text-[#2563EB]" /> Locked
+                  <span className="text-[10px] text-[#64748B] flex items-center gap-1 font-medium bg-white px-1.5 py-0.5 rounded border border-[#DBEAFE]">
+                    <Lock className="w-2.5 h-2.5 text-[#2563EB]" /> Locked
                   </span>
                 </div>
                 <p className="text-xs font-semibold text-[#172554] truncate">
@@ -909,10 +1081,11 @@ const StudentProfile = () => {
                 </p>
               </div>
 
+              {/* Phone Number */}
               <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE]">
                 <span className="text-[11px] font-medium text-[#64748B] flex items-center gap-1.5 mb-1">
                   <Phone className="w-3.5 h-3.5 text-[#2563EB]" />
-                  Contact Phone Number
+                  Contact Mobile Phone
                 </span>
                 <p className="text-xs font-semibold text-[#172554]">
                   {profile?.phone || (
@@ -926,27 +1099,11 @@ const StudentProfile = () => {
                   )}
                 </p>
               </div>
-            </div>
-          </Card>
 
-          {/* Professional Links Card */}
-          <Card
-            title="Professional Profiles"
-            subtitle="Coding portfolios and networking profiles"
-            action={
-              <button
-                type="button"
-                onClick={handleOpenEditModal}
-                className="text-xs font-semibold text-[#2563EB] hover:text-[#172554] hover:underline"
-              >
-                Edit
-              </button>
-            }
-          >
-            <div className="space-y-3">
+              {/* GitHub Link */}
               <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#172554] flex-shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#172554] flex-shrink-0">
                     <Github className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
@@ -970,16 +1127,17 @@ const StudentProfile = () => {
                     href={profile.githubUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-1.5 rounded-lg text-[#64748B] hover:text-[#172554] hover:bg-white transition-colors"
+                    className="p-1 rounded text-[#64748B] hover:text-[#172554] transition-colors"
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 )}
               </div>
 
+              {/* LinkedIn Link */}
               <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] flex-shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] flex-shrink-0">
                     <Linkedin className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
@@ -1003,49 +1161,86 @@ const StudentProfile = () => {
                     href={profile.linkedinUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-1.5 rounded-lg text-[#64748B] hover:text-[#172554] hover:bg-white transition-colors"
+                    className="p-1 rounded text-[#64748B] hover:text-[#172554] transition-colors"
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 )}
               </div>
             </div>
           </Card>
 
-          {/* Security & Access Card */}
+          {/* CARD 6: Account and Security Settings */}
           <Card
-            title="Account Security"
-            subtitle="Password protection and credentials"
+            title="6. Account & Security Settings"
+            subtitle="Password credentials, recovery verification, and authentication security"
           >
-            <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] shadow-sm flex-shrink-0">
-                  <Lock className="w-4 h-4" />
+            <div className="space-y-3">
+              {/* Password Setting Tile */}
+              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] shadow-sm flex-shrink-0">
+                    <Lock className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#172554]">Account Password</h4>
+                    <p className="text-[11px] text-[#64748B]">Protected by bcrypt hashing</p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-xs font-bold text-[#172554]">Account Password</h4>
-                  <p className="text-[11px] text-[#64748B]">Updated periodically</p>
-                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  icon={KeyRound}
+                  onClick={() => setPasswordModalOpen(true)}
+                >
+                  Change
+                </Button>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                icon={KeyRound}
-                onClick={() => setPasswordModalOpen(true)}
-              >
-                Change
-              </Button>
+
+              {/* Security Questions Recovery Status */}
+              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#0D9488] shadow-sm flex-shrink-0">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#172554]">Security Questions</h4>
+                    <p className="text-[11px] text-[#64748B]">Configured at registration for recovery</p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-semibold text-[#0D9488] bg-[#0D9488]/10 px-2 py-0.5 rounded border border-[#0D9488]/20">
+                  Active
+                </span>
+              </div>
+
+              {/* Session / Account Status */}
+              <div className="p-3 bg-[#F0F7FF] rounded-xl border border-[#DBEAFE] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-white border border-[#DBEAFE] flex items-center justify-center text-[#2563EB] shadow-sm flex-shrink-0">
+                    <CheckCircle2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#172554]">Account Status</h4>
+                    <p className="text-[11px] text-[#64748B]">Active Student • Placement Enrolled</p>
+                  </div>
+                </div>
+                <span className="text-[11px] font-semibold text-[#0D9488]">
+                  Verified
+                </span>
+              </div>
             </div>
           </Card>
         </div>
       </div>
 
+      {/* Change Password Modal */}
       <ChangePasswordModal
         isOpen={passwordModalOpen}
         onClose={() => setPasswordModalOpen(false)}
       />
 
+      {/* Profile Picture View Modal */}
       <ProfilePictureModal
         isOpen={showPhotoModal}
         onClose={() => setShowPhotoModal(false)}
@@ -1057,6 +1252,7 @@ const StudentProfile = () => {
         }}
       />
 
+      {/* Interactive Crop Modal */}
       <ImageCropperModal
         isOpen={isCropModalOpen}
         onClose={() => {
@@ -1068,7 +1264,7 @@ const StudentProfile = () => {
         isUploading={uploadingPhoto}
       />
 
-      {/* EDIT PROFILE POPUP MODAL */}
+      {/* EDIT PROFILE MODAL */}
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
