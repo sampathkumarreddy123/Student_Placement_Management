@@ -1055,7 +1055,7 @@ export const changePassword = async (req, res, next) => {
       } else {
         return res.status(400).json({
           success: false,
-          message: 'Incorrect current password. Please try again or answer your security questions.',
+          message: 'Incorrect current password. Please enter your existing password correctly.',
         });
       }
     }
@@ -1097,17 +1097,10 @@ export const changePassword = async (req, res, next) => {
     }
 
     if (!isAuthorized) {
-      if (user.securityQuestions && user.securityQuestions.length === 3) {
-        return res.status(400).json({
-          success: false,
-          message: 'Please answer your 3 security questions to authorize this password change.',
-        });
-      } else {
-        return res.status(400).json({
-          success: false,
-          message: 'Please answer your security questions or provide your current password.',
-        });
-      }
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide your current password to authorize this password change.',
+      });
     }
 
     // Update password

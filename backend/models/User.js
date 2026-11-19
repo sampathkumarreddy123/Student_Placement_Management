@@ -148,6 +148,7 @@ userSchema.methods.setSecurityQuestions = async function (questionsWithAnswers) 
     });
   }
   this.securityQuestions = hashed;
+  this.markModified('securityQuestions');
   this.securityQuestionAttempts = 0;
   this.securityQuestionLockUntil = undefined;
 };
