@@ -213,12 +213,12 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
           <div className="bg-gradient-to-br from-[#F8FAFC] to-[#EFF6FF] rounded-xl border border-[#DBEAFE] p-4 space-y-3">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[#DBEAFE]">
               <h5 className="text-xs font-bold text-[#172554] flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-purple-600" />
+                <Sparkles className="w-4 h-4 text-[#2563EB]" />
                 AI Candidate Match Assessment
               </h5>
               <div className="flex items-center gap-2">
                 <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                  className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                     application.aiScreening.score >= 85
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                       : application.aiScreening.score >= 70
@@ -228,7 +228,6 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                       : 'bg-rose-50 text-rose-700 border border-rose-200'
                   }`}
                 >
-                  <Sparkles className="w-3 h-3" />
                   {application.aiScreening.score}% Match • {application.aiScreening.fitLevel}
                 </span>
               </div>

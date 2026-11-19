@@ -522,7 +522,6 @@ const ManageApplications = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-purple-600" />
               <span className="text-[#64748B] text-[11px] font-medium">AI Match Fit:</span>
               <select
                 value={selectedAiFit}
@@ -698,10 +697,10 @@ const ManageApplications = () => {
                       </td>
 
                       {/* 10. AI Match Column */}
-                      <td className="py-3 px-3 text-center min-w-[130px]">
+                      <td className="py-3 px-3 text-center min-w-[125px]">
                         {app.aiScreening?.score !== null && app.aiScreening?.score !== undefined ? (
                           <div
-                            className="inline-flex flex-col items-center group cursor-pointer"
+                            className="inline-flex flex-col items-center group cursor-pointer hover:opacity-80 transition-opacity"
                             onClick={() =>
                               setProfileTarget({
                                 studentId: profile._id || student._id,
@@ -711,7 +710,7 @@ const ManageApplications = () => {
                             title={app.aiScreening.summary || `${app.aiScreening.score}% match`}
                           >
                             <span
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                              className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
                                 app.aiScreening.score >= 85
                                   ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                   : app.aiScreening.score >= 70
@@ -721,8 +720,7 @@ const ManageApplications = () => {
                                   : 'bg-rose-50 text-rose-700 border border-rose-200'
                               }`}
                             >
-                              <Sparkles className="w-3 h-3 flex-shrink-0" />
-                              {app.aiScreening.score}%
+                              {app.aiScreening.score}% Match
                             </span>
                             <span className="text-[10px] text-[#64748B] font-medium mt-0.5 truncate max-w-[110px]">
                               {app.aiScreening.fitLevel}
@@ -733,29 +731,17 @@ const ManageApplications = () => {
                             type="button"
                             onClick={() => handleScreenSingle(app)}
                             disabled={screeningAppId === app._id}
-                            className="inline-flex items-center gap-1 text-[11px] text-purple-600 hover:text-purple-800 hover:underline font-medium disabled:opacity-50"
+                            className="text-[11px] text-[#2563EB] hover:text-[#163A5F] hover:underline font-medium disabled:opacity-50"
                             title="Screen this applicant with AI"
                           >
-                            <Sparkles className={`w-3 h-3 ${screeningAppId === app._id ? 'animate-spin' : ''}`} />
-                            {screeningAppId === app._id ? 'Analyzing...' : 'Screen'}
+                            {screeningAppId === app._id ? 'Analyzing...' : 'Analyze Match'}
                           </button>
                         )}
                       </td>
 
                       {/* 11. Actions */}
-                      <td className="py-3 px-4 text-right whitespace-nowrap min-w-[185px]">
+                      <td className="py-3 px-4 text-right whitespace-nowrap min-w-[170px]">
                         <div className="flex items-center justify-end gap-1">
-                          {/* AI Screening Button */}
-                          <button
-                            type="button"
-                            onClick={() => handleScreenSingle(app)}
-                            disabled={screeningAppId === app._id}
-                            className="p-1.5 rounded-lg text-purple-600 hover:text-purple-800 hover:bg-purple-50 transition-colors disabled:opacity-50"
-                            title="Run / Refresh AI Match Screening"
-                          >
-                            <Sparkles className={`w-4 h-4 ${screeningAppId === app._id ? 'animate-spin' : ''}`} />
-                          </button>
-
                           {/* Update Status Button */}
                           <button
                             type="button"

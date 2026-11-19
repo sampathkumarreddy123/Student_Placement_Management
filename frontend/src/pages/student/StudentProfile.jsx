@@ -28,7 +28,6 @@ import {
   Copy,
   Check,
   Calendar,
-  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/studentService';
@@ -635,7 +634,7 @@ const StudentProfile = () => {
           <div className="mt-5 pt-4 border-t border-[#EFF6FF]">
             <div className="flex items-center justify-between text-xs mb-2">
               <span className="font-semibold text-[#172554] flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#2563EB]" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[#2563EB]" />
                 Profile Completeness Score
               </span>
               <span className="font-bold text-[#163A5F]">

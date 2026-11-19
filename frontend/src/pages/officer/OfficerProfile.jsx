@@ -18,7 +18,6 @@ import {
   Copy,
   Check,
   ExternalLink,
-  Sparkles,
 } from 'lucide-react';
 import { officerService } from '../../services/officerService';
 import Card from '../../components/common/Card';
