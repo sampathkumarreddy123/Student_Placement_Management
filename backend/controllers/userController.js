@@ -8,6 +8,7 @@ import PlacementDrive from '../models/PlacementDrive.js';
 import Company from '../models/Company.js';
 import OfficerProfile from '../models/OfficerProfile.js';
 import Notification from '../models/Notification.js';
+import { extractTextFromPdfBuffer, parseResumeText } from '../services/resumeParserService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -342,11 +343,11 @@ export const uploadResumeFile = async (req, res, next) => {
     profile.resumeSize = req.file.size;
     profile.resumeUpdatedAt = new Date();
 
-    // Persist actual original PDF binary in MongoDB so it is NEVER lost across container restarts
+    let fileBuffer = null;
     try {
       if (fs.existsSync(req.file.path)) {
-        const fileBuf = fs.readFileSync(req.file.path);
-        profile.resumeData = fileBuf.toString('base64');
+        fileBuffer = fs.readFileSync(req.file.path);
+        profile.resumeData = fileBuffer.toString('base64');
         profile.markModified('resumeData');
       }
     } catch (readErr) {
@@ -354,6 +355,17 @@ export const uploadResumeFile = async (req, res, next) => {
     }
 
     await profile.save();
+
+    // Auto-parse uploaded resume to provide instant smart suggestions
+    let parsedProfile = null;
+    try {
+      if (fileBuffer) {
+        const text = await extractTextFromPdfBuffer(fileBuffer);
+        parsedProfile = parseResumeText(text);
+      }
+    } catch (parseErr) {
+      console.warn('[ResumeParser] Auto-parse warning:', parseErr.message);
+    }
 
     const completion = calculateProfileCompletion(req.user, profile);
 
@@ -366,7 +378,67 @@ export const uploadResumeFile = async (req, res, next) => {
         size: profile.resumeSize,
         updatedAt: profile.resumeUpdatedAt,
       },
+      parsedProfile,
       completion,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Parse student's uploaded resume and extract profile suggestions
+// @route   POST /api/users/profile/resume/parse
+// @access  Private (Student)
+export const parseStudentResume = async (req, res, next) => {
+  try {
+    let query = { user: req.user._id };
+    if (req.user.role === 'officer' && req.params.studentId) {
+      // Find profile either by user ID or profile ID
+      query = {
+        $or: [
+          { user: req.params.studentId },
+          { _id: req.params.studentId }
+        ]
+      };
+    }
+    const profile = await StudentProfile.findOne(query);
+    if (!profile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Student profile not found.',
+      });
+    }
+
+    let buffer = null;
+
+    // Check if local file exists
+    if (profile.resumeUrl && profile.resumeUrl.startsWith('/uploads/resumes/')) {
+      const filename = profile.resumeUrl.replace('/uploads/resumes/', '');
+      const localPath = path.join(__dirname, '../uploads/resumes', filename);
+      if (fs.existsSync(localPath)) {
+        buffer = fs.readFileSync(localPath);
+      }
+    }
+
+    // Fallback to MongoDB base64 resumeData
+    if (!buffer && profile.resumeData) {
+      buffer = Buffer.from(profile.resumeData, 'base64');
+    }
+
+    if (!buffer) {
+      return res.status(400).json({
+        success: false,
+        message: 'No resume document found to parse. Please upload your PDF resume first.',
+      });
+    }
+
+    const text = await extractTextFromPdfBuffer(buffer);
+    const parsed = parseResumeText(text);
+
+    res.status(200).json({
+      success: true,
+      message: 'Resume parsed successfully!',
+      parsedProfile: parsed,
     });
   } catch (error) {
     next(error);

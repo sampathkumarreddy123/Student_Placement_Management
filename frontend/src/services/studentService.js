@@ -41,6 +41,11 @@ export const studentService = {
     return response;
   },
 
+  parseResume: async () => {
+    const response = await api.post('/users/profile/resume/parse');
+    return response.data;
+  },
+
   downloadStudentResume: async (studentId) => {
     const response = await api.get(`/users/students/${studentId}/resume`, {
       responseType: 'blob',

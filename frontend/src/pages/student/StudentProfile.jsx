@@ -28,6 +28,8 @@ import {
   Copy,
   Check,
   Calendar,
+  Sparkles,
+  Wand2,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { studentService } from '../../services/studentService';
@@ -120,6 +122,22 @@ const StudentProfile = () => {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const resumeInputRef = useRef(null);
   const photoInputRef = useRef(null);
+
+  // Resume Auto-Fill State
+  const [parsingResume, setParsingResume] = useState(false);
+  const [isAutoFillModalOpen, setIsAutoFillModalOpen] = useState(false);
+  const [parsedData, setParsedData] = useState(null);
+  const [selectedFields, setSelectedFields] = useState({
+    skills: true,
+    phone: true,
+    tenthPercentage: true,
+    twelfthPercentage: true,
+    cgpa: true,
+    department: true,
+    githubUrl: true,
+    linkedinUrl: true,
+  });
+  const [selectedSkills, setSelectedSkills] = useState([]);
 
   const handleOpenEditModal = () => {
     setFormData({
@@ -347,6 +365,37 @@ const StudentProfile = () => {
         type: 'success',
         text: 'Resume PDF uploaded and verified successfully!',
       });
+
+      // Auto-prompt to review & apply parsed credentials
+      if (res.parsedProfile) {
+        const p = res.parsedProfile;
+        const hasAnyData = Boolean(
+          (p.skills && p.skills.length > 0) ||
+          p.phone ||
+          p.cgpa ||
+          p.tenthPercentage ||
+          p.twelfthPercentage ||
+          p.department ||
+          p.githubUrl ||
+          p.linkedinUrl
+        );
+
+        if (hasAnyData) {
+          setParsedData(p);
+          setSelectedSkills(p.skills || []);
+          setSelectedFields({
+            skills: (p.skills || []).length > 0,
+            phone: Boolean(p.phone),
+            tenthPercentage: Boolean(p.tenthPercentage),
+            twelfthPercentage: Boolean(p.twelfthPercentage),
+            cgpa: Boolean(p.cgpa),
+            department: Boolean(p.department),
+            githubUrl: Boolean(p.githubUrl),
+            linkedinUrl: Boolean(p.linkedinUrl),
+          });
+          setIsAutoFillModalOpen(true);
+        }
+      }
     } catch (err) {
       toast.error(err.message || 'Failed to upload resume document.');
       setNotification({
@@ -357,6 +406,89 @@ const StudentProfile = () => {
       setUploadingResume(false);
       e.target.value = '';
     }
+  };
+
+  const handleParseExistingResume = async () => {
+    try {
+      setParsingResume(true);
+      const res = await studentService.parseResume();
+      if (res.parsedProfile) {
+        const p = res.parsedProfile;
+        setParsedData(p);
+        setSelectedSkills(p.skills || []);
+        setSelectedFields({
+          skills: (p.skills || []).length > 0,
+          phone: Boolean(p.phone),
+          tenthPercentage: Boolean(p.tenthPercentage),
+          twelfthPercentage: Boolean(p.twelfthPercentage),
+          cgpa: Boolean(p.cgpa),
+          department: Boolean(p.department),
+          githubUrl: Boolean(p.githubUrl),
+          linkedinUrl: Boolean(p.linkedinUrl),
+        });
+        setIsAutoFillModalOpen(true);
+        toast.success('Resume parsed successfully! Review the extracted details.');
+      } else {
+        toast.info('No extractable details found in your resume.');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Failed to parse resume.');
+    } finally {
+      setParsingResume(false);
+    }
+  };
+
+  const handleApplyParsedData = async () => {
+    if (!parsedData) return;
+    try {
+      setSaving(true);
+      const currentSkills = profile?.skills || formData.skills || [];
+      const mergedSkills = selectedFields.skills
+        ? Array.from(new Set([...currentSkills, ...selectedSkills]))
+        : currentSkills;
+
+      const payload = {
+        name: formData.name || profile?.name || user?.name || '',
+        phone: selectedFields.phone && parsedData.phone ? parsedData.phone : (profile?.phone || formData.phone || ''),
+        department: selectedFields.department && parsedData.department ? parsedData.department : (profile?.department || formData.department || ''),
+        batch: profile?.batch || formData.batch || '',
+        cgpa: selectedFields.cgpa && parsedData.cgpa ? parsedData.cgpa : (profile?.cgpa || formData.cgpa || 0),
+        activeBacklogs: profile?.activeBacklogs ?? formData.activeBacklogs ?? 0,
+        totalBacklogs: profile?.totalBacklogs ?? formData.totalBacklogs ?? 0,
+        tenthPercentage: selectedFields.tenthPercentage && parsedData.tenthPercentage ? parsedData.tenthPercentage : (profile?.tenthPercentage || formData.tenthPercentage || 0),
+        twelfthPercentage: selectedFields.twelfthPercentage && parsedData.twelfthPercentage ? parsedData.twelfthPercentage : (profile?.twelfthPercentage || formData.twelfthPercentage || 0),
+        githubUrl: selectedFields.githubUrl && parsedData.githubUrl ? parsedData.githubUrl : (profile?.githubUrl || formData.githubUrl || ''),
+        linkedinUrl: selectedFields.linkedinUrl && parsedData.linkedinUrl ? parsedData.linkedinUrl : (profile?.linkedinUrl || formData.linkedinUrl || ''),
+        skills: mergedSkills,
+      };
+
+      const res = await studentService.updateMyProfile(payload);
+      setProfile(res.profile);
+      setFormData((prev) => ({
+        ...prev,
+        ...payload,
+      }));
+      if (res.completion) {
+        setCompletion(res.completion);
+      }
+      updateUserProfile(res.profile);
+      setIsAutoFillModalOpen(false);
+      toast.success('Profile auto-filled from resume successfully!');
+      setNotification({
+        type: 'success',
+        text: 'Profile auto-filled from resume successfully!',
+      });
+    } catch (err) {
+      toast.error(err.message || 'Failed to apply extracted details.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleSkillSelection = (skill) => {
+    setSelectedSkills((prev) =>
+      prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+    );
   };
 
   const handleAvatarFileChange = (e) => {
@@ -959,7 +1091,19 @@ const StudentProfile = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end flex-shrink-0">
+                <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end flex-shrink-0 flex-wrap">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    icon={Sparkles}
+                    onClick={handleParseExistingResume}
+                    isLoading={parsingResume}
+                    className="border-[#93C5FD] text-[#2563EB] hover:bg-white"
+                  >
+                    Auto-Fill Profile
+                  </Button>
+
                   <Button
                     type="button"
                     variant="outline"
@@ -1254,6 +1398,34 @@ const StudentProfile = () => {
         maxWidth="max-w-2xl"
       >
         <form onSubmit={handleSaveProfile} className="space-y-5">
+          {/* Smart Resume Auto-Fill Banner */}
+          {profile?.resumeUrl && (
+            <div className="p-3 bg-gradient-to-r from-[#EFF6FF] to-[#DBEAFE]/40 border border-[#93C5FD] rounded-xl flex items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-[#2563EB] text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-xs font-bold text-[#163A5F]">Smart Resume Auto-Fill</h4>
+                  <p className="text-[11px] text-[#475569] truncate">
+                    Extract skills, marks, phone, and links directly from your PDF resume
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                icon={Sparkles}
+                onClick={handleParseExistingResume}
+                isLoading={parsingResume}
+                className="bg-white hover:bg-[#F0F7FF] text-[#2563EB] border-[#93C5FD] flex-shrink-0 text-xs font-semibold"
+              >
+                Scan Resume
+              </Button>
+            </div>
+          )}
+
           {/* Section A: Personal Information */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-[#163A5F] uppercase tracking-wider pb-1.5 border-b border-[#DBEAFE]">
@@ -1519,6 +1691,234 @@ const StudentProfile = () => {
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* AI RESUME PARSER & AUTO-FILL MODAL */}
+      <Modal
+        isOpen={isAutoFillModalOpen}
+        onClose={() => setIsAutoFillModalOpen(false)}
+        title="Resume Profile Extraction"
+        subtitle="Review the verified credentials and competencies detected from your resume PDF"
+        maxWidth="max-w-2xl"
+      >
+        <div className="space-y-4">
+          <div className="p-3.5 bg-gradient-to-r from-[#EFF6FF] via-[#F0F7FF] to-[#DBEAFE]/30 rounded-xl border border-[#BFDBFE] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#163A5F] text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                <Sparkles className="w-5 h-5 text-[#60A5FA]" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-[#163A5F]">
+                  Extraction Complete
+                </h4>
+                <p className="text-[11px] text-[#64748B]">
+                  Select the detected items you want to apply to your official placement profile.
+                </p>
+              </div>
+            </div>
+            <span className="text-[11px] font-bold text-[#2563EB] bg-white px-2.5 py-1 rounded-full border border-[#BFDBFE] shadow-2xs">
+              {parsedData?.skills?.length || 0} Skills Detected
+            </span>
+          </div>
+
+          {/* Academic & Department Details */}
+          <div className="space-y-2">
+            <h5 className="text-[11px] font-bold text-[#163A5F] uppercase tracking-wider">
+              Academic Credentials
+            </h5>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {/* Department */}
+              {parsedData?.department && (
+                <label className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${selectedFields.department ? 'bg-[#F0F7FF] border-[#2563EB]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 rounded text-[#2563EB] focus:ring-[#2563EB]"
+                    checked={selectedFields.department}
+                    onChange={(e) => setSelectedFields(prev => ({ ...prev, department: e.target.checked }))}
+                  />
+                  <div className="min-w-0">
+                    <span className="text-[11px] text-[#64748B] block">Department / Branch</span>
+                    <span className="text-xs font-bold text-[#172554]">{parsedData.department}</span>
+                  </div>
+                </label>
+              )}
+
+              {/* CGPA */}
+              {parsedData?.cgpa !== null && parsedData?.cgpa !== undefined && (
+                <label className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${selectedFields.cgpa ? 'bg-[#F0F7FF] border-[#2563EB]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 rounded text-[#2563EB] focus:ring-[#2563EB]"
+                    checked={selectedFields.cgpa}
+                    onChange={(e) => setSelectedFields(prev => ({ ...prev, cgpa: e.target.checked }))}
+                  />
+                  <div className="min-w-0">
+                    <span className="text-[11px] text-[#64748B] block">Cumulative CGPA</span>
+                    <span className="text-xs font-bold text-[#172554]">{parsedData.cgpa} / 10.0</span>
+                  </div>
+                </label>
+              )}
+
+              {/* 10th Percentage */}
+              {parsedData?.tenthPercentage && (
+                <label className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${selectedFields.tenthPercentage ? 'bg-[#F0F7FF] border-[#2563EB]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 rounded text-[#2563EB] focus:ring-[#2563EB]"
+                    checked={selectedFields.tenthPercentage}
+                    onChange={(e) => setSelectedFields(prev => ({ ...prev, tenthPercentage: e.target.checked }))}
+                  />
+                  <div className="min-w-0">
+                    <span className="text-[11px] text-[#64748B] block">10th / SSC Board Marks</span>
+                    <span className="text-xs font-bold text-[#172554]">{parsedData.tenthPercentage}%</span>
+                  </div>
+                </label>
+              )}
+
+              {/* 12th / Diploma */}
+              {parsedData?.twelfthPercentage && (
+                <label className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${selectedFields.twelfthPercentage ? 'bg-[#F0F7FF] border-[#2563EB]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                  <input
+                    type="checkbox"
+                    className="mt-0.5 rounded text-[#2563EB] focus:ring-[#2563EB]"
+                    checked={selectedFields.twelfthPercentage}
+                    onChange={(e) => setSelectedFields(prev => ({ ...prev, twelfthPercentage: e.target.checked }))}
+                  />
+                  <div className="min-w-0">
+                    <span className="text-[11px] text-[#64748B] block">12th / Diploma Marks</span>
+                    <span className="text-xs font-bold text-[#172554]">{parsedData.twelfthPercentage}%</span>
+                  </div>
+                </label>
+              )}
+            </div>
+          </div>
+
+          {/* Contact & Social Links */}
+          {(parsedData?.phone || parsedData?.githubUrl || parsedData?.linkedinUrl) && (
+            <div className="space-y-2">
+              <h5 className="text-[11px] font-bold text-[#163A5F] uppercase tracking-wider">
+                Contact & Professional Profiles
+              </h5>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {parsedData?.phone && (
+                  <label className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${selectedFields.phone ? 'bg-[#F0F7FF] border-[#2563EB]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 rounded text-[#2563EB] focus:ring-[#2563EB]"
+                      checked={selectedFields.phone}
+                      onChange={(e) => setSelectedFields(prev => ({ ...prev, phone: e.target.checked }))}
+                    />
+                    <div className="min-w-0">
+                      <span className="text-[11px] text-[#64748B] block">Mobile Phone</span>
+                      <span className="text-xs font-bold text-[#172554]">{parsedData.phone}</span>
+                    </div>
+                  </label>
+                )}
+
+                {parsedData?.githubUrl && (
+                  <label className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${selectedFields.githubUrl ? 'bg-[#F0F7FF] border-[#2563EB]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 rounded text-[#2563EB] focus:ring-[#2563EB]"
+                      checked={selectedFields.githubUrl}
+                      onChange={(e) => setSelectedFields(prev => ({ ...prev, githubUrl: e.target.checked }))}
+                    />
+                    <div className="min-w-0">
+                      <span className="text-[11px] text-[#64748B] block">GitHub</span>
+                      <span className="text-xs font-bold text-[#172554] truncate block">{parsedData.githubUrl}</span>
+                    </div>
+                  </label>
+                )}
+
+                {parsedData?.linkedinUrl && (
+                  <label className={`p-3 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${selectedFields.linkedinUrl ? 'bg-[#F0F7FF] border-[#2563EB]' : 'bg-[#F8FAFC] border-[#E2E8F0]'}`}>
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 rounded text-[#2563EB] focus:ring-[#2563EB]"
+                      checked={selectedFields.linkedinUrl}
+                      onChange={(e) => setSelectedFields(prev => ({ ...prev, linkedinUrl: e.target.checked }))}
+                    />
+                    <div className="min-w-0">
+                      <span className="text-[11px] text-[#64748B] block">LinkedIn</span>
+                      <span className="text-xs font-bold text-[#172554] truncate block">{parsedData.linkedinUrl}</span>
+                    </div>
+                  </label>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Technical Skills Section */}
+          {parsedData?.skills && parsedData.skills.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <h5 className="text-[11px] font-bold text-[#163A5F] uppercase tracking-wider">
+                  Technical Skills ({selectedSkills.length} of {parsedData.skills.length} selected)
+                </h5>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSkills([...parsedData.skills])}
+                    className="text-[11px] text-[#2563EB] hover:underline font-semibold"
+                  >
+                    Select All
+                  </button>
+                  <span className="text-[#CBD5E1]">|</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSkills([])}
+                    className="text-[11px] text-[#64748B] hover:underline"
+                  >
+                    Deselect All
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] flex flex-wrap gap-2 max-h-48 overflow-y-auto">
+                {parsedData.skills.map((skill) => {
+                  const isChecked = selectedSkills.includes(skill);
+                  return (
+                    <button
+                      key={skill}
+                      type="button"
+                      onClick={() => toggleSkillSelection(skill)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        isChecked
+                          ? 'bg-[#2563EB] text-white shadow-xs'
+                          : 'bg-white text-[#475569] border border-[#CBD5E1] hover:border-[#94A3B8]'
+                      }`}
+                    >
+                      {isChecked ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5 opacity-60" />}
+                      {skill}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Modal Actions */}
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#E2E8F0]">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAutoFillModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              icon={Sparkles}
+              isLoading={saving}
+              onClick={handleApplyParsedData}
+            >
+              Apply Selected Details
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
