@@ -1073,66 +1073,80 @@ const StudentProfile = () => {
             subtitle="Official PDF resume document submitted automatically during campus drive applications"
           >
             {profile?.resumeUrl ? (
-              <div className="p-4 rounded-xl border border-[#DBEAFE] bg-[#F0F7FF] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-11 h-11 rounded-xl bg-[#163A5F] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <FileText className="w-5 h-5" />
+              <div className="p-4 rounded-xl border border-[#DBEAFE] bg-[#F0F7FF] space-y-3.5">
+                {/* Top Section: File info & status */}
+                <div className="flex items-start sm:items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-11 h-11 rounded-xl bg-[#163A5F] text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-xs font-bold text-[#172554] truncate">
+                        {profile.resumeOriginalName || 'Student_Verified_Resume.pdf'}
+                      </h4>
+                      <p className="text-[11px] text-[#64748B] mt-0.5">
+                        PDF Document • {formatFileSize(profile.resumeSize)}
+                        {profile.resumeUpdatedAt && (
+                          <span> • Uploaded {new Date(profile.resumeUpdatedAt).toLocaleDateString()}</span>
+                        )}
+                      </p>
+                    </div>
                   </div>
-                  <div className="min-w-0">
-                    <h4 className="text-xs font-bold text-[#172554] truncate max-w-xs sm:max-w-sm">
-                      {profile.resumeOriginalName || 'Student_Verified_Resume.pdf'}
-                    </h4>
-                    <p className="text-[11px] text-[#64748B] mt-0.5">
-                      PDF Document • {formatFileSize(profile.resumeSize)}
-                      {profile.resumeUpdatedAt && (
-                        <span> • Uploaded {new Date(profile.resumeUpdatedAt).toLocaleDateString()}</span>
-                      )}
-                    </p>
-                  </div>
+
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex-shrink-0">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Verified
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-2 self-stretch sm:self-auto justify-end flex-shrink-0 flex-wrap">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    icon={Sparkles}
-                    onClick={handleParseExistingResume}
-                    isLoading={parsingResume}
-                    className="border-[#93C5FD] text-[#2563EB] hover:bg-white"
-                  >
-                    Auto-Fill Profile
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    icon={Download}
-                    onClick={handleDownloadResume}
-                  >
-                    Download
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    icon={ExternalLink}
-                    onClick={handlePreviewResume}
-                  >
-                    Preview
-                  </Button>
-
+                {/* Bottom Section: Action Toolbar */}
+                <div className="pt-3 border-t border-[#DBEAFE] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                   <Button
                     type="button"
                     variant="primary"
                     size="sm"
-                    onClick={() => resumeInputRef.current?.click()}
-                    disabled={uploadingResume}
+                    icon={Sparkles}
+                    onClick={handleParseExistingResume}
+                    isLoading={parsingResume}
+                    className="w-full sm:w-auto bg-[#2563EB] hover:bg-[#1D4ED8]"
                   >
-                    {uploadingResume ? 'Replacing...' : 'Replace PDF'}
+                    Auto-Fill Profile
                   </Button>
+
+                  <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      icon={Download}
+                      onClick={handleDownloadResume}
+                      className="bg-white hover:bg-slate-50 flex-1 sm:flex-initial"
+                    >
+                      Download
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      icon={ExternalLink}
+                      onClick={handlePreviewResume}
+                      className="hover:bg-white flex-1 sm:flex-initial"
+                    >
+                      Preview
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => resumeInputRef.current?.click()}
+                      disabled={uploadingResume}
+                      className="bg-white hover:bg-slate-50 flex-1 sm:flex-initial"
+                    >
+                      {uploadingResume ? 'Replacing...' : 'Replace PDF'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             ) : (
