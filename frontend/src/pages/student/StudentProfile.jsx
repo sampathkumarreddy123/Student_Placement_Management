@@ -46,7 +46,6 @@ import ImageCropperModal from '../../components/common/ImageCropperModal';
 import { useToast } from '../../context/ToastContext';
 import { getImageUrl } from '../../utils/imageUrl';
 import {
-  generateCandidateResumeBlob,
   downloadBlobFile,
   previewBlobFile,
   isJsonErrorBlob,
@@ -428,6 +427,10 @@ const StudentProfile = () => {
   };
 
   const handleDownloadResume = async () => {
+    if (!profile?.resumeUrl) {
+      toast.error('No resume document uploaded yet. Please choose and upload your PDF resume.');
+      return;
+    }
     const filename = profile?.resumeOriginalName || 'Student_Resume.pdf';
     try {
       const response = await studentService.downloadResume();
@@ -438,25 +441,16 @@ const StudentProfile = () => {
         return;
       }
     } catch (err) {
-      console.warn('Backend download failed, generating client fallback:', err);
+      console.warn('Backend download failed:', err);
     }
-
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: user?.name,
-      rollNumber: profile?.rollNumber,
-      department: profile?.department,
-      cgpa: profile?.cgpa,
-      email: user?.email,
-      phone: profile?.phone,
-      skills: profile?.skills,
-      tenthPercentage: profile?.tenthPercentage,
-      twelfthPercentage: profile?.twelfthPercentage,
-    });
-    downloadBlobFile(fallbackBlob, filename);
-    toast.success('Resume downloaded successfully.');
+    toast.error('Resume document is currently not available on server. Please re-upload your PDF resume.');
   };
 
   const handlePreviewResume = async () => {
+    if (!profile?.resumeUrl) {
+      toast.error('No resume document uploaded yet. Please choose and upload your PDF resume.');
+      return;
+    }
     try {
       const response = await studentService.downloadResume();
       const isError = await isJsonErrorBlob(response.data);
@@ -465,21 +459,9 @@ const StudentProfile = () => {
         return;
       }
     } catch (err) {
-      console.warn('Backend preview failed, generating client fallback:', err);
+      console.warn('Backend preview failed:', err);
     }
-
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: user?.name,
-      rollNumber: profile?.rollNumber,
-      department: profile?.department,
-      cgpa: profile?.cgpa,
-      email: user?.email,
-      phone: profile?.phone,
-      skills: profile?.skills,
-      tenthPercentage: profile?.tenthPercentage,
-      twelfthPercentage: profile?.twelfthPercentage,
-    });
-    previewBlobFile(fallbackBlob);
+    toast.error('Resume document is currently not available on server. Please re-upload your PDF resume.');
   };
 
   const formatFileSize = (bytes) => {

@@ -22,16 +22,17 @@ import Button from '../common/Button';
 import LoadingSpinner from '../common/LoadingSpinner';
 import { studentService } from '../../services/studentService';
 import { applicationService } from '../../services/applicationService';
+import { useToast } from '../../context/ToastContext';
 import { formatDate, formatLPA } from '../../utils/formatters';
 import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
 import {
-  generateCandidateResumeBlob,
   downloadBlobFile,
   previewBlobFile,
   isJsonErrorBlob,
 } from '../../utils/clientPdfGenerator';
 
 const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId, onDelete }) => {
+  const toast = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
@@ -67,6 +68,10 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId, onDele
 
   const handleDownloadResume = async () => {
     if (!applicationId && !student?._id && !studentId) return;
+    if (!student?.resumeUrl) {
+      toast.warning('This candidate has not uploaded a resume document yet.');
+      return;
+    }
     const candidateName = (student?.name || 'Candidate').replace(/\s+/g, '_');
     const filename = student?.resumeOriginalName || `${candidateName}_Resume.pdf`;
 
@@ -82,31 +87,24 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId, onDele
       const isError = await isJsonErrorBlob(response.data);
       if (!isError && response.data && response.data.size > 100) {
         downloadBlobFile(new Blob([response.data], { type: 'application/pdf' }), filename);
+        toast.success(`Resume downloaded for ${student?.name || 'candidate'}.`);
         return;
       }
     } catch (err) {
-      console.warn('Backend download call failed, generating verified client snapshot:', err);
+      console.warn('Backend download call failed:', err);
     } finally {
       setDownloading(false);
     }
 
-    // High-res client PDF generator fallback so user NEVER sees a 404
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: student?.name,
-      rollNumber: student?.rollNumber,
-      department: student?.department,
-      cgpa: student?.cgpa,
-      email: student?.email,
-      phone: student?.phone,
-      skills: student?.skills,
-      tenthPercentage: student?.tenthPercentage,
-      twelfthPercentage: student?.twelfthPercentage,
-    });
-    downloadBlobFile(fallbackBlob, filename);
+    toast.error('Candidate\'s original resume file is not available on the server.');
   };
 
   const handleViewResume = async () => {
-    if (!applicationId && !student?._id && !studentId && !student?.resumeUrl) return;
+    if (!applicationId && !student?._id && !studentId) return;
+    if (!student?.resumeUrl) {
+      toast.warning('This candidate has not uploaded a resume document yet.');
+      return;
+    }
 
     try {
       setViewing(true);
@@ -123,24 +121,12 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId, onDele
         return;
       }
     } catch (err) {
-      console.warn('Backend preview call failed, generating verified client snapshot:', err);
+      console.warn('Backend preview call failed:', err);
     } finally {
       setViewing(false);
     }
 
-    // High-res client PDF generator fallback
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: student?.name,
-      rollNumber: student?.rollNumber,
-      department: student?.department,
-      cgpa: student?.cgpa,
-      email: student?.email,
-      phone: student?.phone,
-      skills: student?.skills,
-      tenthPercentage: student?.tenthPercentage,
-      twelfthPercentage: student?.twelfthPercentage,
-    });
-    previewBlobFile(fallbackBlob);
+    toast.error('Candidate\'s original resume file is not available on the server.');
   };
 
   return (
@@ -312,46 +298,62 @@ const StudentProfileModal = ({ isOpen, onClose, studentId, applicationId, onDele
           </div>
 
           {/* Resume Download Box */}
-          <div className="p-3.5 rounded-xl bg-[#F0F7FF] border border-[#DBEAFE] flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="p-2 rounded-lg bg-[#DBEAFE] text-[#163A5F] flex-shrink-0">
+          {student.resumeUrl ? (
+            <div className="p-3.5 rounded-xl bg-[#F0F7FF] border border-[#DBEAFE] flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="p-2 rounded-lg bg-[#DBEAFE] text-[#163A5F] flex-shrink-0">
+                  <FileText className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <span className="font-semibold text-[#172554] block truncate text-xs">
+                    {student.resumeOriginalName || 'Candidate Resume (PDF)'}
+                  </span>
+                  <span className="text-[11px] text-[#64748B] block">
+                    {student.resumeSize
+                      ? `${(student.resumeSize / 1024).toFixed(1)} KB • Verified PDF Document`
+                      : 'PDF Resume document available'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  icon={ExternalLink}
+                  isLoading={viewing}
+                  onClick={handleViewResume}
+                  title="Preview candidate resume in a new browser tab"
+                >
+                  Preview
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Download}
+                  isLoading={downloading}
+                  onClick={handleDownloadResume}
+                  title="Download candidate resume file"
+                >
+                  Download
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-amber-100 text-amber-700 flex-shrink-0">
                 <FileText className="w-5 h-5" />
               </div>
               <div className="min-w-0">
-                <span className="font-semibold text-[#172554] block truncate text-xs">
-                  {student.resumeOriginalName || 'Candidate Resume (PDF)'}
+                <span className="font-semibold text-amber-900 block truncate text-xs">
+                  No Resume Document Uploaded
                 </span>
-                <span className="text-[11px] text-[#64748B] block">
-                  {student.resumeSize
-                    ? `${(student.resumeSize / 1024).toFixed(1)} KB • Verified PDF Document`
-                    : 'PDF Resume document available'}
+                <span className="text-[11px] text-amber-700 block">
+                  Candidate has not uploaded a PDF resume to their profile yet.
                 </span>
               </div>
             </div>
-
-            <div className="flex items-center gap-2 flex-shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                icon={ExternalLink}
-                isLoading={viewing}
-                onClick={handleViewResume}
-                title="Preview candidate resume in a new browser tab"
-              >
-                Preview
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={Download}
-                isLoading={downloading}
-                onClick={handleDownloadResume}
-                title="Download candidate resume file"
-              >
-                Download
-              </Button>
-            </div>
-          </div>
+          )}
 
           {/* Past Drive Applications History */}
           <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 space-y-3">

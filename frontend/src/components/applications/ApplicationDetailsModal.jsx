@@ -23,14 +23,15 @@ import Button from '../common/Button';
 import { formatDate, formatLPA } from '../../utils/formatters';
 import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
 import { applicationService } from '../../services/applicationService';
+import { useToast } from '../../context/ToastContext';
 import {
-  generateCandidateResumeBlob,
   downloadBlobFile,
   previewBlobFile,
   isJsonErrorBlob,
 } from '../../utils/clientPdfGenerator';
 
 const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
+  const toast = useToast();
   if (!application) return null;
 
   const company = application.company || application.drive?.company;
@@ -76,6 +77,10 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
   }, [application]);
 
   const handleDownloadResume = async () => {
+    if (!resume.resumeUrl && !application.studentProfile?.resumeUrl) {
+      toast.warning('No resume document was attached to this application.');
+      return;
+    }
     const candidateName = (application.student?.name || 'Applicant').replace(/\s+/g, '_');
     const filename = resume.resumeOriginalName || `${candidateName}_Resume.pdf`;
 
@@ -85,25 +90,21 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
         const isError = await isJsonErrorBlob(response.data);
         if (!isError && response.data && response.data.size > 100) {
           downloadBlobFile(new Blob([response.data], { type: 'application/pdf' }), filename);
+          toast.success('Resume downloaded successfully.');
           return;
         }
       } catch (e) {
-        console.warn('Backend download failed, generating client fallback:', e);
+        console.warn('Backend download failed:', e);
       }
     }
-
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: application.student?.name,
-      rollNumber: resume.studentRollNumber,
-      department: resume.studentDepartment,
-      cgpa: resume.studentCgpa,
-      email: application.student?.email,
-      skills: resume.skills,
-    });
-    downloadBlobFile(fallbackBlob, filename);
+    toast.error('The candidate\'s original resume file is not available on the server.');
   };
 
   const handleViewResume = async () => {
+    if (!resume.resumeUrl && !application.studentProfile?.resumeUrl) {
+      toast.warning('No resume document was attached to this application.');
+      return;
+    }
     if (application._id) {
       try {
         const response = await applicationService.previewApplicantResume(application._id);
@@ -113,19 +114,10 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
           return;
         }
       } catch (e) {
-        console.warn('Backend preview failed, generating client fallback:', e);
+        console.warn('Backend preview failed:', e);
       }
     }
-
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: application.student?.name,
-      rollNumber: resume.studentRollNumber,
-      department: resume.studentDepartment,
-      cgpa: resume.studentCgpa,
-      email: application.student?.email,
-      skills: resume.skills,
-    });
-    previewBlobFile(fallbackBlob);
+    toast.error('The candidate\'s original resume file is not available on the server.');
   };
 
   return (
@@ -387,7 +379,7 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
               </div>
             </div>
 
-            {resume.resumeUrl && (
+            {resume.resumeUrl ? (
               <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                 <Button
                   variant="outline"
@@ -408,6 +400,8 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
                   Download
                 </Button>
               </div>
+            ) : (
+              <span className="text-xs text-amber-600 font-medium italic">No file attached</span>
             )}
           </div>
         </div>

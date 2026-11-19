@@ -31,7 +31,6 @@ import { useToast } from '../../context/ToastContext';
 import { formatDate, formatLPA } from '../../utils/formatters';
 import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
 import {
-  generateCandidateResumeBlob,
   downloadBlobFile,
   previewBlobFile,
   isJsonErrorBlob,
@@ -205,6 +204,11 @@ const ManageApplications = () => {
 
   // Download student resume
   const handleDownloadResume = async (app) => {
+    if (!app.resumeSnapshot?.resumeUrl && !app.studentProfile?.resumeUrl) {
+      toast.warning(`No resume document uploaded for ${app.student?.name || 'this candidate'}.`);
+      return;
+    }
+
     const candidateName = (app.student?.name || 'Applicant').replace(/\s+/g, '_');
     const filename =
       app.resumeSnapshot?.resumeOriginalName ||
@@ -221,28 +225,21 @@ const ManageApplications = () => {
         return;
       }
     } catch (err) {
-      console.warn('Backend download failed, generating client fallback resume:', err);
+      console.warn('Backend download failed:', err);
     } finally {
       setDownloadingAppId(null);
     }
 
-    // High-res client PDF generator fallback so officer NEVER sees 404
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: app.student?.name,
-      rollNumber: app.studentProfile?.rollNumber || app.resumeSnapshot?.studentRollNumber,
-      department: app.studentProfile?.department || app.resumeSnapshot?.studentDepartment,
-      cgpa: app.studentProfile?.cgpa ?? app.resumeSnapshot?.studentCgpa,
-      email: app.student?.email,
-      skills: app.studentProfile?.skills || app.resumeSnapshot?.skills,
-      tenthPercentage: app.studentProfile?.tenthPercentage,
-      twelfthPercentage: app.studentProfile?.twelfthPercentage,
-    });
-    downloadBlobFile(fallbackBlob, filename);
-    toast.success(`Resume for ${app.student?.name || 'candidate'} downloaded.`);
+    toast.error(`Original resume file is not available on server for ${app.student?.name || 'this candidate'}.`);
   };
 
   // View / Show candidate resume
   const handleViewResume = async (app) => {
+    if (!app.resumeSnapshot?.resumeUrl && !app.studentProfile?.resumeUrl) {
+      toast.warning(`No resume document uploaded for ${app.student?.name || 'this candidate'}.`);
+      return;
+    }
+
     try {
       setViewingAppId(app._id);
       const response = await applicationService.previewApplicantResume(app._id);
@@ -252,24 +249,12 @@ const ManageApplications = () => {
         return;
       }
     } catch (err) {
-      console.warn('Backend preview failed, generating client fallback resume:', err);
+      console.warn('Backend preview failed:', err);
     } finally {
       setViewingAppId(null);
     }
 
-    // High-res client PDF generator fallback
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: app.student?.name,
-      rollNumber: app.studentProfile?.rollNumber || app.resumeSnapshot?.studentRollNumber,
-      department: app.studentProfile?.department || app.resumeSnapshot?.studentDepartment,
-      cgpa: app.studentProfile?.cgpa ?? app.resumeSnapshot?.studentCgpa,
-      email: app.student?.email,
-      skills: app.studentProfile?.skills || app.resumeSnapshot?.skills,
-      tenthPercentage: app.studentProfile?.tenthPercentage,
-      twelfthPercentage: app.studentProfile?.twelfthPercentage,
-    });
-    previewBlobFile(fallbackBlob);
-    toast.info(`Opened resume preview for ${app.student?.name || 'candidate'}.`);
+    toast.error(`Original resume file is not available on server for ${app.student?.name || 'this candidate'}.`);
   };
 
   const hasActiveFilters =

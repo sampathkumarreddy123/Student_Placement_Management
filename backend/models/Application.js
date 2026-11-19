@@ -38,6 +38,10 @@ const applicationSchema = new mongoose.Schema(
         type: Number,
         default: 0,
       },
+      resumeData: {
+        type: String,
+        select: false,
+      },
       studentCgpa: {
         type: Number,
       },

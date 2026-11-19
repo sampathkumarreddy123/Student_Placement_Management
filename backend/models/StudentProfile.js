@@ -86,6 +86,10 @@ const studentProfileSchema = new mongoose.Schema(
     resumeUpdatedAt: {
       type: Date,
     },
+    resumeData: {
+      type: String,
+      select: false,
+    },
     githubUrl: {
       type: String,
       trim: true,

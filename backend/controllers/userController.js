@@ -8,7 +8,6 @@ import PlacementDrive from '../models/PlacementDrive.js';
 import Company from '../models/Company.js';
 import OfficerProfile from '../models/OfficerProfile.js';
 import Notification from '../models/Notification.js';
-import { generateCandidateResumePdf } from '../utils/pdfGenerator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -343,6 +342,17 @@ export const uploadResumeFile = async (req, res, next) => {
     profile.resumeSize = req.file.size;
     profile.resumeUpdatedAt = new Date();
 
+    // Persist actual original PDF binary in MongoDB so it is NEVER lost across container restarts
+    try {
+      if (fs.existsSync(req.file.path)) {
+        const fileBuf = fs.readFileSync(req.file.path);
+        profile.resumeData = fileBuf.toString('base64');
+        profile.markModified('resumeData');
+      }
+    } catch (readErr) {
+      console.warn('Could not read uploaded PDF file into MongoDB buffer:', readErr.message);
+    }
+
     await profile.save();
 
     const completion = calculateProfileCompletion(req.user, profile);
@@ -368,11 +378,11 @@ export const uploadResumeFile = async (req, res, next) => {
 // @access  Private (Student)
 export const downloadResumeFile = async (req, res, next) => {
   try {
-    const profile = await StudentProfile.findOne({ user: req.user._id });
+    const profile = await StudentProfile.findOne({ user: req.user._id }).select('+resumeData');
     if (!profile || !profile.resumeUrl) {
       return res.status(404).json({
         success: false,
-        message: 'No resume has been uploaded yet.',
+        message: 'No resume document has been uploaded yet. Please upload your PDF resume in your Student Profile.',
       });
     }
 
@@ -384,28 +394,21 @@ export const downloadResumeFile = async (req, res, next) => {
     const filename = path.basename(profile.resumeUrl);
     let filePath = path.join(__dirname, '../uploads/resumes', filename);
 
-    if (!fs.existsSync(filePath)) {
+    // If file missing on disk (e.g. Render restarted container), restore EXACT original PDF from MongoDB
+    if (!fs.existsSync(filePath) || fs.statSync(filePath).size < 100) {
       const altPath = path.join(__dirname, '../uploads', filename);
-      if (fs.existsSync(altPath)) {
+      if (fs.existsSync(altPath) && fs.statSync(altPath).size >= 100) {
         filePath = altPath;
-      } else {
+      } else if (profile.resumeData) {
         try {
           const resumesDir = path.join(__dirname, '../uploads/resumes');
           if (!fs.existsSync(resumesDir)) {
             fs.mkdirSync(resumesDir, { recursive: true });
           }
-          const defaultPdf = generateCandidateResumePdf({
-            name: req.user.name,
-            rollNumber: profile.rollNumber,
-            department: profile.department,
-            cgpa: profile.cgpa,
-            email: req.user.email,
-            phone: profile.phone,
-            skills: profile.skills,
-          });
-          fs.writeFileSync(filePath, defaultPdf);
-        } catch (e) {
-          console.error('Error generating fallback resume PDF:', e);
+          const buf = Buffer.from(profile.resumeData, 'base64');
+          fs.writeFileSync(filePath, buf);
+        } catch (restoreErr) {
+          console.error('Error restoring original resume PDF from MongoDB:', restoreErr);
         }
       }
     }
@@ -413,7 +416,7 @@ export const downloadResumeFile = async (req, res, next) => {
     const downloadName =
       profile.resumeOriginalName || `${req.user.name.replace(/\s+/g, '_')}_Resume.pdf`;
 
-    if (fs.existsSync(filePath)) {
+    if (fs.existsSync(filePath) && fs.statSync(filePath).size >= 100) {
       if (isInline) {
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader(
@@ -425,8 +428,20 @@ export const downloadResumeFile = async (req, res, next) => {
       return res.download(filePath, downloadName);
     }
 
-    // If external URL
-    return res.redirect(profile.resumeUrl);
+    if (profile.resumeData) {
+      const buf = Buffer.from(profile.resumeData, 'base64');
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader(
+        'Content-Disposition',
+        `${isInline ? 'inline' : 'attachment'}; filename="${encodeURIComponent(downloadName)}"`
+      );
+      return res.send(buf);
+    }
+
+    return res.status(404).json({
+      success: false,
+      message: 'Original resume document is missing on the server. Please re-upload your PDF resume.',
+    });
   } catch (error) {
     next(error);
   }
@@ -438,9 +453,9 @@ export const downloadResumeFile = async (req, res, next) => {
 export const getStudentResumeFile = async (req, res, next) => {
   try {
     const { id } = req.params;
-    let profile = await StudentProfile.findById(id).populate('user', 'name email');
+    let profile = await StudentProfile.findById(id).select('+resumeData').populate('user', 'name email');
     if (!profile) {
-      profile = await StudentProfile.findOne({ user: id }).populate('user', 'name email');
+      profile = await StudentProfile.findOne({ user: id }).select('+resumeData').populate('user', 'name email');
     }
 
     if (!profile) {
@@ -475,33 +490,26 @@ export const getStudentResumeFile = async (req, res, next) => {
       const filename = path.basename(resumeUrl);
       let filePath = path.join(__dirname, '../uploads/resumes', filename);
 
-      if (!fs.existsSync(filePath)) {
+      // Restore exact original PDF from MongoDB if missing on disk
+      if (!fs.existsSync(filePath) || fs.statSync(filePath).size < 100) {
         const altPath = path.join(__dirname, '../uploads', filename);
-        if (fs.existsSync(altPath)) {
+        if (fs.existsSync(altPath) && fs.statSync(altPath).size >= 100) {
           filePath = altPath;
-        } else {
+        } else if (profile.resumeData) {
           try {
             const resumesDir = path.join(__dirname, '../uploads/resumes');
             if (!fs.existsSync(resumesDir)) {
               fs.mkdirSync(resumesDir, { recursive: true });
             }
-            const defaultPdf = generateCandidateResumePdf({
-              name: studentName,
-              rollNumber: profile.rollNumber,
-              department: profile.department,
-              cgpa: profile.cgpa,
-              email: profile.user?.email || profile.email,
-              phone: profile.phone,
-              skills: profile.skills,
-            });
-            fs.writeFileSync(filePath, defaultPdf);
-          } catch (e) {
-            console.error('Error generating fallback resume PDF:', e);
+            const buf = Buffer.from(profile.resumeData, 'base64');
+            fs.writeFileSync(filePath, buf);
+          } catch (restoreErr) {
+            console.error('Error restoring original resume PDF from MongoDB:', restoreErr);
           }
         }
       }
 
-      if (fs.existsSync(filePath)) {
+      if (fs.existsSync(filePath) && fs.statSync(filePath).size >= 100) {
         if (isInline) {
           res.setHeader('Content-Type', 'application/pdf');
           res.setHeader(
@@ -512,9 +520,26 @@ export const getStudentResumeFile = async (req, res, next) => {
         }
         return res.download(filePath, originalName);
       }
+
+      if (profile.resumeData) {
+        const buf = Buffer.from(profile.resumeData, 'base64');
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+          'Content-Disposition',
+          `${isInline ? 'inline' : 'attachment'}; filename="${encodeURIComponent(originalName)}"`
+        );
+        return res.send(buf);
+      }
     }
 
-    return res.redirect(resumeUrl);
+    if (profile.resumeUrl.startsWith('http://') || profile.resumeUrl.startsWith('https://')) {
+      return res.redirect(profile.resumeUrl);
+    }
+
+    return res.status(404).json({
+      success: false,
+      message: 'The original resume document uploaded for this student is not available on the server.',
+    });
   } catch (error) {
     next(error);
   }

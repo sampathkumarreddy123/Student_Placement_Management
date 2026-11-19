@@ -5,7 +5,6 @@ import Application from '../models/Application.js';
 import PlacementDrive from '../models/PlacementDrive.js';
 import RecruitmentRound from '../models/RecruitmentRound.js';
 import StudentProfile from '../models/StudentProfile.js';
-import { generateCandidateResumePdf } from '../utils/pdfGenerator.js';
 import { checkEligibility } from '../services/eligibilityService.js';
 import {
   notifyOnApplicationSubmitted,
@@ -63,8 +62,8 @@ export const applyForDrive = async (req, res, next) => {
       });
     }
 
-    // 4. Check if student profile exists
-    const profile = await StudentProfile.findOne({ user: req.user._id });
+    // 4. Check if student profile exists (including binary resumeData)
+    const profile = await StudentProfile.findOne({ user: req.user._id }).select('+resumeData');
     if (!profile) {
       return res.status(400).json({
         success: false,
@@ -149,6 +148,7 @@ export const applyForDrive = async (req, res, next) => {
         resumeUrl: resumeUrl,
         resumeOriginalName: profile.resumeOriginalName || profile.resume?.originalName || 'Resume.pdf',
         resumeSize: profile.resumeSize || profile.resume?.fileSize || 0,
+        resumeData: profile.resumeData || '',
         studentCgpa: studentCgpa,
         studentDepartment: department,
         studentRollNumber: rollNumber,
@@ -320,41 +320,38 @@ export const downloadApplicantResume = async (req, res, next) => {
       const filename = path.basename(resumeUrl);
       let filePath = path.join(__dirname, '../uploads/resumes', filename);
 
-      if (!fs.existsSync(filePath)) {
+      if (!fs.existsSync(filePath) || fs.statSync(filePath).size < 100) {
         const altPath = path.join(__dirname, '../uploads', filename);
-        if (fs.existsSync(altPath)) {
+        if (fs.existsSync(altPath) && fs.statSync(altPath).size >= 100) {
           filePath = altPath;
         } else {
-          // Generate fallback minimal valid PDF on disk so user never gets a broken 404
-          try {
-            const resumesDir = path.join(__dirname, '../uploads/resumes');
-            if (!fs.existsSync(resumesDir)) {
-              fs.mkdirSync(resumesDir, { recursive: true });
+          // Restore exact original PDF from MongoDB resumeData if available
+          let base64Pdf = application.resumeSnapshot?.resumeData;
+          if (!base64Pdf && application.studentProfile) {
+            try {
+              const sp = await StudentProfile.findById(application.studentProfile._id || application.studentProfile).select('+resumeData');
+              base64Pdf = sp?.resumeData;
+            } catch (err) {
+              console.warn('Could not query StudentProfile for resume data:', err.message);
             }
-            const fallbackPdf = generateCandidateResumePdf({
-              name: candidateName,
-              rollNumber:
-                application.studentProfile?.rollNumber ||
-                application.resumeSnapshot?.studentRollNumber,
-              department:
-                application.studentProfile?.department ||
-                application.resumeSnapshot?.studentDepartment,
-              cgpa:
-                application.studentProfile?.cgpa ||
-                application.resumeSnapshot?.studentCgpa,
-              email: application.student?.email,
-              skills:
-                application.studentProfile?.skills ||
-                application.resumeSnapshot?.skills,
-            });
-            fs.writeFileSync(filePath, fallbackPdf);
-          } catch (writeErr) {
-            console.error('Error writing fallback resume:', writeErr);
+          }
+
+          if (base64Pdf) {
+            try {
+              const resumesDir = path.join(__dirname, '../uploads/resumes');
+              if (!fs.existsSync(resumesDir)) {
+                fs.mkdirSync(resumesDir, { recursive: true });
+              }
+              const buf = Buffer.from(base64Pdf, 'base64');
+              fs.writeFileSync(filePath, buf);
+            } catch (restoreErr) {
+              console.error('Error restoring original resume PDF from MongoDB:', restoreErr);
+            }
           }
         }
       }
 
-      if (fs.existsSync(filePath)) {
+      if (fs.existsSync(filePath) && fs.statSync(filePath).size >= 100) {
         if (isInline) {
           res.setHeader('Content-Type', 'application/pdf');
           res.setHeader(

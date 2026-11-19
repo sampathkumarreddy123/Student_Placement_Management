@@ -30,7 +30,6 @@ import { useToast } from '../../context/ToastContext';
 import { formatDate, formatLPA } from '../../utils/formatters';
 import { getResumeUrl } from '../../utils/imageUrl';
 import {
-  generateCandidateResumeBlob,
   downloadBlobFile,
   previewBlobFile,
   isJsonErrorBlob,
@@ -143,6 +142,11 @@ const ManageRounds = () => {
     const candidateName = student.name || 'Candidate';
     const applicationId = cand.applicationId;
 
+    if (!student.resumeUrl && !cand.resumeUrl) {
+      toast.warning(`No resume document uploaded for ${candidateName}.`);
+      return;
+    }
+
     if (applicationId) {
       try {
         const res = await applicationService.previewApplicantResume(applicationId);
@@ -152,19 +156,11 @@ const ManageRounds = () => {
           return;
         }
       } catch (err) {
-        console.warn('Backend preview failed, falling back to client generation:', err);
+        console.warn('Backend preview failed:', err);
       }
     }
 
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: student.name,
-      rollNumber: student.rollNumber,
-      department: student.department,
-      cgpa: student.cgpa,
-      email: student.email,
-    });
-    previewBlobFile(fallbackBlob);
-    toast.info(`Opened resume preview for ${candidateName}.`);
+    toast.error(`Original resume file is not available on server for ${candidateName}.`);
   };
 
   const handleDownloadCandidateResume = async (cand) => {
@@ -172,6 +168,11 @@ const ManageRounds = () => {
     const candidateName = (student.name || 'Candidate').replace(/\s+/g, '_');
     const filename = `${candidateName}_Resume.pdf`;
     const applicationId = cand.applicationId;
+
+    if (!student.resumeUrl && !cand.resumeUrl) {
+      toast.warning(`No resume document uploaded for ${student.name || 'this candidate'}.`);
+      return;
+    }
 
     if (applicationId) {
       try {
@@ -183,19 +184,11 @@ const ManageRounds = () => {
           return;
         }
       } catch (err) {
-        console.warn('Backend download failed, falling back to client generation:', err);
+        console.warn('Backend download failed:', err);
       }
     }
 
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: student.name,
-      rollNumber: student.rollNumber,
-      department: student.department,
-      cgpa: student.cgpa,
-      email: student.email,
-    });
-    downloadBlobFile(fallbackBlob, filename);
-    toast.success(`Resume downloaded for ${candidateName}.`);
+    toast.error(`Original resume file is not available on server for ${candidateName}.`);
   };
 
   // Open Add/Edit Round Modal

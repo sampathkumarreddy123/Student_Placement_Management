@@ -23,7 +23,6 @@ import Pagination from '../../components/common/Pagination';
 import StudentProfileModal from '../../components/officer/StudentProfileModal';
 import { getImageUrl, getResumeUrl } from '../../utils/imageUrl';
 import {
-  generateCandidateResumeBlob,
   downloadBlobFile,
   previewBlobFile,
   isJsonErrorBlob,
@@ -89,6 +88,11 @@ const ManageStudents = () => {
     const studentId = profile._id || profile.user?._id || profile.user;
     const candidateName = profile.user?.name || profile.rollNumber || 'Candidate';
 
+    if (!profile.resumeUrl) {
+      toast.warning(`No resume document uploaded yet for ${candidateName}.`);
+      return;
+    }
+
     try {
       setPreviewingId(studentId);
       const res = await studentService.previewStudentResume(studentId);
@@ -98,25 +102,12 @@ const ManageStudents = () => {
         return;
       }
     } catch (err) {
-      console.warn('Backend resume preview call failed, generating verified client snapshot:', err);
+      console.warn('Backend resume preview call failed:', err);
     } finally {
       setPreviewingId(null);
     }
 
-    // High-res client PDF generator fallback so user NEVER sees a 404
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: profile.user?.name || profile.name,
-      rollNumber: profile.rollNumber,
-      department: profile.department,
-      cgpa: profile.cgpa,
-      email: profile.user?.email || profile.email,
-      phone: profile.phone,
-      skills: profile.skills,
-      tenthPercentage: profile.tenthPercentage,
-      twelfthPercentage: profile.twelfthPercentage,
-    });
-    previewBlobFile(fallbackBlob);
-    toast.info(`Opened resume preview for ${candidateName}.`);
+    toast.error(`Original resume file is not available on server for ${candidateName}.`);
   };
 
   const handleDownloadResume = async (profile) => {
@@ -124,6 +115,11 @@ const ManageStudents = () => {
     if (!studentId) return;
     const name = profile.user?.name || profile.rollNumber || 'Student';
     const filename = profile.resumeOriginalName || `${name.replace(/\s+/g, '_')}_Resume.pdf`;
+
+    if (!profile.resumeUrl) {
+      toast.warning(`No resume document uploaded yet for ${name}.`);
+      return;
+    }
 
     try {
       setDownloadingId(studentId);
@@ -135,25 +131,12 @@ const ManageStudents = () => {
         return;
       }
     } catch (err) {
-      console.warn('Backend resume download call failed, generating verified client snapshot:', err);
+      console.warn('Backend resume download call failed:', err);
     } finally {
       setDownloadingId(null);
     }
 
-    // High-res client PDF generator fallback
-    const fallbackBlob = generateCandidateResumeBlob({
-      name: profile.user?.name || profile.name,
-      rollNumber: profile.rollNumber,
-      department: profile.department,
-      cgpa: profile.cgpa,
-      email: profile.user?.email || profile.email,
-      phone: profile.phone,
-      skills: profile.skills,
-      tenthPercentage: profile.tenthPercentage,
-      twelfthPercentage: profile.twelfthPercentage,
-    });
-    downloadBlobFile(fallbackBlob, filename);
-    toast.success(`Resume downloaded for ${name}.`);
+    toast.error(`Original resume file is not available on server for ${name}.`);
   };
 
   const fetchStudents = async () => {
