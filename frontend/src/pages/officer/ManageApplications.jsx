@@ -12,6 +12,9 @@ import {
   RotateCcw,
   Users,
   FileText,
+  Sparkles,
+  CheckCircle2,
+  Award,
 } from 'lucide-react';
 import { applicationService } from '../../services/applicationService';
 import { driveService } from '../../services/driveService';
@@ -46,6 +49,14 @@ const STATUS_OPTIONS = [
   'Rejected',
 ];
 
+const AI_FIT_OPTIONS = [
+  'All Matches',
+  'Excellent Fit',
+  'Strong Fit',
+  'Moderate Fit',
+  'Low Fit',
+];
+
 const DEPARTMENTS = [
   'All',
   'Computer Science',
@@ -68,7 +79,8 @@ const CGPA_FILTERS = [
 
 const SORT_OPTIONS = [
   { label: 'Applied Date (Newest first)', sortBy: 'appliedAt', sortOrder: 'desc' },
-  { label: 'Applied Date (Oldest first)', sortBy: 'appliedAt', sortOrder: 'asc' },
+  { label: 'AI Match Score (Highest first)', sortBy: 'aiScore', sortOrder: 'desc' },
+  { label: 'AI Match Score (Lowest first)', sortBy: 'aiScore', sortOrder: 'asc' },
   { label: 'CGPA (Highest first)', sortBy: 'cgpa', sortOrder: 'desc' },
   { label: 'CGPA (Lowest first)', sortBy: 'cgpa', sortOrder: 'asc' },
   { label: 'Candidate Name (A-Z)', sortBy: 'name', sortOrder: 'asc' },
@@ -94,6 +106,7 @@ const ManageApplications = () => {
   const [selectedDepartment, setSelectedDepartment] = useState('All');
   const [selectedCgpa, setSelectedCgpa] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('All');
+  const [selectedAiFit, setSelectedAiFit] = useState('All Matches');
   const [sortIndex, setSortIndex] = useState(0);
 
   // Pagination
@@ -102,12 +115,14 @@ const ManageApplications = () => {
   const [totalApplicants, setTotalApplicants] = useState(0);
   const limit = 10;
 
-  // Modals state
+  // Modals state & screening loaders
   const [appForStatusUpdate, setAppForStatusUpdate] = useState(null);
   const [profileTarget, setProfileTarget] = useState(null);
   const [appForHistory, setAppForHistory] = useState(null);
   const [downloadingAppId, setDownloadingAppId] = useState(null);
   const [viewingAppId, setViewingAppId] = useState(null);
+  const [screeningDrive, setScreeningDrive] = useState(false);
+  const [screeningAppId, setScreeningAppId] = useState(null);
 
   // 1. Fetch available placement drives
   const fetchDrives = async () => {
@@ -138,6 +153,9 @@ const ManageApplications = () => {
       if (selectedCgpa) params.minCgpa = selectedCgpa;
       if (selectedStatus && selectedStatus !== 'All') {
         params.status = selectedStatus;
+      }
+      if (selectedAiFit && selectedAiFit !== 'All Matches') {
+        params.aiFit = selectedAiFit;
       }
 
       let res;
@@ -178,7 +196,7 @@ const ManageApplications = () => {
     } else {
       setSearchParams({});
     }
-  }, [selectedDriveId, selectedStatus, selectedDepartment, selectedCgpa, sortIndex]);
+  }, [selectedDriveId, selectedStatus, selectedDepartment, selectedCgpa, selectedAiFit, sortIndex]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -191,8 +209,51 @@ const ManageApplications = () => {
     setSelectedDepartment('All');
     setSelectedCgpa('');
     setSelectedStatus('All');
+    setSelectedAiFit('All Matches');
     setSortIndex(0);
     setCurrentPage(1);
+  };
+
+  // Run AI candidate screening for all applicants of the selected drive
+  const handleScreenDrive = async () => {
+    if (!selectedDriveId) {
+      toast.warning('Please select a placement drive above to run AI screening.');
+      return;
+    }
+    try {
+      setScreeningDrive(true);
+      const res = await applicationService.screenDriveApplicants(selectedDriveId);
+      toast.success(res.message || 'AI candidate screening completed!');
+      // Set sort order to AI Match Score (Highest first) -> index 1 in SORT_OPTIONS
+      setSortIndex(1);
+      await fetchApplicants(1);
+    } catch (err) {
+      console.error('Failed to run AI drive screening:', err);
+      toast.error(err.response?.data?.message || err.message || 'Failed to complete AI screening.');
+    } finally {
+      setScreeningDrive(false);
+    }
+  };
+
+  // Run AI candidate screening for a single applicant
+  const handleScreenSingle = async (app) => {
+    try {
+      setScreeningAppId(app._id);
+      const res = await applicationService.screenSingleApplicant(app._id);
+      toast.success(`AI evaluated ${app.student?.name || 'candidate'}: ${res.aiScreening?.score}% Match (${res.aiScreening?.fitLevel})`);
+      setApplications((prev) =>
+        prev.map((item) =>
+          item._id === app._id
+            ? { ...item, aiScreening: res.aiScreening }
+            : item
+        )
+      );
+    } catch (err) {
+      console.error('Failed to screen applicant:', err);
+      toast.error(err.response?.data?.message || err.message || 'Failed to screen applicant.');
+    } finally {
+      setScreeningAppId(null);
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -262,6 +323,7 @@ const ManageApplications = () => {
     selectedDepartment !== 'All' ||
     Boolean(selectedCgpa) ||
     selectedStatus !== 'All' ||
+    selectedAiFit !== 'All Matches' ||
     sortIndex !== 0;
 
   // Selected Drive details fallback
@@ -273,7 +335,7 @@ const ManageApplications = () => {
       <PageHeader
         category="Applicant Management"
         title="Placement Drive Applicants"
-        subtitle="Review candidate qualifications, inspect academic profiles, download resumes, and manage hiring outcomes"
+        subtitle="Review candidate qualifications, inspect academic profiles, download resumes, and run AI match screening"
         badge={`${totalApplicants} ${totalApplicants === 1 ? 'Applicant' : 'Total Applicants'}`}
         actions={
           selectedDriveId && (
@@ -355,13 +417,18 @@ const ManageApplications = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 text-xs flex-shrink-0">
-              <div className="text-right">
-                <span className="text-[11px] text-[#64748B] block">Cutoff Requirement</span>
-                <span className="font-semibold text-[#172554] block">
-                  {driveInfo.eligibilityCriteria?.minCgpa ? `${driveInfo.eligibilityCriteria.minCgpa}+ CGPA` : 'No CGPA cutoff'}
-                </span>
-              </div>
+            <div className="flex items-center gap-2.5 text-xs flex-shrink-0">
+              <Button
+                variant="primary"
+                size="sm"
+                icon={Sparkles}
+                isLoading={screeningDrive}
+                onClick={handleScreenDrive}
+                className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white shadow-sm font-semibold"
+                title="Run AI semantic & qualification matching across all applicants for this drive"
+              >
+                {screeningDrive ? 'Screening Applicants...' : 'Run AI Match Screening'}
+              </Button>
               <Link to={`/drives/${driveInfo._id}`} className="flex-shrink-0">
                 <Button variant="outline" size="sm">
                   Drive Details
@@ -435,22 +502,43 @@ const ManageApplications = () => {
           </div>
         </form>
 
-        {/* Secondary Toolbar: Sorting & Reset */}
+        {/* Secondary Toolbar: Sorting, AI Fit & Reset */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#DBEAFE] text-xs">
-          <div className="flex items-center gap-2">
-            <ArrowUpDown className="w-3.5 h-3.5 text-[#2563EB]" />
-            <span className="text-[#64748B] text-[11px] font-medium">Sort By:</span>
-            <select
-              value={sortIndex}
-              onChange={(e) => setSortIndex(Number(e.target.value))}
-              className="h-[30px] rounded-md border border-[#DBEAFE] text-xs px-2.5 focus:outline-none focus:border-[#2563EB] bg-white font-medium text-[#172554]"
-            >
-              {SORT_OPTIONS.map((opt, i) => (
-                <option key={i} value={i}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <ArrowUpDown className="w-3.5 h-3.5 text-[#2563EB]" />
+              <span className="text-[#64748B] text-[11px] font-medium">Sort By:</span>
+              <select
+                value={sortIndex}
+                onChange={(e) => setSortIndex(Number(e.target.value))}
+                className="h-[30px] rounded-md border border-[#DBEAFE] text-xs px-2.5 focus:outline-none focus:border-[#2563EB] bg-white font-medium text-[#172554]"
+              >
+                {SORT_OPTIONS.map((opt, i) => (
+                  <option key={i} value={i}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-purple-600" />
+              <span className="text-[#64748B] text-[11px] font-medium">AI Match Fit:</span>
+              <select
+                value={selectedAiFit}
+                onChange={(e) => {
+                  setSelectedAiFit(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="h-[30px] rounded-md border border-[#DBEAFE] text-xs px-2.5 focus:outline-none focus:border-[#2563EB] bg-white font-medium text-[#172554]"
+              >
+                {AI_FIT_OPTIONS.map((fit) => (
+                  <option key={fit} value={fit}>
+                    {fit}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {hasActiveFilters && (
@@ -497,7 +585,8 @@ const ManageApplications = () => {
                   <th className="py-3 px-3 text-center min-w-[100px]">Backlogs</th>
                   <th className="py-3 px-3 min-w-[110px]">Applied Date</th>
                   <th className="py-3 px-3 min-w-[120px]">Current Status</th>
-                  <th className="py-3 px-4 text-right min-w-[170px]">Actions</th>
+                  <th className="py-3 px-3 text-center min-w-[130px]">AI Match</th>
+                  <th className="py-3 px-4 text-right min-w-[185px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DBEAFE]/60 text-xs">
@@ -608,9 +697,65 @@ const ManageApplications = () => {
                         )}
                       </td>
 
-                      {/* 10. Actions */}
-                      <td className="py-3 px-4 text-right whitespace-nowrap min-w-[170px]">
+                      {/* 10. AI Match Column */}
+                      <td className="py-3 px-3 text-center min-w-[130px]">
+                        {app.aiScreening?.score !== null && app.aiScreening?.score !== undefined ? (
+                          <div
+                            className="inline-flex flex-col items-center group cursor-pointer"
+                            onClick={() =>
+                              setProfileTarget({
+                                studentId: profile._id || student._id,
+                                applicationId: app._id,
+                              })
+                            }
+                            title={app.aiScreening.summary || `${app.aiScreening.score}% match`}
+                          >
+                            <span
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                                app.aiScreening.score >= 85
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : app.aiScreening.score >= 70
+                                  ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                  : app.aiScreening.score >= 50
+                                  ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                  : 'bg-rose-50 text-rose-700 border border-rose-200'
+                              }`}
+                            >
+                              <Sparkles className="w-3 h-3 flex-shrink-0" />
+                              {app.aiScreening.score}%
+                            </span>
+                            <span className="text-[10px] text-[#64748B] font-medium mt-0.5 truncate max-w-[110px]">
+                              {app.aiScreening.fitLevel}
+                            </span>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleScreenSingle(app)}
+                            disabled={screeningAppId === app._id}
+                            className="inline-flex items-center gap-1 text-[11px] text-purple-600 hover:text-purple-800 hover:underline font-medium disabled:opacity-50"
+                            title="Screen this applicant with AI"
+                          >
+                            <Sparkles className={`w-3 h-3 ${screeningAppId === app._id ? 'animate-spin' : ''}`} />
+                            {screeningAppId === app._id ? 'Analyzing...' : 'Screen'}
+                          </button>
+                        )}
+                      </td>
+
+                      {/* 11. Actions */}
+                      <td className="py-3 px-4 text-right whitespace-nowrap min-w-[185px]">
                         <div className="flex items-center justify-end gap-1">
+                          {/* AI Screening Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleScreenSingle(app)}
+                            disabled={screeningAppId === app._id}
+                            className="p-1.5 rounded-lg text-purple-600 hover:text-purple-800 hover:bg-purple-50 transition-colors disabled:opacity-50"
+                            title="Run / Refresh AI Match Screening"
+                          >
+                            <Sparkles className={`w-4 h-4 ${screeningAppId === app._id ? 'animate-spin' : ''}`} />
+                          </button>
+
                           {/* Update Status Button */}
                           <button
                             type="button"

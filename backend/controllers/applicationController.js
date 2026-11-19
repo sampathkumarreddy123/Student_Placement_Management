@@ -6,6 +6,7 @@ import PlacementDrive from '../models/PlacementDrive.js';
 import RecruitmentRound from '../models/RecruitmentRound.js';
 import StudentProfile from '../models/StudentProfile.js';
 import { checkEligibility } from '../services/eligibilityService.js';
+import { evaluateApplicantMatch } from '../services/aiScreeningService.js';
 import {
   notifyOnApplicationSubmitted,
   notifyOnApplicationStatusChange,
@@ -379,6 +380,7 @@ const filterSortPaginate = (applications, options) => {
     minCgpa = '',
     maxCgpa = '',
     status = '',
+    aiFit = '',
     sortBy = 'appliedAt',
     sortOrder = 'desc',
     page = 1,
@@ -390,6 +392,11 @@ const filterSortPaginate = (applications, options) => {
   // 1. Status Filter
   if (status && status !== 'All') {
     filtered = filtered.filter((app) => app.status === status);
+  }
+
+  // 1b. AI Match Fit Filter
+  if (aiFit && aiFit !== 'All') {
+    filtered = filtered.filter((app) => app.aiScreening?.fitLevel === aiFit);
   }
 
   // 2. Department Filter
@@ -447,6 +454,12 @@ const filterSortPaginate = (applications, options) => {
     let valA, valB;
 
     switch (sortBy) {
+      case 'aiScore':
+      case 'aiMatch':
+        valA = a.aiScreening?.score ?? -1;
+        valB = b.aiScreening?.score ?? -1;
+        return isAsc ? valA - valB : valB - valA;
+
       case 'cgpa':
         valA = a.studentProfile?.cgpa ?? a.resumeSnapshot?.studentCgpa ?? 0;
         valB = b.studentProfile?.cgpa ?? b.resumeSnapshot?.studentCgpa ?? 0;
@@ -697,6 +710,118 @@ export const getApplicationStatusHistory = async (req, res, next) => {
     next(error);
   }
 };
+
+// @desc    Run AI candidate screening for all applicants of a placement drive
+// @route   POST /api/applications/drive/:driveId/ai-screen
+// @access  Private (Officer only)
+export const screenDriveApplicantsWithAI = async (req, res, next) => {
+  try {
+    const { driveId } = req.params;
+    const drive = await PlacementDrive.findById(driveId).populate('company');
+    if (!drive) {
+      return res.status(404).json({
+        success: false,
+        message: 'Placement drive record not found.',
+      });
+    }
+
+    const applications = await Application.find({ drive: driveId })
+      .populate('student', 'name email profilePhoto phone')
+      .populate('studentProfile')
+      .populate('company', 'name logoUrl industry');
+
+    if (applications.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: 'No applicants have applied to this placement drive yet.',
+        count: 0,
+        averageScore: 0,
+        topMatchesCount: 0,
+        applications: [],
+      });
+    }
+
+    let totalScore = 0;
+    let topMatchesCount = 0;
+
+    for (const app of applications) {
+      const evaluation = await evaluateApplicantMatch({
+        application: app,
+        drive,
+        profile: app.studentProfile,
+        student: app.student,
+      });
+
+      app.aiScreening = evaluation;
+      await app.save();
+
+      totalScore += evaluation.score;
+      if (evaluation.score >= 80) {
+        topMatchesCount++;
+      }
+    }
+
+    const averageScore = Math.round(totalScore / applications.length);
+
+    res.status(200).json({
+      success: true,
+      message: `AI screening completed successfully for ${applications.length} candidate(s).`,
+      count: applications.length,
+      averageScore,
+      topMatchesCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Run AI candidate screening for a single application
+// @route   POST /api/applications/:id/ai-screen
+// @access  Private (Officer only)
+export const screenSingleApplicationWithAI = async (req, res, next) => {
+  try {
+    const application = await Application.findById(req.params.id)
+      .populate('drive')
+      .populate('student', 'name email profilePhoto phone')
+      .populate('studentProfile')
+      .populate('company', 'name logoUrl industry');
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: 'Application record not found.',
+      });
+    }
+
+    const drive = application.drive;
+    if (!drive) {
+      return res.status(400).json({
+        success: false,
+        message: 'Associated placement drive details are missing.',
+      });
+    }
+
+    const evaluation = await evaluateApplicantMatch({
+      application,
+      drive,
+      profile: application.studentProfile,
+      student: application.student,
+    });
+
+    application.aiScreening = evaluation;
+    await application.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'AI candidate screening evaluation completed.',
+      aiScreening: evaluation,
+      application,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 
 

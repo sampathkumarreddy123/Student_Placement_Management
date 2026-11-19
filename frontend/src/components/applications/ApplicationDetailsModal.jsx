@@ -16,6 +16,7 @@ import {
   History,
   ListOrdered,
   CheckCircle2,
+  Sparkles,
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Badge from '../common/Badge';
@@ -206,6 +207,86 @@ const ApplicationDetailsModal = ({ isOpen, onClose, application }) => {
             </div>
           )}
         </div>
+
+        {/* AI Candidate Screening & Smart Match Assessment */}
+        {application.aiScreening?.score !== null && application.aiScreening?.score !== undefined && (
+          <div className="bg-gradient-to-br from-[#F8FAFC] to-[#EFF6FF] rounded-xl border border-[#DBEAFE] p-4 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[#DBEAFE]">
+              <h5 className="text-xs font-bold text-[#172554] flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-purple-600" />
+                AI Candidate Match Assessment
+              </h5>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                    application.aiScreening.score >= 85
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : application.aiScreening.score >= 70
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                      : application.aiScreening.score >= 50
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                      : 'bg-rose-50 text-rose-700 border border-rose-200'
+                  }`}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  {application.aiScreening.score}% Match • {application.aiScreening.fitLevel}
+                </span>
+              </div>
+            </div>
+
+            {/* AI Summary */}
+            <p className="text-xs text-[#172554] leading-relaxed">
+              {application.aiScreening.summary}
+            </p>
+
+            {/* Recommendation & Skills breakdown */}
+            <div className="space-y-2 pt-1 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-[#64748B] font-medium">Hiring Recommendation:</span>
+                <span className="font-semibold text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 text-[11px]">
+                  {application.aiScreening.recommendation || 'Standard Review'}
+                </span>
+              </div>
+
+              {/* Matching Skills */}
+              {Array.isArray(application.aiScreening.matchingSkills) &&
+                application.aiScreening.matchingSkills.length > 0 && (
+                  <div>
+                    <span className="text-[11px] text-[#64748B] block mb-1">Matching Requirements & Skills:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {application.aiScreening.matchingSkills.map((sk, i) => (
+                        <span
+                          key={i}
+                          className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-medium flex items-center gap-1"
+                        >
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          {sk}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+              {/* Missing Skills */}
+              {Array.isArray(application.aiScreening.missingSkills) &&
+                application.aiScreening.missingSkills.length > 0 && (
+                  <div>
+                    <span className="text-[11px] text-[#64748B] block mb-1">Unmatched / Additional Skills:</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {application.aiScreening.missingSkills.map((sk, i) => (
+                        <span
+                          key={i}
+                          className="bg-[#F1F5F9] text-[#64748B] border border-[#CBD5E1] px-2 py-0.5 rounded text-[11px] font-medium"
+                        >
+                          {sk}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+            </div>
+          </div>
+        )}
 
         {/* Recruitment Round Progression */}
         <div className="bg-white rounded-xl border border-[#DBEAFE] p-4 space-y-3">

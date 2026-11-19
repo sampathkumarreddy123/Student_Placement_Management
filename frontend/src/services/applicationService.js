@@ -48,5 +48,15 @@ export const applicationService = {
     const response = await api.patch(`/applications/${applicationId}/status`, updateData);
     return response.data;
   },
+
+  screenDriveApplicants: async (driveId) => {
+    const response = await api.post(`/applications/drive/${driveId}/ai-screen`);
+    return response.data;
+  },
+
+  screenSingleApplicant: async (applicationId) => {
+    const response = await api.post(`/applications/${applicationId}/ai-screen`);
+    return response.data;
+  },
 };
 

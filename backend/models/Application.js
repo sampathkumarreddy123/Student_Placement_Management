@@ -111,6 +111,38 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    aiScreening: {
+      score: {
+        type: Number,
+        default: null,
+      },
+      fitLevel: {
+        type: String,
+        enum: ['Excellent Fit', 'Strong Fit', 'Moderate Fit', 'Low Fit', ''],
+        default: '',
+      },
+      summary: {
+        type: String,
+        default: '',
+      },
+      matchingSkills: [
+        {
+          type: String,
+        },
+      ],
+      missingSkills: [
+        {
+          type: String,
+        },
+      ],
+      recommendation: {
+        type: String,
+        default: '',
+      },
+      screenedAt: {
+        type: Date,
+      },
+    },
     statusHistory: [
       {
         previousStatus: {
