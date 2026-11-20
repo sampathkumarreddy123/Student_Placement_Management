@@ -10,6 +10,14 @@ import { checkEligibility } from './eligibilityService.js';
 import { calculateProfileCompletion } from '../controllers/userController.js';
 
 /**
+ * Escapes regex special characters to prevent invalid regular expression errors
+ */
+export const escapeRegExp = (str) => {
+  if (!str || typeof str !== 'string') return '';
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
+/**
  * Standard department normalizer
  */
 const normalizeDept = (dept) => {
@@ -45,7 +53,7 @@ export const searchStudents = async (params = {}) => {
 
   if (department && department !== 'All') {
     const norm = normalizeDept(department);
-    profileFilter.department = { $regex: new RegExp(norm, 'i') };
+    profileFilter.department = { $regex: new RegExp(escapeRegExp(norm), 'i') };
   }
 
   if (batch) {
@@ -77,16 +85,16 @@ export const searchStudents = async (params = {}) => {
   // Handle skill filter (checks StudentProfile skills array)
   if (Array.isArray(skills) && skills.length > 0) {
     profileFilter.skills = {
-      $all: skills.map((s) => new RegExp(s.trim(), 'i')),
+      $all: skills.map((s) => new RegExp(escapeRegExp(s.trim()), 'i')),
     };
   } else if (typeof skills === 'string' && skills.trim().length > 0) {
-    profileFilter.skills = { $regex: new RegExp(skills.trim(), 'i') };
+    profileFilter.skills = { $regex: new RegExp(escapeRegExp(skills.trim()), 'i') };
   }
 
   // Text search on User name / email or rollNumber
   let userIds = null;
   if (query && query.trim()) {
-    const qRegex = new RegExp(query.trim(), 'i');
+    const qRegex = new RegExp(escapeRegExp(query.trim()), 'i');
     const matchedUsers = await User.find({
       role: 'student',
       $or: [{ name: qRegex }, { email: qRegex }],
@@ -279,7 +287,7 @@ export const getStudentEligibility = async (params = {}) => {
     drive = await PlacementDrive.findById(driveId).populate('company');
   } else if (driveName || companyName) {
     const qName = driveName || companyName;
-    const regex = new RegExp(qName.trim(), 'i');
+    const regex = new RegExp(escapeRegExp(qName.trim()), 'i');
 
     const matchedCompanies = await Company.find({ name: regex }).select('_id');
     const compIds = matchedCompanies.map((c) => c._id);
@@ -310,7 +318,7 @@ export const getStudentEligibility = async (params = {}) => {
   const profileQuery = {};
   if (department && department !== 'All') {
     const norm = normalizeDept(department);
-    profileQuery.department = { $regex: new RegExp(norm, 'i') };
+    profileQuery.department = { $regex: new RegExp(escapeRegExp(norm), 'i') };
   }
 
   const profiles = await StudentProfile.find(profileQuery)
@@ -447,11 +455,11 @@ export const getPlacementDrives = async (params = {}) => {
 
   if (department && department !== 'All') {
     const norm = normalizeDept(department);
-    filter['eligibilityCriteria.allowedDepartments'] = { $regex: new RegExp(norm, 'i') };
+    filter['eligibilityCriteria.allowedDepartments'] = { $regex: new RegExp(escapeRegExp(norm), 'i') };
   }
 
   if (jobRole && jobRole !== 'All') {
-    filter.jobRole = { $regex: new RegExp(jobRole.trim(), 'i') };
+    filter.jobRole = { $regex: new RegExp(escapeRegExp(jobRole.trim()), 'i') };
   }
 
   if (closingWithinDays !== undefined && closingWithinDays !== null) {
@@ -468,7 +476,7 @@ export const getPlacementDrives = async (params = {}) => {
     .lean();
 
   if (company && company !== 'All') {
-    const cRegex = new RegExp(company.trim(), 'i');
+    const cRegex = new RegExp(escapeRegExp(company.trim()), 'i');
     drives = drives.filter((d) => d.company?.name && cRegex.test(d.company.name));
   }
 
@@ -526,7 +534,7 @@ export const getDriveDetails = async (params = {}) => {
     drive = await PlacementDrive.findById(driveId).populate('company');
   } else if (companyName || jobRole) {
     const qName = companyName || jobRole;
-    const regex = new RegExp(qName.trim(), 'i');
+    const regex = new RegExp(escapeRegExp(qName.trim()), 'i');
     const matchedComps = await Company.find({ name: regex }).select('_id');
     const compIds = matchedComps.map((c) => c._id);
 
@@ -589,7 +597,7 @@ export const getDriveApplicants = async (params = {}) => {
 
   if (!targetDriveId || !mongoose.isValidObjectId(targetDriveId)) {
     if (companyName) {
-      const comp = await Company.findOne({ name: new RegExp(companyName.trim(), 'i') });
+      const comp = await Company.findOne({ name: new RegExp(escapeRegExp(companyName.trim()), 'i') });
       if (comp) {
         const drive = await PlacementDrive.findOne({ company: comp._id }).sort({ createdAt: -1 });
         if (drive) targetDriveId = drive._id;
@@ -622,7 +630,7 @@ export const getDriveApplicants = async (params = {}) => {
   let filtered = applications;
 
   if (search && search.trim()) {
-    const sRegex = new RegExp(search.trim(), 'i');
+    const sRegex = new RegExp(escapeRegExp(search.trim()), 'i');
     filtered = filtered.filter(
       (a) =>
         sRegex.test(a.student?.name || '') ||

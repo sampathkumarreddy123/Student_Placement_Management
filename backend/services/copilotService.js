@@ -3,13 +3,36 @@ import * as tools from './copilotTools.js';
 import CopilotConversation from '../models/CopilotConversation.js';
 
 /**
- * Common skill mapping
+ * Safe skill detection with pre-compiled regex to prevent regex syntax errors (e.g. c++, c#)
  */
 const KNOWN_SKILLS = [
-  'java', 'python', 'javascript', 'typescript', 'c++', 'c', 'c#', 'php', 'sql',
-  'react', 'node', 'express', 'spring', 'springboot', 'django', 'flask', 'fastapi',
-  'mongodb', 'postgresql', 'mysql', 'redis', 'aws', 'docker', 'kubernetes', 'git',
-  'html', 'css', 'tailwind', 'machine learning', 'data structures', 'dsa'
+  { name: 'Java', pattern: /\bjava\b/i },
+  { name: 'Python', pattern: /\bpython\b/i },
+  { name: 'JavaScript', pattern: /\b(?:javascript|js|es6)\b/i },
+  { name: 'TypeScript', pattern: /\b(?:typescript|ts)\b/i },
+  { name: 'C++', pattern: /(?:\bc\+\+|\bcpp\b)/i },
+  { name: 'C#', pattern: /(?:\bc#|\bcsharp\b)/i },
+  { name: 'C', pattern: /\bc(?:\s+programming|\s+language)?\b/i },
+  { name: 'SQL', pattern: /\bsql\b/i },
+  { name: 'React', pattern: /\breact(?:\.js)?\b/i },
+  { name: 'Node.js', pattern: /\bnode(?:\.js)?\b/i },
+  { name: 'Express.js', pattern: /\bexpress(?:\.js)?\b/i },
+  { name: 'Spring Boot', pattern: /\bspring(?:\s*boot)?\b/i },
+  { name: 'Django', pattern: /\bdjango\b/i },
+  { name: 'Flask', pattern: /\bflask\b/i },
+  { name: 'FastAPI', pattern: /\bfastapi\b/i },
+  { name: 'MongoDB', pattern: /\bmongodb?\b/i },
+  { name: 'PostgreSQL', pattern: /\bpostgre(?:sql)?\b/i },
+  { name: 'MySQL', pattern: /\bmysql\b/i },
+  { name: 'AWS', pattern: /\baws\b/i },
+  { name: 'Docker', pattern: /\bdocker\b/i },
+  { name: 'Kubernetes', pattern: /\b(?:kubernetes|k8s)\b/i },
+  { name: 'Git', pattern: /\bgit(?:hub)?\b/i },
+  { name: 'HTML', pattern: /\bhtml5?\b/i },
+  { name: 'CSS', pattern: /\bcss3?\b/i },
+  { name: 'Tailwind CSS', pattern: /\btailwind(?:\s*css)?\b/i },
+  { name: 'Machine Learning', pattern: /\b(?:machine\s+learning|ml)\b/i },
+  { name: 'Data Structures', pattern: /\b(?:data\s+structures|dsa)\b/i },
 ];
 
 /**
@@ -179,7 +202,7 @@ const parseIntentAndParameters = (message, lastContext = {}) => {
   }
 
   // 11. Statistics & Analytics
-  if (/(?:statistics|stats|selection\s+progress|company-wise|department-wise|packages?)/i.test(lower)) {
+  if (/(?:statistics|stats|selection\s+progress|company-wise|department-wise|packages?|how\s+many\s+(?:students\s+are\s+)?placed)/i.test(lower)) {
     return {
       tool: 'getSelectionStatistics',
       parameters: {},
@@ -194,10 +217,9 @@ const parseIntentAndParameters = (message, lastContext = {}) => {
   const cgpaMatch = lower.match(/(?:cgpa\s*(?:above|>|>=)\s*|above\s*)(\d+(?:\.\d+)?)/i);
   if (cgpaMatch) cgpaMin = parseFloat(cgpaMatch[1]);
 
-  const skillsFound = KNOWN_SKILLS.filter((s) => {
-    const reg = new RegExp(`\\b${s}\\b`, 'i');
-    return reg.test(lower);
-  });
+  const skillsFound = KNOWN_SKILLS
+    .filter((item) => item.pattern.test(lower))
+    .map((item) => item.name);
 
   const hasResume = lower.includes('uploaded resume') || lower.includes('with resume')
     ? true
@@ -207,10 +229,13 @@ const parseIntentAndParameters = (message, lastContext = {}) => {
 
   const minProjects = /(?:at\s+least\s+one\s+project|1\s+project|with\s+projects?)/i.test(lower) ? 1 : undefined;
 
+  const isQuestionSentence = /(?:how\s+many|show\s+me|find|list|get|count|who\s+are|are\s+there)\b/i.test(lower);
+  const queryText = !isQuestionSentence && text.length < 30 && !dept && !cgpaMin && skillsFound.length === 0 ? text : '';
+
   return {
     tool: 'searchStudents',
     parameters: {
-      query: text.length < 30 && !dept && !cgpaMin && skillsFound.length === 0 ? text : '',
+      query: queryText,
       department: dept,
       cgpaMin,
       cgpaMax,
@@ -335,9 +360,21 @@ export const processCopilotMessage = async ({ message, conversationId, officerUs
         break;
 
       case 'searchStudents':
+        responseType = 'STUDENT_TABLE';
+        if (toolParams?.department) {
+          naturalExplanation = `There are currently **${toolData.total}** student(s) enrolled in the **${toolParams.department}** department${toolParams.cgpaMin ? ` with CGPA >= ${toolParams.cgpaMin}` : ''}.`;
+        } else if (toolParams?.skills && toolParams.skills.length > 0) {
+          naturalExplanation = `Found **${toolData.total}** student(s) proficient in **${toolParams.skills.join(', ')}**.`;
+        } else if (toolParams?.hasResume === false) {
+          naturalExplanation = `Found **${toolData.total}** student(s) who have not uploaded their resumes.`;
+        } else {
+          naturalExplanation = `Identified **${toolData.total}** student(s) matching your request.`;
+        }
+        break;
+
       case 'getMissingResumes':
         responseType = 'STUDENT_TABLE';
-        naturalExplanation = `Identified **${toolData.total}** student(s) matching your criteria.`;
+        naturalExplanation = `Found **${toolData.total}** student(s) who have not uploaded their verified resumes.`;
         break;
 
       case 'getPlacementDrives':
