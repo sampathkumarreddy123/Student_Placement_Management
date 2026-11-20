@@ -42,6 +42,7 @@ export const searchStudents = async (params = {}) => {
     batch,
     skills = [],
     hasResume,
+    hasBacklogs,
     minProjects,
     backlogsMax,
     placementStatus,
@@ -68,7 +69,11 @@ export const searchStudents = async (params = {}) => {
     profileFilter.cgpa = { ...(profileFilter.cgpa || {}), $lte: Number(cgpaMax) };
   }
 
-  if (backlogsMax !== undefined && backlogsMax !== null && !isNaN(backlogsMax)) {
+  if (hasBacklogs === true) {
+    profileFilter.activeBacklogs = { $gt: 0 };
+  } else if (hasBacklogs === false) {
+    profileFilter.activeBacklogs = 0;
+  } else if (backlogsMax !== undefined && backlogsMax !== null && !isNaN(backlogsMax)) {
     profileFilter.activeBacklogs = { $lte: Number(backlogsMax) };
   }
 
