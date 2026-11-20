@@ -34,10 +34,13 @@ const OfficerLogin = () => {
 
   const validate = () => {
     const errors = {};
-    if (!email.trim()) {
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail) {
       errors.email = 'Official institutional email is required';
-    } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email.trim())) {
+    } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(trimmedEmail)) {
       errors.email = 'Please provide a valid institutional email format';
+    } else if (!trimmedEmail.endsWith('@mits.ac.in')) {
+      errors.email = 'Only official institutional email addresses ending in @mits.ac.in are allowed';
     }
 
     if (!password) {
@@ -181,11 +184,11 @@ const OfficerLogin = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
         <Input
-          label="Official Email"
+          label="Official Email (@mits.ac.in)"
           id="email"
           name="email"
           type="email"
-          placeholder=""
+          placeholder="e.g. officer@mits.ac.in"
           icon={Mail}
           value={email}
           onChange={(e) => {

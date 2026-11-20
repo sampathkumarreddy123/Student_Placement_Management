@@ -34,10 +34,13 @@ const StudentLogin = () => {
 
   const validate = () => {
     const errors = {};
-    if (!email.trim()) {
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail) {
       errors.email = 'College email is required';
-    } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email.trim())) {
+    } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(trimmedEmail)) {
       errors.email = 'Please enter a valid college email format';
+    } else if (!trimmedEmail.endsWith('@mits.ac.in')) {
+      errors.email = 'Only official college email addresses ending in @mits.ac.in are allowed';
     }
 
     if (!password) {
@@ -181,11 +184,11 @@ const StudentLogin = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
         <Input
-          label="College Email"
+          label="College Email (@mits.ac.in)"
           id="email"
           name="email"
           type="email"
-          placeholder=""
+          placeholder="e.g. 24695A0554@mits.ac.in"
           icon={Mail}
           value={email}
           onChange={(e) => {

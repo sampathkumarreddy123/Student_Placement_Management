@@ -86,10 +86,13 @@ const Register = () => {
       errors.name = 'Full name is required';
     }
 
-    if (!formData.email.trim()) {
+    const trimmedEmail = formData.email.trim().toLowerCase();
+    if (!trimmedEmail) {
       errors.email = 'College email is required';
-    } else if (!emailRegex.test(formData.email.trim())) {
+    } else if (!emailRegex.test(trimmedEmail)) {
       errors.email = 'Please provide a valid email format';
+    } else if (!trimmedEmail.endsWith('@mits.ac.in')) {
+      errors.email = 'Only official college email addresses ending in @mits.ac.in are allowed';
     }
 
     if (!formData.rollNumber.trim()) {
@@ -269,11 +272,12 @@ const Register = () => {
         {/* College Email & Roll Number */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
-            label="College Email"
+            label="College Email (@mits.ac.in)"
             id="email"
             name="email"
             type="email"
-            placeholder=""
+            placeholder="e.g. 24695A0554@mits.ac.in"
+            helperText="Must be an official @mits.ac.in email address"
             icon={Mail}
             value={formData.email}
             onChange={handleChange}

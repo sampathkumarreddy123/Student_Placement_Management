@@ -74,12 +74,22 @@ export const register = async (req, res, next) => {
       });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Email format validation
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-    if (!emailRegex.test(email.trim())) {
+    if (!emailRegex.test(normalizedEmail)) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide a valid email format (e.g., student@college.edu).',
+        message: 'Please provide a valid email format (e.g., student@mits.ac.in).',
+      });
+    }
+
+    // Strict @mits.ac.in domain restriction
+    if (!normalizedEmail.endsWith('@mits.ac.in')) {
+      return res.status(400).json({
+        success: false,
+        message: 'Registration is restricted to official college email addresses ending in @mits.ac.in',
       });
     }
 
@@ -185,7 +195,6 @@ export const register = async (req, res, next) => {
     }
 
     // Uniqueness Check 1: College Email
-    const normalizedEmail = email.trim().toLowerCase();
     const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({
@@ -265,6 +274,18 @@ const authenticateUser = async ({ email, password, requiredRole, rememberMe = fa
   }
 
   const normalizedEmail = email.trim().toLowerCase();
+
+  // Strict @mits.ac.in domain restriction
+  if (!normalizedEmail.endsWith('@mits.ac.in')) {
+    return {
+      status: 400,
+      body: {
+        success: false,
+        message: 'Access is restricted to official college email addresses ending in @mits.ac.in',
+      },
+    };
+  }
+
   const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
   if (!user) {
