@@ -38,6 +38,7 @@ import ManageRounds from '../pages/officer/ManageRounds';
 import ManageReports from '../pages/officer/ManageReports';
 import OfficerProfile from '../pages/officer/OfficerProfile';
 import OfficerResumeInsights from '../pages/officer/OfficerResumeInsights';
+import OfficerCopilot from '../pages/officer/OfficerCopilot';
 import NotificationsPage from '../pages/NotificationsPage';
 
 // Common Components & Hook
@@ -121,6 +122,7 @@ const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/officer/dashboard" replace />} />
         <Route path="dashboard" element={<OfficerDashboard />} />
+        <Route path="copilot" element={<OfficerCopilot />} />
         <Route path="ai-resume-insights" element={<OfficerResumeInsights />} />
         <Route path="drives" element={<ManageDrives />} />
         <Route path="companies" element={<ManageCompanies />} />

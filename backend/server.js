@@ -24,6 +24,7 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import roundRoutes from './routes/roundRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import resumeIntelligenceRoutes from './routes/resumeIntelligenceRoutes.js';
+import copilotRoutes from './routes/copilotRoutes.js';
 
 // Middleware imports
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
@@ -185,6 +186,9 @@ app.use('/reports', reportRoutes);
 app.use('/api/ai-resume', resumeIntelligenceRoutes);
 app.use('/ai-resume', resumeIntelligenceRoutes);
 app.use('/api/officer/ai-resume', resumeIntelligenceRoutes);
+
+app.use('/api/copilot', copilotRoutes);
+app.use('/copilot', copilotRoutes);
 
 // Error Handling Middlewares
 app.use(notFound);

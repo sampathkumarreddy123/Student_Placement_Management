@@ -15,6 +15,7 @@ import {
   ListOrdered,
   BarChart3,
   Sparkles,
+  Bot,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -32,6 +33,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
 
   const officerLinks = [
     { label: 'Dashboard', to: '/officer/dashboard', icon: LayoutDashboard },
+    { label: 'AI Placement Copilot', to: '/officer/copilot', icon: Bot },
     { label: 'AI Resume Insights', to: '/officer/ai-resume-insights', icon: Sparkles },
     { label: 'Placement Drives', to: '/officer/drives', icon: Briefcase },
     { label: 'Recruitment Rounds', to: '/officer/rounds', icon: ListOrdered },
