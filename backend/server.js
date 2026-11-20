@@ -23,6 +23,7 @@ import applicationRoutes from './routes/applicationRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import roundRoutes from './routes/roundRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
+import resumeIntelligenceRoutes from './routes/resumeIntelligenceRoutes.js';
 
 // Middleware imports
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
@@ -180,6 +181,10 @@ app.use('/rounds', roundRoutes);
 
 app.use('/api/reports', reportRoutes);
 app.use('/reports', reportRoutes);
+
+app.use('/api/ai-resume', resumeIntelligenceRoutes);
+app.use('/ai-resume', resumeIntelligenceRoutes);
+app.use('/api/officer/ai-resume', resumeIntelligenceRoutes);
 
 // Error Handling Middlewares
 app.use(notFound);

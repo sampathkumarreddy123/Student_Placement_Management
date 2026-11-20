@@ -14,6 +14,7 @@ import {
   ChevronRight,
   ListOrdered,
   BarChart3,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -22,6 +23,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
 
   const studentLinks = [
     { label: 'Dashboard', to: '/student/dashboard', icon: LayoutDashboard },
+    { label: 'AI Resume Intelligence', to: '/student/ai-resume', icon: Sparkles },
     { label: 'Placement Drives', to: '/student/drives', icon: Briefcase },
     { label: 'My Applications', to: '/student/applications', icon: FileText },
     { label: 'Student Profile', to: '/student/profile', icon: User },
@@ -30,6 +32,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed = false, onToggleCollapse }) => 
 
   const officerLinks = [
     { label: 'Dashboard', to: '/officer/dashboard', icon: LayoutDashboard },
+    { label: 'AI Resume Insights', to: '/officer/ai-resume-insights', icon: Sparkles },
     { label: 'Placement Drives', to: '/officer/drives', icon: Briefcase },
     { label: 'Recruitment Rounds', to: '/officer/rounds', icon: ListOrdered },
     { label: 'Companies', to: '/officer/companies', icon: Building2 },

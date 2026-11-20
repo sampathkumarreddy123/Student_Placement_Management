@@ -17,7 +17,7 @@ const logoDir = path.join(__dirname, '../uploads/logos');
   }
 });
 
-// Storage for Resumes (PDFs)
+// Storage for Resumes (PDFs and Word DOCX)
 const resumeStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, resumeDir);
@@ -31,13 +31,18 @@ const resumeStorage = multer.diskStorage({
 
 const resumeFileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase();
-  const isMimePdf = file.mimetype === 'application/pdf';
-  const isExtPdf = ext === '.pdf';
+  const allowedExts = ['.pdf', '.docx'];
+  const allowedMimes = [
+    'application/pdf',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/msword',
+    'application/octet-stream',
+  ];
 
-  if (isMimePdf && isExtPdf) {
+  if (allowedExts.includes(ext) && (allowedMimes.includes(file.mimetype) || ext === '.docx' || ext === '.pdf')) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only PDF documents (.pdf) are allowed as resumes.'), false);
+    cb(new Error('Invalid file type. Only PDF (.pdf) and Word documents (.docx) are allowed as resumes.'), false);
   }
 };
 

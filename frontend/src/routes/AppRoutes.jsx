@@ -26,6 +26,7 @@ import StudentProfile from '../pages/student/StudentProfile';
 import DrivesList from '../pages/student/DrivesList';
 import DriveDetails from '../pages/student/DriveDetails';
 import MyApplications from '../pages/student/MyApplications';
+import AIResumeIntelligence from '../pages/student/AIResumeIntelligence';
 
 // Officer Pages
 import OfficerDashboard from '../pages/officer/OfficerDashboard';
@@ -36,6 +37,7 @@ import ManageApplications from '../pages/officer/ManageApplications';
 import ManageRounds from '../pages/officer/ManageRounds';
 import ManageReports from '../pages/officer/ManageReports';
 import OfficerProfile from '../pages/officer/OfficerProfile';
+import OfficerResumeInsights from '../pages/officer/OfficerResumeInsights';
 import NotificationsPage from '../pages/NotificationsPage';
 
 // Common Components & Hook
@@ -103,6 +105,7 @@ const AppRoutes = () => {
         <Route index element={<Navigate to="/student/dashboard" replace />} />
         <Route path="dashboard" element={<StudentDashboard />} />
         <Route path="profile" element={<StudentProfile />} />
+        <Route path="ai-resume" element={<AIResumeIntelligence />} />
         <Route path="drives" element={<DrivesList />} />
         <Route path="applications" element={<MyApplications />} />
       </Route>
@@ -118,6 +121,7 @@ const AppRoutes = () => {
       >
         <Route index element={<Navigate to="/officer/dashboard" replace />} />
         <Route path="dashboard" element={<OfficerDashboard />} />
+        <Route path="ai-resume-insights" element={<OfficerResumeInsights />} />
         <Route path="drives" element={<ManageDrives />} />
         <Route path="companies" element={<ManageCompanies />} />
         <Route path="students" element={<ManageStudents />} />
