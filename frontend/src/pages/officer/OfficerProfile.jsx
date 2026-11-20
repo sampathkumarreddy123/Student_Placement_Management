@@ -24,7 +24,6 @@ import Card from '../../components/common/Card';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import Badge from '../../components/common/Badge';
-import PageHeader from '../../components/common/PageHeader';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import ChangePasswordModal from '../../components/common/ChangePasswordModal';
 import ProfilePictureModal from '../../components/common/ProfilePictureModal';
@@ -239,14 +238,7 @@ const OfficerProfile = () => {
 
   return (
     <div className="space-y-6 pb-12 max-w-6xl mx-auto">
-      {/* 1. Page Header */}
-      <PageHeader
-        category="Placement Cell"
-        title="Placement Officer Profile"
-        subtitle="Manage administrative credentials, institutional contact details, designation, and official profile picture."
-      />
-
-      {/* 2. LINKEDIN/PORTAL STYLE PROFILE HEADER CARD */}
+      {/* 1. LINKEDIN/PORTAL STYLE PROFILE HEADER CARD */}
       <div className="bg-white rounded-2xl border border-[#DBEAFE] shadow-sm overflow-hidden relative">
         {/* Subtle decorative cover banner */}
         <div className="h-28 sm:h-36 bg-gradient-to-r from-[#163A5F] via-[#1E4E79] to-[#2563EB] relative">
