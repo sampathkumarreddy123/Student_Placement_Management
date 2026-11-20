@@ -601,8 +601,12 @@ export const updateApplicationStatus = async (req, res, next) => {
     const { status, currentRound, officerNotes, selectionRemarks, feedback } = req.body;
 
     const application = await Application.findById(req.params.id)
-      .populate('drive')
-      .populate('student');
+      .populate({
+        path: 'drive',
+        populate: { path: 'company', select: 'name logo' },
+      })
+      .populate('company', 'name logo')
+      .populate('student', '_id name email');
 
     if (!application) {
       return res.status(404).json({

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   FileText,
   ArrowRight,
@@ -28,6 +28,9 @@ const STATUS_FILTERS = [
 ];
 
 const MyApplications = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const targetId = searchParams.get('id') || searchParams.get('applicationId');
+
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
@@ -54,9 +57,55 @@ const MyApplications = () => {
     fetchApplications();
   }, []);
 
+  // Deep linking: auto-open application details if ?id=... or ?applicationId=... is passed
+  useEffect(() => {
+    if (!targetId) return;
+
+    if (applications.length > 0) {
+      const match = applications.find((a) => a._id === targetId);
+      if (match) {
+        setSelectedApp(match);
+        setIsDetailsOpen(true);
+        if (activeFilter !== 'All' && match.status !== activeFilter) {
+          setActiveFilter('All');
+        }
+        return;
+      }
+    }
+
+    // If not found in loaded array yet, fetch by ID directly
+    let isCancelled = false;
+    applicationService
+      .getApplicationById(targetId)
+      .then((res) => {
+        if (!isCancelled && res?.application) {
+          setSelectedApp(res.application);
+          setIsDetailsOpen(true);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load targeted application by id:', err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [targetId, applications]);
+
   const handleOpenDetails = (app) => {
     setSelectedApp(app);
     setIsDetailsOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setIsDetailsOpen(false);
+    setSelectedApp(null);
+    if (searchParams.get('id') || searchParams.get('applicationId')) {
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('id');
+      newParams.delete('applicationId');
+      setSearchParams(newParams, { replace: true });
+    }
   };
 
   // Filter & Search
@@ -293,15 +342,21 @@ const MyApplications = () => {
                       </td>
 
                       {/* Application Status */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <Badge status={app.status} size="sm" />
+                      <td
+                        className="py-3.5 px-4 whitespace-nowrap cursor-pointer group/status"
+                        onClick={() => handleOpenDetails(app)}
+                        title="Click to view round evaluations & full application status"
+                      >
+                        <div className="inline-block transition-transform group-hover/status:scale-105">
+                          <Badge status={app.status} size="sm" />
+                        </div>
                         {(() => {
                           const roundObj =
                             app.roundResults?.find((r) => r.roundNumber === (app.currentRound || 1)) ||
                             app.drive?.rounds?.find((r) => r.roundNumber === (app.currentRound || 1));
                           const roundName = roundObj?.roundName || roundObj?.name;
                           return (
-                            <span className="text-[11px] text-[#2563EB] block mt-0.5 font-semibold">
+                            <span className="text-[11px] text-[#2563EB] group-hover/status:underline block mt-0.5 font-semibold">
                               Round {app.currentRound || 1}{roundName ? `: ${roundName}` : ''}
                             </span>
                           );
@@ -340,10 +395,7 @@ const MyApplications = () => {
       {/* Application Details Modal */}
       <ApplicationDetailsModal
         isOpen={isDetailsOpen}
-        onClose={() => {
-          setIsDetailsOpen(false);
-          setSelectedApp(null);
-        }}
+        onClose={handleCloseDetails}
         application={selectedApp}
       />
     </div>

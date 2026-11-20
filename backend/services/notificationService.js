@@ -3,7 +3,7 @@ import User from '../models/User.js';
 import Company from '../models/Company.js';
 import PlacementDrive from '../models/PlacementDrive.js';
 import Application from '../models/Application.js';
-import emailService from './emailService.js';
+import emailService, { sanitizePortalUrl, getFrontendBaseUrl } from './emailService.js';
 
 /**
  * Modular Email Dispatcher Hook
@@ -13,13 +13,9 @@ export const sendEmailNotification = async (notification, recipientUser) => {
   try {
     if (!recipientUser?.email) return;
 
-    const frontendUrl =
-      process.env.FRONTEND_URL ||
-      process.env.CLIENT_URL ||
-      'http://localhost:5173';
-    const actionUrl = notification.link
-      ? `${frontendUrl}${notification.link}`
-      : `${frontendUrl}/student/dashboard`;
+    // Build resilient portal URL using centralized sanitization
+    const defaultFallbackPath = notification.recipientRole === 'student' ? '/student/applications' : '/officer/dashboard';
+    const actionUrl = sanitizePortalUrl(notification.link, defaultFallbackPath);
 
     switch (notification.type) {
       case 'APPLICATION_SUBMITTED':
@@ -100,6 +96,7 @@ export const createNotification = async ({
   relatedModel = null,
   eventKey = null,
   metadata = {},
+  recipientUser = null,
 }) => {
   try {
     if (!recipient) return null;
@@ -125,15 +122,22 @@ export const createNotification = async ({
       metadata,
     });
 
-    // Optionally trigger modular email dispatcher in background
-    User.findById(recipient)
-      .select('name email')
-      .then((user) => {
-        if (user) {
-          sendEmailNotification(notification, user);
-        }
-      })
-      .catch(() => {});
+    // If recipientUser is already populated, send email instantly without DB delay
+    if (recipientUser?.email) {
+      sendEmailNotification(notification, recipientUser).catch((err) =>
+        console.error('[Instant Notification Email Dispatch Error]:', err.message)
+      );
+    } else {
+      // Background fallback lookup
+      User.findById(recipient)
+        .select('name email')
+        .then((user) => {
+          if (user) {
+            sendEmailNotification(notification, user);
+          }
+        })
+        .catch(() => {});
+    }
 
     return notification;
   } catch (error) {
@@ -210,7 +214,7 @@ export const notifyOnApplicationSubmitted = async (application, studentUser, dri
       type: 'APPLICATION_SUBMITTED',
       title: 'Application Submitted Successfully',
       message: `Your application for "${jobRole}" at ${companyName} was submitted successfully and is now under review.`,
-      link: '/student/applications',
+      link: `/student/applications?id=${application._id}`,
       relatedId: application._id,
       relatedModel: 'Application',
       eventKey: `APP_SUBMIT_STU_${application._id}`,
@@ -220,6 +224,7 @@ export const notifyOnApplicationSubmitted = async (application, studentUser, dri
         companyName,
         jobRole,
       },
+      recipientUser: studentUser,
     });
 
     // 2b. Placement Officer Notifications
@@ -278,6 +283,10 @@ export const notifyOnApplicationStatusChange = async (
     jobRole = jobRole || 'Position';
 
     const studentId = application.student?._id || application.student;
+    let studentUser = application.student?.email ? application.student : null;
+    if (!studentUser && studentId) {
+      studentUser = await User.findById(studentId).select('_id name email');
+    }
 
     let type = 'APPLICATION_STATUS_CHANGED';
     let title = `Application Status: ${newStatus}`;
@@ -309,7 +318,7 @@ export const notifyOnApplicationStatusChange = async (
       type,
       title,
       message,
-      link: '/student/applications',
+      link: `/student/applications?id=${application._id}`,
       relatedId: application._id,
       relatedModel: 'Application',
       eventKey,
@@ -321,6 +330,7 @@ export const notifyOnApplicationStatusChange = async (
         jobRole,
         remarks,
       },
+      recipientUser: studentUser,
     });
   } catch (err) {
     console.error('[Notification Service Error] notifyOnApplicationStatusChange:', err.message);
@@ -372,7 +382,7 @@ export const notifyStudentsOnRoundAnnounced = async (drive, round) => {
         type: 'APPLICATION_STATUS_CHANGED',
         title,
         message,
-        link: '/student/applications',
+        link: `/student/applications?id=${app._id}`,
         relatedId: app._id,
         relatedModel: 'Application',
         eventKey,
@@ -386,6 +396,7 @@ export const notifyStudentsOnRoundAnnounced = async (drive, round) => {
           companyName,
           jobRole,
         },
+        recipientUser: app.student,
       });
     }
   } catch (err) {
@@ -437,7 +448,7 @@ export const notifyStudentsOnRoundUpdated = async (drive, round) => {
         type: 'APPLICATION_STATUS_CHANGED',
         title,
         message,
-        link: '/student/applications',
+        link: `/student/applications?id=${app._id}`,
         relatedId: app._id,
         relatedModel: 'Application',
         eventKey,
@@ -451,6 +462,7 @@ export const notifyStudentsOnRoundUpdated = async (drive, round) => {
           companyName,
           jobRole,
         },
+        recipientUser: app.student,
       });
     }
   } catch (err) {

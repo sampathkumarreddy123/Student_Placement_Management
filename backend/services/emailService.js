@@ -15,6 +15,39 @@ import nodemailer from 'nodemailer';
 let cachedTransporter = null;
 
 /**
+ * Resolves the production or local frontend URL for emails.
+ * Always ensures links sent to student mailboxes open the live web app rather than an unreachable localhost.
+ */
+export const getFrontendBaseUrl = () => {
+  const envUrl = process.env.FRONTEND_URL || process.env.CLIENT_URL;
+  // If explicitly configured to an external live domain, use it
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl.replace(/\/+$/, '');
+  }
+  // In production, on Render, or if running live, use production Vercel frontend URL
+  if (process.env.NODE_ENV === 'production' || process.env.RENDER || process.env.RENDER_EXTERNAL_URL) {
+    return 'https://student-placement-management-portal.vercel.app';
+  }
+  // For emails dispatched to real student inboxes, default to verified production Vercel portal so links open on phones & laptops
+  return 'https://student-placement-management-portal.vercel.app';
+};
+
+/**
+ * Sanitizes URLs passed to email buttons to never contain broken localhost addresses
+ */
+export const sanitizePortalUrl = (url, defaultPath = '/student/applications') => {
+  const baseUrl = getFrontendBaseUrl();
+  if (!url) return `${baseUrl}${defaultPath}`;
+  if (url.startsWith('http://localhost:5173') || url.startsWith('http://127.0.0.1:5173')) {
+    return url.replace(/^http:\/\/(localhost|127\.0\.0\.1):5173/, baseUrl);
+  }
+  if (url.startsWith('/')) {
+    return `${baseUrl}${url}`;
+  }
+  return url;
+};
+
+/**
  * Resolves the centralized sender address and display name
  */
 export const getSenderDetails = () => {
@@ -180,10 +213,7 @@ const buildEmailHtml = ({
   securityNotice = null,
   expiryNotice = null,
 }) => {
-  const portalUrl =
-    process.env.FRONTEND_URL ||
-    process.env.CLIENT_URL ||
-    'http://localhost:5173';
+  const portalUrl = getFrontendBaseUrl();
 
   return `
 <!DOCTYPE html>
@@ -516,10 +546,7 @@ export const sendPasswordResetConfirmationEmail = async ({
   name,
   resetTime,
 }) => {
-  const portalUrl =
-    process.env.FRONTEND_URL ||
-    process.env.CLIENT_URL ||
-    'http://localhost:5173';
+  const portalUrl = getFrontendBaseUrl();
   const loginUrl = `${portalUrl}/student/login`;
 
   const subject = 'Password Successfully Changed - MITS Placement Portal';
@@ -557,8 +584,9 @@ export const sendApplicationSubmittedEmail = async ({
   packageLPA,
   portalUrl,
 }) => {
+  const finalPortalUrl = sanitizePortalUrl(portalUrl, '/student/applications');
   const subject = `Application Confirmed: ${companyName} (${jobRole})`;
-  const text = `Hello ${name},\n\nYour application for "${jobRole}" at ${companyName} has been submitted successfully.\nPackage: ${packageLPA ? `₹${packageLPA} LPA` : 'As per company policy'}\nStatus: Under Review\n\nYou can track the progress of your application in your student portal.\n\nBest regards,\nMITS Placement Cell`;
+  const text = `Hello ${name},\n\nYour application for "${jobRole}" at ${companyName} has been submitted successfully.\nPackage: ${packageLPA ? `₹${packageLPA} LPA` : 'As per company policy'}\nStatus: Under Review\n\nYou can track the progress of your application in your student portal: ${finalPortalUrl}\n\nBest regards,\nMITS Placement Cell`;
 
   const html = buildEmailHtml({
     title: 'Application Submitted Successfully',
@@ -580,7 +608,7 @@ export const sendApplicationSubmittedEmail = async ({
     },
     actionButton: {
       text: 'Track Application Status',
-      url: portalUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/student/applications`,
+      url: finalPortalUrl,
     },
   });
 
@@ -599,8 +627,9 @@ export const sendApplicationStatusUpdateEmail = async ({
   remarks,
   portalUrl,
 }) => {
+  const finalPortalUrl = sanitizePortalUrl(portalUrl, '/student/applications');
   const subject = `Application Update: ${newStatus} - ${companyName}`;
-  const text = `Hello ${name},\n\nYour application for "${jobRole}" at ${companyName} has been updated.\nNew Status: ${newStatus}\n${remarks ? `Remarks: ${remarks}\n` : ''}\nView details on the student portal.\n\nBest regards,\nMITS Placement Cell`;
+  const text = `Hello ${name},\n\nYour application for "${jobRole}" at ${companyName} has been updated.\nNew Status: ${newStatus}\n${remarks ? `Remarks: ${remarks}\n` : ''}\nView details on the student portal: ${finalPortalUrl}\n\nBest regards,\nMITS Placement Cell`;
 
   const html = buildEmailHtml({
     title: `Application Status: ${newStatus}`,
@@ -623,7 +652,7 @@ export const sendApplicationStatusUpdateEmail = async ({
     },
     actionButton: {
       text: 'View Application Details',
-      url: portalUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/student/applications`,
+      url: finalPortalUrl,
     },
   });
 
@@ -642,8 +671,9 @@ export const sendDriveAnnouncementEmail = async ({
   deadline,
   portalUrl,
 }) => {
+  const finalPortalUrl = sanitizePortalUrl(portalUrl, '/student/drives');
   const subject = `New Placement Drive: ${companyName} (${jobRole})`;
-  const text = `Hello ${name},\n\nA new campus placement drive has been announced by ${companyName} for "${jobRole}".\nPackage: ${packageLPA ? `₹${packageLPA} LPA` : 'Competitive'}\nDeadline: ${deadline || 'Check portal'}\n\nPlease check eligibility and apply through your student dashboard.\n\nBest regards,\nMITS Placement Cell`;
+  const text = `Hello ${name},\n\nA new campus placement drive has been announced by ${companyName} for "${jobRole}".\nPackage: ${packageLPA ? `₹${packageLPA} LPA` : 'Competitive'}\nDeadline: ${deadline || 'Check portal'}\n\nPlease check eligibility and apply through your student dashboard: ${finalPortalUrl}\n\nBest regards,\nMITS Placement Cell`;
 
   const html = buildEmailHtml({
     title: `New Campus Recruitment Drive: ${companyName}`,
@@ -661,7 +691,7 @@ export const sendDriveAnnouncementEmail = async ({
     },
     actionButton: {
       text: 'View Drive & Apply Now',
-      url: portalUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/student/drives`,
+      url: finalPortalUrl,
     },
   });
 
@@ -680,8 +710,9 @@ export const sendSelectionOfferEmail = async ({
   remarks,
   portalUrl,
 }) => {
+  const finalPortalUrl = sanitizePortalUrl(portalUrl, '/student/applications');
   const subject = `🎉 Congratulations! Selected for ${jobRole} at ${companyName}`;
-  const text = `Congratulations ${name}!\n\nYou have been selected for the position of "${jobRole}" at ${companyName} with an offered CTC of ₹${packageLPA || ''} LPA.\n${remarks ? `Remarks: ${remarks}\n` : ''}\nPlease visit the placement portal for formal documentation.\n\nWarm regards,\nMITS Placement Cell`;
+  const text = `Congratulations ${name}!\n\nYou have been selected for the position of "${jobRole}" at ${companyName} with an offered CTC of ₹${packageLPA || ''} LPA.\n${remarks ? `Remarks: ${remarks}\n` : ''}\nPlease visit the placement portal for formal documentation: ${finalPortalUrl}\n\nWarm regards,\nMITS Placement Cell`;
 
   const html = buildEmailHtml({
     title: `🎉 Congratulations on Your Selection at ${companyName}!`,
@@ -700,7 +731,7 @@ export const sendSelectionOfferEmail = async ({
     },
     actionButton: {
       text: 'View Offer in Placement Portal',
-      url: portalUrl || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/student/applications`,
+      url: finalPortalUrl,
     },
   });
 
@@ -717,18 +748,19 @@ export const sendGenericNotificationEmail = async ({
   message,
   portalUrl,
 }) => {
+  const finalPortalUrl = sanitizePortalUrl(portalUrl, '/student/dashboard');
   const subject = `${title} - MITS Placement Portal`;
-  const text = `Hello ${name},\n\n${title}\n\n${message}\n\nPortal: ${portalUrl || 'http://localhost:5173'}\n\nBest regards,\nMITS Placement Cell`;
+  const text = `Hello ${name},\n\n${title}\n\n${message}\n\nPortal: ${finalPortalUrl}\n\nBest regards,\nMITS Placement Cell`;
 
   const html = buildEmailHtml({
     title,
     preheader: title,
     greeting: `Hello ${name}`,
     paragraphs: [message],
-    actionButton: portalUrl
+    actionButton: finalPortalUrl
       ? {
           text: 'Open Placement Portal',
-          url: portalUrl,
+          url: finalPortalUrl,
         }
       : null,
   });

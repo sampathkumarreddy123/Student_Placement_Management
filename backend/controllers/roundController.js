@@ -579,10 +579,11 @@ export const evaluateCandidate = async (req, res, next) => {
         type: 'APPLICATION_STATUS_CHANGED',
         title: `Round ${round.roundNumber} Result: ${status}`,
         message: `Your result for ${round.name} at ${companyName} has been marked as "${status}".${remarks ? ` Remarks: "${remarks}"` : ''}`,
-        link: '/student/applications',
+        link: `/student/applications?id=${application._id}`,
         relatedId: application._id,
         relatedModel: 'Application',
         eventKey: `ROUND_EVAL_${round._id}_${application._id}_${status}`,
+        recipientUser: studentUser,
       }).catch(() => {});
     }
 
@@ -685,10 +686,11 @@ export const moveQualifiedToNextRound = async (req, res, next) => {
           type: 'APPLICATION_SHORTLISTED',
           title: `Advanced to Round ${nextRound.roundNumber}: ${nextRound.name}`,
           message: `Congratulations! You have qualified for Round ${nextRound.roundNumber} (${nextRound.name}). Date: ${nextRound.date ? new Date(nextRound.date).toLocaleDateString() : 'TBA'}.`,
-          link: '/student/applications',
+          link: `/student/applications?id=${app._id}`,
           relatedId: app._id,
           relatedModel: 'Application',
           eventKey: `ADVANCE_ROUND_${nextRound._id}_${app._id}`,
+          recipientUser: app.student,
         }).catch(() => {});
       }
     }
