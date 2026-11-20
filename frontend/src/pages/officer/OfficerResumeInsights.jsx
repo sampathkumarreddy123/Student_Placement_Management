@@ -16,6 +16,7 @@ import {
   Award,
   Layers,
   ArrowUpDown,
+  Check,
 } from 'lucide-react';
 import resumeIntelligenceService from '../../services/resumeIntelligenceService';
 import Card from '../../components/common/Card';
