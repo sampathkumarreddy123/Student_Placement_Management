@@ -570,7 +570,7 @@ export const evaluateCandidate = async (req, res, next) => {
             remarks || `Result for Round ${round.roundNumber} (${round.name}): ${status}`,
             req.user
           ),
-          new Promise((resolve) => setTimeout(resolve, 3500)),
+          new Promise((resolve) => setTimeout(resolve, 6000)),
         ]);
       } catch (err) {
         console.error('[Notification Error] Round evaluation dispatch:', err.message);
@@ -679,8 +679,16 @@ export const moveQualifiedToNextRound = async (req, res, next) => {
           link: `/student/applications?id=${app._id}`,
           relatedId: app._id,
           relatedModel: 'Application',
-          eventKey: `ADVANCE_ROUND_${nextRound._id}_${app._id}`,
+          eventKey: `ADVANCE_ROUND_${nextRound._id}_${app._id}_${Date.now()}`,
+          metadata: {
+            applicationId: app._id,
+            companyName: currentRound.drive?.company?.name || 'Company',
+            jobRole: currentRound.drive?.jobRole || 'Position',
+            newStatus: `Round ${nextRound.roundNumber} Scheduled: ${nextRound.name}`,
+            officer: req.user ? { _id: req.user._id, name: req.user.name, email: req.user.email } : undefined,
+          },
           recipientUser: app.student,
+          officer: req.user,
         }).catch(() => {});
       }
     }

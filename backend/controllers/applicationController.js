@@ -663,7 +663,7 @@ export const updateApplicationStatus = async (req, res, next) => {
     const isStatusChanged = previousStatus !== newStatus;
     const isRemarksAdded = Boolean(remarks && remarks.trim());
 
-    if (isStatusChanged || isRemarksAdded) {
+    if (status !== undefined || isStatusChanged || isRemarksAdded) {
       try {
         await Promise.race([
           notifyOnApplicationStatusChange(
@@ -673,7 +673,7 @@ export const updateApplicationStatus = async (req, res, next) => {
             remarks,
             req.user
           ),
-          new Promise((resolve) => setTimeout(resolve, 3500)),
+          new Promise((resolve) => setTimeout(resolve, 6000)),
         ]);
       } catch (notifyErr) {
         console.error('[Application Status Notification Dispatch Error]:', notifyErr.message);

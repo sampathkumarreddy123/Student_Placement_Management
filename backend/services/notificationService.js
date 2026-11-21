@@ -288,8 +288,11 @@ export const notifyOnApplicationStatusChange = async (
       companyName = comp?.name;
     }
     if (!jobRole && application.drive) {
-      const d = await PlacementDrive.findById(application.drive).select('jobRole');
+      const d = await PlacementDrive.findById(application.drive).populate('company').select('jobRole company');
       jobRole = d?.jobRole;
+      if (!companyName && d?.company?.name) {
+        companyName = d.company.name;
+      }
     }
     companyName = companyName || 'Company';
     jobRole = jobRole || 'Position';
