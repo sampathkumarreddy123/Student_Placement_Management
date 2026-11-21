@@ -470,15 +470,81 @@ const buildEmailHtml = ({
 };
 
 /**
- * Base email dispatcher: executes sendMail safely and returns info or throws
+ * Base email dispatcher: supports both modern HTTPS REST APIs (Port 443, immune to cloud firewall port blocks)
+ * and direct Microsoft 365 pooled SMTP (Port 587).
  */
 export const sendEmail = async ({ to, subject, text, html, officer = null }) => {
   if (!to) {
     throw new Error('Recipient email address is required.');
   }
 
+  const { fromHeader, replyTo, officerName, officerEmail } = getSenderDetails(officer);
+  const senderDisplayName = officerName ? `${officerName} (MITS Placement Cell)` : 'MITS Placement Cell';
+  const effectiveReplyTo = officerEmail || '25695a0545@mits.ac.in';
+
+  // 1. PRIMARY HTTPS DISPATCH: Resend REST API over Port 443 (Immune to Render SMTP port blocks)
+  if (process.env.RESEND_API_KEY) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: process.env.RESEND_FROM || `${senderDisplayName} <onboarding@resend.dev>`,
+          to: [to],
+          reply_to: effectiveReplyTo,
+          subject,
+          text,
+          html,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log(`[Email Service HTTPS] Delivered "${subject}" to ${to} via Resend API (ID: ${data.id})`);
+        return { messageId: data.id, accepted: [to], response: '250 Delivered via Resend HTTPS API' };
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        console.warn(`[Email Service Warning] Resend HTTPS API failed (${res.status}):`, errData.message || res.statusText);
+      }
+    } catch (httpErr) {
+      console.warn('[Email Service Warning] Resend HTTPS call failed, falling back to SMTP:', httpErr.message);
+    }
+  }
+
+  // 2. SECONDARY HTTPS DISPATCH: Brevo / Sendinblue REST API over Port 443
+  if (process.env.BREVO_API_KEY) {
+    try {
+      const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sender: { name: senderDisplayName, email: process.env.BREVO_FROM || '25695a0545@mits.ac.in' },
+          to: [{ email: to }],
+          replyTo: { email: effectiveReplyTo, name: senderDisplayName },
+          subject,
+          textContent: text,
+          htmlContent: html,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log(`[Email Service HTTPS] Delivered "${subject}" to ${to} via Brevo API (ID: ${data.messageId})`);
+        return { messageId: data.messageId, accepted: [to], response: '250 Delivered via Brevo HTTPS API' };
+      }
+    } catch (brevoErr) {
+      console.warn('[Email Service Warning] Brevo HTTPS call failed, falling back to SMTP:', brevoErr.message);
+    }
+  }
+
+  // 3. DIRECT SMTP RELAY: Microsoft 365 / Outlook SMTP (Port 587)
   let transporter = await getTransporter();
-  const { fromHeader, replyTo } = getSenderDetails(officer);
 
   const mailOptions = {
     from: fromHeader,
@@ -491,23 +557,13 @@ export const sendEmail = async ({ to, subject, text, html, officer = null }) => 
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log(`[Email Service] Delivered email "${subject}" to ${to} (MessageID: ${info.messageId || 'OK'})`);
+    console.log(`[Email Service SMTP] Delivered email "${subject}" to ${to} (MessageID: ${info.messageId || 'OK'})`);
     return info;
   } catch (err) {
     console.warn(`[Email Service Warning] sendMail failed (${err.message}), clearing cached transporter pool.`);
     cachedTransporter = null;
     throw err;
   }
-
-  // If in development using test accounts, log the preview URL for immediate testing
-  if (process.env.NODE_ENV !== 'production' && nodemailer.getTestMessageUrl) {
-    const previewUrl = nodemailer.getTestMessageUrl(info);
-    if (previewUrl) {
-      console.log(`[Email Service] Development Preview URL: ${previewUrl}`);
-    }
-  }
-
-  return info;
 };
 
 /**
