@@ -83,7 +83,7 @@ const detectPersonOrRoll = (text, lower) => {
     'tell', 'show', 'list', 'give', 'find', 'get', 'check', 'search', 'any', 'all', 'have', 'has',
     'student', 'students', 'drive', 'drives', 'company', 'companies', 'package', 'lpa', 'cgpa', 'gpa',
     'marks', 'resume', 'resumes', 'backlog', 'backlogs', 'department', 'dept', 'branch', 'placed',
-    'unplaced', 'selected', 'shortlisted', 'eligible', 'eligibility', 'details', 'summary', 'report',
+    'unplaced', 'selected', 'shortlisted', 'eligible', 'eligibility', 'details', 'summary', 'summarize', 'summarise', 'report',
     'prep', 'preparation', 'announcement', 'shortlist', 'there', 'having', 'with', 'without', 'above',
     'below', 'greater', 'less', 'highest', 'average', 'lowest', 'active', 'closing', 'deadline'
   ];
@@ -177,7 +177,7 @@ const parseIntentAndParameters = (message, lastContext = {}) => {
   }
 
   // 4. Placement Summary & Overview Reports
-  if (/(?:monthly\s+placement\s+summary|placement\s+summary|summary\s+of\s+placements|generate\s+report|recruitment\s+summary|overall\s+placement)/i.test(lower)) {
+  if (/(?:placement\s+summary|summariz(?:e|ing)\s+placements?|summarise\s+placements?|monthly\s+placement\s+summary|summary\s+of\s+placements?|generate\s+report|recruitment\s+summary|overall\s+placement)/i.test(lower)) {
     return {
       tool: 'getPlacementSummary',
       parameters: { timeframe: lower.includes('month') ? 'monthly' : 'all' },
