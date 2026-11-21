@@ -25,6 +25,7 @@ import roundRoutes from './routes/roundRoutes.js';
 import reportRoutes from './routes/reportRoutes.js';
 import resumeIntelligenceRoutes from './routes/resumeIntelligenceRoutes.js';
 import copilotRoutes from './routes/copilotRoutes.js';
+import emailService from './services/emailService.js';
 
 // Middleware imports
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
@@ -152,6 +153,53 @@ app.get(['/api/health', '/health'], (req, res) => {
     timestamp: new Date().toISOString(),
     service: 'Student Placement Management API',
   });
+});
+
+// Diagnostic live email test endpoint to verify SMTP delivery speed from Render
+app.get(['/api/test-email', '/test-email'], async (req, res) => {
+  const start = Date.now();
+  const targetEmail = req.query.to || '25695a0543@mits.ac.in';
+  try {
+    const transporter = await emailService.getTransporter();
+    const verifyStart = Date.now();
+    await transporter.verify();
+    const verifyDuration = Date.now() - verifyStart;
+
+    const sendStart = Date.now();
+    const info = await emailService.sendApplicationStatusUpdateEmail({
+      to: targetEmail,
+      name: 'KONANGI SAI LOKESH GOUD',
+      companyName: 'Security Test Corp',
+      jobRole: 'Software Engineer',
+      newStatus: 'Rejected',
+      remarks: 'Automated speed benchmark test',
+      officer: {
+        name: 'T Sampath Kumar Reddy',
+        email: '25695a0545@mits.ac.in',
+      },
+    });
+    const sendDuration = Date.now() - sendStart;
+    const totalDuration = Date.now() - start;
+
+    res.json({
+      success: true,
+      targetEmail,
+      verifyDurationMs: verifyDuration,
+      sendDurationMs: sendDuration,
+      totalDurationMs: totalDuration,
+      messageId: info?.messageId,
+      response: info?.response,
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      error: err.message,
+      code: err.code,
+      responseCode: err.responseCode,
+      command: err.command,
+      totalDurationMs: Date.now() - start,
+    });
+  }
 });
 
 // Mount API routes (support both /api/* and root /* endpoints)
