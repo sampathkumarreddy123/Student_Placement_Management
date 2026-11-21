@@ -156,6 +156,51 @@ app.get(['/api/health', '/health'], (req, res) => {
   });
 });
 
+// Diagnostic TCP & SMTP probe endpoint to test Render outbound network
+app.get('/api/probe-smtp', async (req, res) => {
+  import('net').then(async (net) => {
+    import('dns').then(async (dns) => {
+      const results = {};
+      const start = Date.now();
+
+      // 1. DNS check
+      try {
+        const addresses = await dns.promises.resolve4('smtp.office365.com');
+        results.dns = { success: true, addresses };
+      } catch (dnsErr) {
+        results.dns = { success: false, error: dnsErr.message };
+      }
+
+      // 2. TCP connect check to port 587
+      const testPort = (port, host = 'smtp.office365.com') =>
+        new Promise((resolve) => {
+          const s = Date.now();
+          const socket = net.createConnection(port, host);
+          socket.setTimeout(8000);
+          socket.on('connect', () => {
+            const time = Date.now() - s;
+            socket.destroy();
+            resolve({ port, success: true, latencyMs: time });
+          });
+          socket.on('timeout', () => {
+            socket.destroy();
+            resolve({ port, success: false, error: 'TCP connect timeout (8000ms)' });
+          });
+          socket.on('error', (err) => {
+            socket.destroy();
+            resolve({ port, success: false, error: err.message });
+          });
+        });
+
+      results.port587 = await testPort(587);
+      results.port25 = await testPort(25);
+      results.totalDurationMs = Date.now() - start;
+
+      res.json(results);
+    });
+  });
+});
+
 // Diagnostic live email test endpoint to verify SMTP delivery speed from Render
 app.get(['/api/test-email', '/test-email'], async (req, res) => {
   const start = Date.now();
