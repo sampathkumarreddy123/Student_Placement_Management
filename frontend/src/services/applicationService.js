@@ -58,5 +58,15 @@ export const applicationService = {
     const response = await api.post(`/applications/${applicationId}/ai-screen`);
     return response.data;
   },
+
+  getEmailStatus: async (applicationId) => {
+    const response = await api.get(`/applications/${applicationId}/email-status`);
+    return response.data;
+  },
+
+  retryEmail: async (outboxId) => {
+    const response = await api.post(`/applications/notifications/${outboxId}/retry`);
+    return response.data;
+  },
 };
 

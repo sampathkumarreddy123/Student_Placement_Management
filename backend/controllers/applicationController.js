@@ -11,6 +11,11 @@ import {
   notifyOnApplicationSubmitted,
   notifyOnApplicationStatusChange,
 } from '../services/notificationService.js';
+import {
+  enqueueStatusUpdateNotification,
+  getOutboxStatusForApplication,
+  retryOutboxNotification,
+} from '../services/notificationQueueService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -658,32 +663,78 @@ export const updateApplicationStatus = async (req, res, next) => {
 
     await application.populate('statusHistory.updatedBy', 'name email');
 
-    // Notify student of selection/shortlisting/rejection/status change or remarks update
+    // Enqueue durable outbox notification without waiting for SMTP (zero delay response)
     const remarks = selectionRemarks || officerNotes || feedback || '';
     const isStatusChanged = previousStatus !== newStatus;
     const isRemarksAdded = Boolean(remarks && remarks.trim());
+    let emailQueueResult = null;
 
-    if (status !== undefined || isStatusChanged || isRemarksAdded) {
+    if (isStatusChanged || isRemarksAdded) {
       try {
-        await Promise.race([
-          notifyOnApplicationStatusChange(
-            application,
-            previousStatus,
-            newStatus,
-            remarks,
-            req.user
-          ),
-          new Promise((resolve) => setTimeout(resolve, 6000)),
-        ]);
+        emailQueueResult = await enqueueStatusUpdateNotification({
+          application,
+          previousStatus,
+          newStatus,
+          remarks,
+          officer: req.user,
+          clientRequestId: req.body.clientRequestId || null,
+        });
       } catch (notifyErr) {
         console.error('[Application Status Notification Dispatch Error]:', notifyErr.message);
       }
+    } else {
+      emailQueueResult = { skipped: true, reason: 'STATUS_UNCHANGED' };
     }
 
     res.status(200).json({
       success: true,
       message: `Applicant status successfully updated to "${newStatus}".`,
       application,
+      emailNotification: {
+        status: emailQueueResult?.emailStatus || (emailQueueResult?.skipped ? 'skipped' : 'pending'),
+        outboxId: emailQueueResult?.outboxId || null,
+        recipient: emailQueueResult?.recipient || application.student?.email || null,
+        skipped: Boolean(emailQueueResult?.skipped),
+        message: emailQueueResult?.skipped
+          ? 'Status unchanged. Redundant email was not sent.'
+          : 'Status updated successfully. Email notification queued for delivery.',
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get email notification delivery status and history for an application
+// @route   GET /api/applications/:id/email-status
+// @access  Private (Officer only)
+export const getApplicationEmailStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const history = await getOutboxStatusForApplication(id);
+    res.status(200).json({
+      success: true,
+      count: history.length,
+      history,
+      latestStatus: history[0]?.emailStatus || 'none',
+      latestEvent: history[0] || null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Retry sending a failed email notification
+// @route   POST /api/applications/notifications/:outboxId/retry
+// @access  Private (Officer only)
+export const retryApplicationEmail = async (req, res, next) => {
+  try {
+    const { outboxId } = req.params;
+    const retried = await retryOutboxNotification(outboxId, req.user);
+    res.status(200).json({
+      success: true,
+      message: 'Email notification retry scheduled successfully.',
+      item: retried,
     });
   } catch (error) {
     next(error);

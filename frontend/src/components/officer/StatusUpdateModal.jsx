@@ -7,6 +7,8 @@ import {
   Award,
   ArrowRight,
   ShieldAlert,
+  Mail,
+  RefreshCw,
 } from 'lucide-react';
 import Modal from '../common/Modal';
 import Badge from '../common/Badge';
@@ -30,6 +32,8 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
   const [confirmed, setConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [emailStatusInfo, setEmailStatusInfo] = useState(null);
+  const [retryingEmail, setRetryingEmail] = useState(false);
 
   useEffect(() => {
     if (isOpen && application) {
@@ -39,6 +43,17 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
       setOfficerNotes(application.officerNotes || '');
       setConfirmed(false);
       setErrorMsg('');
+
+      // Fetch latest email delivery status for this application
+      applicationService.getEmailStatus(application._id)
+        .then((res) => {
+          if (res.success && res.latestEvent) {
+            setEmailStatusInfo(res.latestEvent);
+          } else {
+            setEmailStatusInfo(null);
+          }
+        })
+        .catch(() => setEmailStatusInfo(null));
     }
   }, [isOpen, application]);
 
@@ -51,6 +66,19 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
   // Validation: if critical status selected, require confirmation checkbox
   const canSubmit = !submitting && (!isCriticalStatus || confirmed || isSameStatus);
 
+  const handleRetryEmail = async (outboxId) => {
+    if (!outboxId || retryingEmail) return;
+    try {
+      setRetryingEmail(true);
+      await applicationService.retryEmail(outboxId);
+      setEmailStatusInfo((prev) => (prev ? { ...prev, emailStatus: 'pending', lastError: null } : null));
+    } catch (err) {
+      setErrorMsg(err.response?.data?.message || err.message || 'Failed to retry email notification.');
+    } finally {
+      setRetryingEmail(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!canSubmit) return;
@@ -59,11 +87,15 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
       setSubmitting(true);
       setErrorMsg('');
 
+      // Unique client request ID to guarantee backend idempotency
+      const clientRequestId = `req_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
       const updateData = {
         status,
         currentRound: Number(currentRound),
         selectionRemarks: selectionRemarks.trim(),
         officerNotes: officerNotes.trim(),
+        clientRequestId,
       };
 
       const res = await applicationService.updateStatus(application._id, updateData);
@@ -117,6 +149,52 @@ const StatusUpdateModal = ({ isOpen, onClose, application, onSuccess }) => {
             </div>
           </div>
         </div>
+
+        {/* Email Notification Status Pill */}
+        {emailStatusInfo && (
+          <div className="p-2.5 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] flex items-center justify-between text-[11px]">
+            <div className="flex items-center gap-2">
+              <Mail className="w-3.5 h-3.5 text-[#2563EB]" />
+              <span className="text-[#64748B]">
+                Last Notification: <strong className="text-[#172554]">{emailStatusInfo.newStatus}</strong> to{' '}
+                <span className="font-mono text-[#0F172A]">{emailStatusInfo.recipientEmail}</span>
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              {emailStatusInfo.emailStatus === 'sent' && (
+                <span className="inline-flex items-center gap-1 text-[#0D9488] font-bold">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Email Sent
+                </span>
+              )}
+              {emailStatusInfo.emailStatus === 'pending' && (
+                <span className="inline-flex items-center gap-1 text-[#2563EB] font-bold animate-pulse">
+                  <Clock className="w-3.5 h-3.5" /> Email Pending
+                </span>
+              )}
+              {emailStatusInfo.emailStatus === 'processing' && (
+                <span className="inline-flex items-center gap-1 text-[#2563EB] font-bold">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Email Dispatching
+                </span>
+              )}
+              {emailStatusInfo.emailStatus === 'failed' && (
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-flex items-center gap-1 text-red-600 font-bold" title={emailStatusInfo.lastError || 'Delivery error'}>
+                    <AlertTriangle className="w-3.5 h-3.5" /> Delivery Failed
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleRetryEmail(emailStatusInfo._id)}
+                    disabled={retryingEmail}
+                    className="px-2 py-0.5 rounded bg-red-100 hover:bg-red-200 text-red-700 font-semibold text-[10px] transition-colors"
+                  >
+                    {retryingEmail ? 'Retrying...' : 'Retry Email'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Status Dropdown */}
         <div>

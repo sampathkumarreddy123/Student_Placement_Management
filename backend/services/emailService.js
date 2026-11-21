@@ -650,7 +650,7 @@ export const sendApplicationSubmittedEmail = async ({
 };
 
 /**
- * 5. Application Status Update Email (Shortlisted, Rejected, Interview Round)
+ * 5. Application Status Update Email (Shortlisted, Rejected, Interview Round, Selected)
  */
 export const sendApplicationStatusUpdateEmail = async ({
   to,
@@ -659,8 +659,11 @@ export const sendApplicationStatusUpdateEmail = async ({
   jobRole,
   newStatus,
   remarks,
+  roundName,
+  interviewDetails,
   portalUrl,
   officer,
+  timestamp,
 }) => {
   const finalPortalUrl = sanitizePortalUrl(portalUrl, '/student/applications');
   const officerName = officer?.name || 'MITS Placement Officer';
@@ -671,10 +674,10 @@ export const sendApplicationStatusUpdateEmail = async ({
   const isShortlisted = /shortlist/i.test(statusStr);
   const isSelected = /select/i.test(statusStr);
   const isUnderReview = /review/i.test(statusStr);
-  const isInterviewing = /interview/i.test(statusStr);
+  const isInterviewing = /interview/i.test(statusStr) || Boolean(roundName);
 
   let statusLabel = statusStr;
-  let subject = `Application Update: ${statusStr} - ${companyName} (${jobRole})`;
+  let subject = `Application Update: ${statusStr} – ${companyName}`;
   let title = `Application Status: ${statusStr}`;
   let preheader = `Status update for ${jobRole} at ${companyName}.`;
   let paragraphs = [
@@ -684,7 +687,7 @@ export const sendApplicationStatusUpdateEmail = async ({
 
   if (isRejected) {
     statusLabel = 'Rejected (Not Shortlisted)';
-    subject = `Application Update: Not Shortlisted / Rejected - ${companyName} (${jobRole})`;
+    subject = `Application Update: Not Shortlisted / Rejected – ${companyName}`;
     title = `Application Status: Rejected`;
     preheader = `Important update regarding your placement application at ${companyName}.`;
     paragraphs = [
@@ -692,61 +695,86 @@ export const sendApplicationStatusUpdateEmail = async ({
       `We regret to inform you that your application has not been shortlisted / advanced to the next round. Your recruitment status has officially been marked as <strong>Rejected</strong> by Placement Officer <strong>${officerName}</strong>.`,
       `We encourage you to review the feedback provided, continue preparing your technical skillset, and apply for other active campus drives on the portal.`,
     ];
-  } else if (isShortlisted) {
-    statusLabel = 'Shortlisted';
-    subject = `🎉 Application Update: Shortlisted - ${companyName} (${jobRole})`;
-    title = `🎉 Congratulations! You are Shortlisted`;
-    preheader = `Congratulations! You have been shortlisted for ${companyName}.`;
-    paragraphs = [
-      `Congratulations! We are pleased to notify you that your application for <strong>${jobRole}</strong> at <strong>${companyName}</strong> has been officially <strong>Shortlisted</strong> by Placement Officer <strong>${officerName}</strong>.`,
-      `You are eligible to participate in the upcoming recruitment rounds. Please check your student placement portal for round schedule, guidelines, and interview instructions.`,
-    ];
   } else if (isSelected) {
     statusLabel = 'Selected / Placed';
-    subject = `🎉 Congratulations! Selected for ${jobRole} at ${companyName}`;
+    subject = `Congratulations! You Have Been Selected – ${companyName}`;
     title = `🎉 Selected at ${companyName}!`;
     preheader = `Formal placement offer for ${jobRole} at ${companyName}.`;
     paragraphs = [
       `On behalf of the <strong>MITS Placement Cell</strong>, we are thrilled to congratulate you on your official selection for <strong>${jobRole}</strong> at <strong>${companyName}</strong>!`,
       `This placement offer has been confirmed by Placement Officer <strong>${officerName}</strong>.`,
     ];
+  } else if (isShortlisted) {
+    statusLabel = 'Shortlisted';
+    subject = `Application Update: Shortlisted – ${companyName}`;
+    title = `🎉 Congratulations! You are Shortlisted`;
+    preheader = `Congratulations! You have been shortlisted for ${companyName}.`;
+    paragraphs = [
+      `Congratulations! We are pleased to notify you that your application for <strong>${jobRole}</strong> at <strong>${companyName}</strong> has been officially <strong>Shortlisted</strong> by Placement Officer <strong>${officerName}</strong>.`,
+      `You are eligible to participate in the upcoming recruitment rounds. Please check your student placement portal for round schedule, guidelines, and interview instructions.`,
+    ];
+  } else if (isInterviewing) {
+    statusLabel = roundName ? `${roundName} Scheduled` : 'Interviewing';
+    subject = `Application Update: ${roundName || 'Technical Interview'} Scheduled – ${companyName}`;
+    title = `Application Status: ${roundName || 'Interview Scheduled'}`;
+    preheader = `Interview round scheduled for ${companyName}.`;
+    paragraphs = [
+      `An interview round has been scheduled for your application for <strong>${jobRole}</strong> at <strong>${companyName}</strong>.`,
+    ];
+    if (interviewDetails?.date || interviewDetails?.venue) {
+      paragraphs.push(
+        `<strong>Interview Details:</strong><br/>` +
+        (interviewDetails.date ? `Date & Time: ${new Date(interviewDetails.date).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}<br/>` : '') +
+        (interviewDetails.venue ? `Venue / Link: ${interviewDetails.venue}<br/>` : '') +
+        (interviewDetails.description ? `Instructions: ${interviewDetails.description}` : '')
+      );
+    }
   } else if (isUnderReview) {
     statusLabel = 'Under Review';
-    subject = `Application Update: Under Review - ${companyName} (${jobRole})`;
+    subject = `Application Update: Under Review – ${companyName}`;
     title = `Application Status: Under Review`;
     preheader = `Your application for ${companyName} is under review.`;
     paragraphs = [
       `Your application for <strong>${jobRole}</strong> at <strong>${companyName}</strong> is currently being reviewed by the placement committee and recruiter.`,
     ];
-  } else if (isInterviewing) {
-    statusLabel = 'Interviewing';
-    subject = `Application Update: Interview Round - ${companyName} (${jobRole})`;
-    title = `Application Status: Interviewing`;
-    preheader = `Interview round scheduled for ${companyName}.`;
-    paragraphs = [
-      `Your application for <strong>${jobRole}</strong> at <strong>${companyName}</strong> is currently in the interview stages.`,
-    ];
   }
 
-  const text = `Hello ${name},\n\nYour application for "${jobRole}" at ${companyName} has been updated.\nStatus: ${statusLabel}\n${remarks ? `Officer Remarks: ${remarks}\n` : ''}Updated by: ${officerName} (${officerEmail})\nView details on the student portal: ${finalPortalUrl}\n\nBest regards,\n${officerName}\nMITS Placement Cell`;
+  const dateObj = timestamp ? new Date(timestamp) : new Date();
+  const formattedDate = dateObj.toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+
+  const highlightBox = {
+    Company: companyName,
+    'Job Role': jobRole,
+    'Recruitment Status': statusLabel,
+    'Updated By Officer': `${officerName} (${officerEmail})`,
+    ...(roundName ? { 'Interview Round': roundName } : {}),
+    ...(interviewDetails?.date
+      ? {
+          'Interview Date & Time': new Date(interviewDetails.date).toLocaleString('en-US', {
+            dateStyle: 'medium',
+            timeStyle: 'short',
+          }),
+        }
+      : {}),
+    ...(interviewDetails?.venue ? { 'Venue / Meeting Link': interviewDetails.venue } : {}),
+    ...(remarks ? { 'Officer Remarks / Feedback': remarks } : {}),
+    'Updated On': formattedDate,
+  };
+
+  const text = `Hello ${name},\n\nYour application for "${jobRole}" at ${companyName} has been updated.\nStatus: ${statusLabel}\n${remarks ? `Officer Remarks: ${remarks}\n` : ''}${roundName ? `Round: ${roundName}\n` : ''}Updated by: ${officerName} (${officerEmail})\nUpdated On: ${formattedDate}\nView details on the student portal: ${finalPortalUrl}\n\nBest regards,\n${officerName}\nMITS Placement Cell`;
 
   const html = buildEmailHtml({
     title,
     preheader,
     greeting: `Hello ${name}`,
     paragraphs,
-    highlightBox: {
-      Company: companyName,
-      'Job Role': jobRole,
-      'Recruitment Status': statusLabel,
-      'Updated By Officer': `${officerName} (${officerEmail})`,
-      ...(remarks ? { 'Officer Remarks / Feedback': remarks } : {}),
-      'Updated On': new Date().toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-      }),
-    },
+    highlightBox,
     actionButton: {
       text: 'View Application Details',
       url: finalPortalUrl,

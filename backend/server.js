@@ -26,6 +26,7 @@ import reportRoutes from './routes/reportRoutes.js';
 import resumeIntelligenceRoutes from './routes/resumeIntelligenceRoutes.js';
 import copilotRoutes from './routes/copilotRoutes.js';
 import emailService from './services/emailService.js';
+import { startNotificationWorker } from './services/notificationQueueService.js';
 
 // Middleware imports
 import { notFound, errorHandler } from './middleware/errorMiddleware.js';
@@ -247,6 +248,12 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`[Server] Placement Management Server running on port ${PORT}`);
   console.log(`[Server] Health check: http://localhost:${PORT}/api/health`);
+  // Start durable asynchronous background outbox worker for application status notifications
+  try {
+    startNotificationWorker();
+  } catch (workerErr) {
+    console.error('[Server Warning] Could not initialize notification worker:', workerErr.message);
+  }
 });
 
 export default app;

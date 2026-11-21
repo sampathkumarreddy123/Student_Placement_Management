@@ -824,10 +824,14 @@ const ManageApplications = () => {
         onClose={() => setAppForStatusUpdate(null)}
         application={appForStatusUpdate}
         onSuccess={(res) => {
-          toast.success(res.message || 'Applicant status updated successfully.');
+          const emailNote = res.emailNotification?.recipient
+            ? ` Email notification queued for ${res.emailNotification.recipient}.`
+            : '';
+          const fullMsg = `${res.message || 'Applicant status updated successfully.'}${emailNote}`;
+          toast.success(fullMsg);
           setActionAlert({
             type: 'success',
-            text: res.message || 'Applicant status updated successfully.',
+            text: fullMsg,
           });
           fetchApplicants(currentPage);
         }}

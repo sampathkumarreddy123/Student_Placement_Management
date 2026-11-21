@@ -9,6 +9,7 @@ import {
   notifyStudentsOnRoundAnnounced,
   notifyStudentsOnRoundUpdated,
 } from '../services/notificationService.js';
+import { enqueueStatusUpdateNotification } from '../services/notificationQueueService.js';
 import emailService from '../services/emailService.js';
 
 /**
@@ -557,23 +558,23 @@ export const evaluateCandidate = async (req, res, next) => {
 
     await application.save();
 
-    // 3. Dispatch automated notifications to student
+    // 3. Dispatch automated outbox notifications to student asynchronously
     const studentUser = application.student;
+    let emailQueueResult = null;
 
     if (studentUser) {
       try {
-        await Promise.race([
-          notifyOnApplicationStatusChange(
-            application,
-            previousAppStatus,
-            newAppStatus,
-            remarks || `Result for Round ${round.roundNumber} (${round.name}): ${status}`,
-            req.user
-          ),
-          new Promise((resolve) => setTimeout(resolve, 6000)),
-        ]);
+        emailQueueResult = await enqueueStatusUpdateNotification({
+          application,
+          previousStatus: previousAppStatus,
+          newStatus: newAppStatus,
+          remarks: remarks || `Result for Round ${round.roundNumber} (${round.name}): ${status}`,
+          roundNumber: round.roundNumber,
+          roundName: round.name,
+          officer: req.user,
+        });
       } catch (err) {
-        console.error('[Notification Error] Round evaluation dispatch:', err.message);
+        console.error('[Notification Queue Error] Round evaluation dispatch:', err.message);
       }
     }
 
@@ -582,6 +583,14 @@ export const evaluateCandidate = async (req, res, next) => {
       message: `Candidate evaluated as "${status}" for Round ${round.roundNumber} (${round.name}).`,
       applicationStatus: application.status,
       roundResult: resultData,
+      emailNotification: {
+        status: emailQueueResult?.emailStatus || (emailQueueResult?.skipped ? 'skipped' : 'pending'),
+        outboxId: emailQueueResult?.outboxId || null,
+        recipient: emailQueueResult?.recipient || studentUser?.email || null,
+        message: emailQueueResult?.skipped
+          ? 'Status unchanged. Redundant email was not sent.'
+          : 'Candidate status updated. Email notification queued for background delivery.',
+      },
     });
   } catch (error) {
     next(error);
@@ -668,28 +677,25 @@ export const moveQualifiedToNextRound = async (req, res, next) => {
       await app.save();
       movedCount++;
 
-      // Notify student
+      // Notify student asynchronously via Outbox Queue
       if (app.student) {
-        createNotification({
-          recipient: app.student._id,
-          recipientRole: 'student',
-          type: 'APPLICATION_SHORTLISTED',
-          title: `Advanced to Round ${nextRound.roundNumber}: ${nextRound.name}`,
-          message: `Congratulations! You have qualified for Round ${nextRound.roundNumber} (${nextRound.name}). Date: ${nextRound.date ? new Date(nextRound.date).toLocaleDateString() : 'TBA'}.`,
-          link: `/student/applications?id=${app._id}`,
-          relatedId: app._id,
-          relatedModel: 'Application',
-          eventKey: `ADVANCE_ROUND_${nextRound._id}_${app._id}_${Date.now()}`,
-          metadata: {
-            applicationId: app._id,
-            companyName: currentRound.drive?.company?.name || 'Company',
-            jobRole: currentRound.drive?.jobRole || 'Position',
-            newStatus: `Round ${nextRound.roundNumber} Scheduled: ${nextRound.name}`,
-            officer: req.user ? { _id: req.user._id, name: req.user.name, email: req.user.email } : undefined,
+        enqueueStatusUpdateNotification({
+          application: app,
+          previousStatus: 'Shortlisted',
+          newStatus: 'Interviewing',
+          remarks: `Qualified for Round ${nextRound.roundNumber}: ${nextRound.name}.`,
+          roundNumber: nextRound.roundNumber,
+          roundName: nextRound.name,
+          interviewDetails: {
+            date: nextRound.date || null,
+            time: nextRound.time || '',
+            venue: nextRound.venue || '',
+            description: nextRound.description || '',
           },
-          recipientUser: app.student,
           officer: req.user,
-        }).catch(() => {});
+        }).catch((err) => {
+          console.error('[Move Qualified Notification Error]:', err.message);
+        });
       }
     }
 

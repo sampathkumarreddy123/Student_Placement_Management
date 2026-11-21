@@ -10,6 +10,8 @@ import {
   updateApplicationStatus,
   screenDriveApplicantsWithAI,
   screenSingleApplicationWithAI,
+  getApplicationEmailStatus,
+  retryApplicationEmail,
 } from '../controllers/applicationController.js';
 import { protect, authorize } from '../middleware/authMiddleware.js';
 
@@ -27,11 +29,13 @@ router.route('/drive/:driveId/ai-screen')
   .get(authorize('officer'), screenDriveApplicantsWithAI);
 router.get('/officer/all', authorize('officer'), getAllApplications);
 router.get('/', authorize('officer'), getAllApplications);
+router.post('/notifications/:outboxId/retry', authorize('officer'), retryApplicationEmail);
 
 // 2. Parameterized /:id routes
 router.get('/:id', getApplicationById);
 router.get('/:id/resume', downloadApplicantResume);
 router.get('/:id/history', getApplicationStatusHistory);
+router.get('/:id/email-status', authorize('officer'), getApplicationEmailStatus);
 router.route('/:id/ai-screen')
   .post(screenSingleApplicationWithAI)
   .get(screenSingleApplicationWithAI);
