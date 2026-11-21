@@ -562,13 +562,16 @@ export const evaluateCandidate = async (req, res, next) => {
 
     if (studentUser) {
       try {
-        await notifyOnApplicationStatusChange(
-          application,
-          previousAppStatus,
-          newAppStatus,
-          remarks || `Result for Round ${round.roundNumber} (${round.name}): ${status}`,
-          req.user
-        );
+        await Promise.race([
+          notifyOnApplicationStatusChange(
+            application,
+            previousAppStatus,
+            newAppStatus,
+            remarks || `Result for Round ${round.roundNumber} (${round.name}): ${status}`,
+            req.user
+          ),
+          new Promise((resolve) => setTimeout(resolve, 3500)),
+        ]);
       } catch (err) {
         console.error('[Notification Error] Round evaluation dispatch:', err.message);
       }

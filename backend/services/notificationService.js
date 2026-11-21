@@ -53,7 +53,7 @@ export const sendEmailNotification = async (notification, recipientUser, officer
           name: recipientUser.name,
           companyName: notification.metadata?.companyName || 'Company',
           jobRole: notification.metadata?.jobRole || 'Position',
-          newStatus: notification.metadata?.newStatus || notification.title,
+          newStatus: notification.metadata?.newStatus || (notification.type === 'APPLICATION_REJECTED' ? 'Rejected' : (notification.type === 'APPLICATION_SHORTLISTED' ? 'Shortlisted' : 'Status Updated')),
           remarks: notification.metadata?.remarks,
           portalUrl: actionUrl,
           officer: dispatchOfficer,
@@ -315,8 +315,8 @@ export const notifyOnApplicationStatusChange = async (
       message = `You have been shortlisted${roundText} for "${jobRole}" at ${companyName}.${remarks ? ` Details: "${remarks}"` : ''}`;
     } else if (newStatus === 'Rejected') {
       type = 'APPLICATION_REJECTED';
-      title = `Application Update: ${companyName}`;
-      message = `Your application for "${jobRole}" at ${companyName} was not shortlisted for the next stage.${remarks ? ` Feedback: "${remarks}"` : ''}`;
+      title = `Application Rejected: ${companyName}`;
+      message = `Your application for "${jobRole}" at ${companyName} was not shortlisted for the next stage and has been marked as Rejected.${remarks ? ` Feedback: "${remarks}"` : ''}`;
     } else if (remarks) {
       message += ` Remarks: "${remarks}"`;
     }
