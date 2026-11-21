@@ -825,7 +825,7 @@ const ManageApplications = () => {
         application={appForStatusUpdate}
         onSuccess={(res) => {
           const emailNote = res.emailNotification?.recipient
-            ? ` Email notification queued for ${res.emailNotification.recipient}.`
+            ? ` Email notification sent to ${res.emailNotification.recipient}.`
             : '';
           const fullMsg = `${res.message || 'Applicant status updated successfully.'}${emailNote}`;
           toast.success(fullMsg);

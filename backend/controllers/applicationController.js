@@ -697,7 +697,7 @@ export const updateApplicationStatus = async (req, res, next) => {
         skipped: Boolean(emailQueueResult?.skipped),
         message: emailQueueResult?.skipped
           ? 'Status unchanged. Redundant email was not sent.'
-          : 'Status updated successfully. Email notification queued for delivery.',
+          : 'Status updated successfully. Email notification sent to student.',
       },
     });
   } catch (error) {

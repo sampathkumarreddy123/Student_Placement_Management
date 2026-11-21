@@ -589,7 +589,7 @@ export const evaluateCandidate = async (req, res, next) => {
         recipient: emailQueueResult?.recipient || studentUser?.email || null,
         message: emailQueueResult?.skipped
           ? 'Status unchanged. Redundant email was not sent.'
-          : 'Candidate status updated. Email notification queued for background delivery.',
+          : 'Candidate status updated. Email notification sent to student.',
       },
     });
   } catch (error) {
