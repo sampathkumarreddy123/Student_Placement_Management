@@ -50,23 +50,37 @@ export const sanitizePortalUrl = (url, defaultPath = '/student/applications') =>
 /**
  * Resolves the centralized sender address and display name
  */
-export const getSenderDetails = () => {
-  const fromName =
+export const getSenderDetails = (officer = null) => {
+  const defaultFromName =
     process.env.FROM_NAME ||
     process.env.EMAIL_FROM_NAME ||
-    'MITS Campus Placement Cell';
+    'MITS Placement Cell';
 
-  const fromAddress =
+  const defaultFromAddress =
     process.env.FROM_EMAIL ||
     process.env.EMAIL_FROM ||
     process.env.EMAIL_USER ||
     process.env.SMTP_USER ||
-    'placement-portal@mits.ac.in';
+    '25695a0545@mits.ac.in';
+
+  if (officer?.name && officer?.email) {
+    return {
+      fromName: `${officer.name} (MITS Placement Cell)`,
+      fromAddress: defaultFromAddress,
+      fromHeader: `"${officer.name} (MITS Placement Cell)" <${defaultFromAddress}>`,
+      replyTo: `"${officer.name}" <${officer.email}>`,
+      officerName: officer.name,
+      officerEmail: officer.email,
+    };
+  }
 
   return {
-    fromName,
-    fromAddress,
-    fromHeader: `"${fromName}" <${fromAddress}>`,
+    fromName: defaultFromName,
+    fromAddress: defaultFromAddress,
+    fromHeader: `"${defaultFromName}" <${defaultFromAddress}>`,
+    replyTo: defaultFromAddress,
+    officerName: null,
+    officerEmail: null,
   };
 };
 
@@ -78,13 +92,21 @@ export const getTransporter = async () => {
     return cachedTransporter;
   }
 
-  const emailUser = process.env.EMAIL_USER || process.env.SMTP_USER;
+  const emailUser =
+    process.env.EMAIL_USER ||
+    process.env.SMTP_USER ||
+    '25695a0545@mits.ac.in';
   const emailPassword =
     process.env.EMAIL_PASSWORD ||
     process.env.EMAIL_PASS ||
-    process.env.SMTP_PASS;
-  const emailHost = process.env.EMAIL_HOST || process.env.SMTP_HOST;
-  const emailPort = Number(process.env.EMAIL_PORT || process.env.SMTP_PORT) || 587;
+    process.env.SMTP_PASS ||
+    'Sampath317.';
+  const emailHost =
+    process.env.EMAIL_HOST ||
+    process.env.SMTP_HOST ||
+    'smtp.office365.com';
+  const emailPort =
+    Number(process.env.EMAIL_PORT || process.env.SMTP_PORT) || 587;
   const emailSecure =
     process.env.EMAIL_SECURE === 'true' ||
     process.env.SMTP_SECURE === 'true' ||
@@ -447,16 +469,17 @@ const buildEmailHtml = ({
 /**
  * Base email dispatcher: executes sendMail safely and returns info or throws
  */
-export const sendEmail = async ({ to, subject, text, html }) => {
+export const sendEmail = async ({ to, subject, text, html, officer = null }) => {
   if (!to) {
     throw new Error('Recipient email address is required.');
   }
 
   const transporter = await getTransporter();
-  const { fromHeader } = getSenderDetails();
+  const { fromHeader, replyTo } = getSenderDetails(officer);
 
   const mailOptions = {
     from: fromHeader,
+    replyTo: replyTo || fromHeader,
     to,
     subject,
     text,
@@ -464,6 +487,7 @@ export const sendEmail = async ({ to, subject, text, html }) => {
   };
 
   const info = await transporter.sendMail(mailOptions);
+  console.log(`[Email Service] Delivered email "${subject}" to ${to} (MessageID: ${info.messageId || 'OK'})`);
 
   // If in development using test accounts, log the preview URL for immediate testing
   if (process.env.NODE_ENV !== 'production' && nodemailer.getTestMessageUrl) {
@@ -626,23 +650,28 @@ export const sendApplicationStatusUpdateEmail = async ({
   newStatus,
   remarks,
   portalUrl,
+  officer,
 }) => {
   const finalPortalUrl = sanitizePortalUrl(portalUrl, '/student/applications');
-  const subject = `Application Update: ${newStatus} - ${companyName}`;
-  const text = `Hello ${name},\n\nYour application for "${jobRole}" at ${companyName} has been updated.\nNew Status: ${newStatus}\n${remarks ? `Remarks: ${remarks}\n` : ''}\nView details on the student portal: ${finalPortalUrl}\n\nBest regards,\nMITS Placement Cell`;
+  const officerName = officer?.name || 'MITS Placement Officer';
+  const officerEmail = officer?.email || '25695a0545@mits.ac.in';
+
+  const subject = `Application Update: ${newStatus} - ${companyName} (${jobRole})`;
+  const text = `Hello ${name},\n\nYour application for "${jobRole}" at ${companyName} has been updated.\nNew Status: ${newStatus}\n${remarks ? `Officer Remarks: ${remarks}\n` : ''}Updated by: ${officerName} (${officerEmail})\nView details on the student portal: ${finalPortalUrl}\n\nBest regards,\n${officerName}\nMITS Placement Cell`;
 
   const html = buildEmailHtml({
     title: `Application Status: ${newStatus}`,
-    preheader: `Update regarding your application at ${companyName}.`,
+    preheader: `Update regarding your application at ${companyName} from Placement Officer ${officerName}.`,
     greeting: `Hello ${name}`,
     paragraphs: [
       `There is an official update regarding your application for the <strong>${jobRole}</strong> opportunity at <strong>${companyName}</strong>.`,
-      `Your current recruitment status has been updated to <strong>${newStatus}</strong>.`,
+      `Your current recruitment status has been updated to <strong>${newStatus}</strong> by Placement Officer <strong>${officerName}</strong>.`,
     ],
     highlightBox: {
       Company: companyName,
       'Job Role': jobRole,
       'New Status': newStatus,
+      'Updated By Officer': `${officerName} (${officerEmail})`,
       ...(remarks ? { 'Officer Remarks': remarks } : {}),
       'Updated On': new Date().toLocaleDateString('en-US', {
         month: 'short',
@@ -656,7 +685,7 @@ export const sendApplicationStatusUpdateEmail = async ({
     },
   });
 
-  return await sendEmail({ to, subject, text, html });
+  return await sendEmail({ to, subject, text, html, officer });
 };
 
 /**
@@ -709,10 +738,14 @@ export const sendSelectionOfferEmail = async ({
   packageLPA,
   remarks,
   portalUrl,
+  officer,
 }) => {
   const finalPortalUrl = sanitizePortalUrl(portalUrl, '/student/applications');
+  const officerName = officer?.name || 'MITS Placement Officer';
+  const officerEmail = officer?.email || '25695a0545@mits.ac.in';
+
   const subject = `🎉 Congratulations! Selected for ${jobRole} at ${companyName}`;
-  const text = `Congratulations ${name}!\n\nYou have been selected for the position of "${jobRole}" at ${companyName} with an offered CTC of ₹${packageLPA || ''} LPA.\n${remarks ? `Remarks: ${remarks}\n` : ''}\nPlease visit the placement portal for formal documentation: ${finalPortalUrl}\n\nWarm regards,\nMITS Placement Cell`;
+  const text = `Congratulations ${name}!\n\nYou have been selected for the position of "${jobRole}" at ${companyName} with an offered CTC of ₹${packageLPA || ''} LPA.\n${remarks ? `Officer Remarks: ${remarks}\n` : ''}Updated by: ${officerName} (${officerEmail})\nPlease visit the placement portal for formal documentation: ${finalPortalUrl}\n\nWarm regards,\n${officerName}\nMITS Placement Cell`;
 
   const html = buildEmailHtml({
     title: `🎉 Congratulations on Your Selection at ${companyName}!`,
@@ -720,14 +753,15 @@ export const sendSelectionOfferEmail = async ({
     greeting: `Dear ${name}`,
     paragraphs: [
       `On behalf of the <strong>MITS Placement Cell</strong>, we are thrilled to congratulate you on your official selection for the <strong>${jobRole}</strong> role at <strong>${companyName}</strong>!`,
-      'Your hard work and dedication have earned you this fantastic achievement. Please check the placement portal for round clearance records and instructions regarding formal offer letters.',
+      `This offer was officially confirmed by Placement Officer <strong>${officerName}</strong>. Please check the placement portal for round clearance records and instructions regarding formal offer letters.`,
     ],
     highlightBox: {
       Company: companyName,
       'Designation / Role': jobRole,
       'Offered Package': packageLPA ? `₹${packageLPA} LPA` : 'Confirmed Offer',
       Status: 'Selected / Placed',
-      ...(remarks ? { 'Recruiter Remarks': remarks } : {}),
+      'Confirmed By Officer': `${officerName} (${officerEmail})`,
+      ...(remarks ? { 'Recruiter / Officer Remarks': remarks } : {}),
     },
     actionButton: {
       text: 'View Offer in Placement Portal',
@@ -735,7 +769,7 @@ export const sendSelectionOfferEmail = async ({
     },
   });
 
-  return await sendEmail({ to, subject, text, html });
+  return await sendEmail({ to, subject, text, html, officer });
 };
 
 /**

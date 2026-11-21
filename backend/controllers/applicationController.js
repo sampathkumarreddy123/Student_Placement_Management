@@ -658,16 +658,23 @@ export const updateApplicationStatus = async (req, res, next) => {
 
     await application.populate('statusHistory.updatedBy', 'name email');
 
-    // Notify student of selection/shortlisting/rejection/status change
-    if (previousStatus !== newStatus) {
-      notifyOnApplicationStatusChange(
-        application,
-        previousStatus,
-        newStatus,
-        selectionRemarks || officerNotes || feedback || ''
-      ).catch((err) =>
-        console.error('Failed to dispatch status change notification:', err)
-      );
+    // Notify student of selection/shortlisting/rejection/status change or remarks update
+    const remarks = selectionRemarks || officerNotes || feedback || '';
+    const isStatusChanged = previousStatus !== newStatus;
+    const isRemarksAdded = Boolean(remarks && remarks.trim());
+
+    if (isStatusChanged || isRemarksAdded) {
+      try {
+        await notifyOnApplicationStatusChange(
+          application,
+          previousStatus,
+          newStatus,
+          remarks,
+          req.user
+        );
+      } catch (notifyErr) {
+        console.error('[Application Status Notification Dispatch Error]:', notifyErr.message);
+      }
     }
 
     res.status(200).json({

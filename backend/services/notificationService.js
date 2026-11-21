@@ -9,13 +9,16 @@ import emailService, { sanitizePortalUrl, getFrontendBaseUrl } from './emailServ
  * Modular Email Dispatcher Hook
  * Automatically dispatches branded institutional emails to students for portal events.
  */
-export const sendEmailNotification = async (notification, recipientUser) => {
+export const sendEmailNotification = async (notification, recipientUser, officer = null) => {
   try {
     if (!recipientUser?.email) return;
 
     // Build resilient portal URL using centralized sanitization
     const defaultFallbackPath = notification.recipientRole === 'student' ? '/student/applications' : '/officer/dashboard';
     const actionUrl = sanitizePortalUrl(notification.link, defaultFallbackPath);
+    const dispatchOfficer = officer || notification.metadata?.officer;
+
+    console.log(`[Notification Email] Dispatching "${notification.type}" to student "${recipientUser.email}" via officer: "${dispatchOfficer?.email || 'MITS Placement Cell'}"`);
 
     switch (notification.type) {
       case 'APPLICATION_SUBMITTED':
@@ -38,6 +41,7 @@ export const sendEmailNotification = async (notification, recipientUser) => {
           packageLPA: notification.metadata?.packageLPA,
           remarks: notification.metadata?.remarks,
           portalUrl: actionUrl,
+          officer: dispatchOfficer,
         });
         break;
 
@@ -52,6 +56,7 @@ export const sendEmailNotification = async (notification, recipientUser) => {
           newStatus: notification.metadata?.newStatus || notification.title,
           remarks: notification.metadata?.remarks,
           portalUrl: actionUrl,
+          officer: dispatchOfficer,
         });
         break;
 
@@ -97,6 +102,7 @@ export const createNotification = async ({
   eventKey = null,
   metadata = {},
   recipientUser = null,
+  officer = null,
 }) => {
   try {
     if (!recipient) return null;
@@ -107,6 +113,14 @@ export const createNotification = async ({
       if (existing) {
         return existing;
       }
+    }
+
+    if (officer) {
+      metadata.officer = {
+        _id: officer._id,
+        name: officer.name,
+        email: officer.email,
+      };
     }
 
     const notification = await Notification.create({
@@ -122,21 +136,18 @@ export const createNotification = async ({
       metadata,
     });
 
-    // If recipientUser is already populated, send email instantly without DB delay
-    if (recipientUser?.email) {
-      sendEmailNotification(notification, recipientUser).catch((err) =>
-        console.error('[Instant Notification Email Dispatch Error]:', err.message)
-      );
-    } else {
-      // Background fallback lookup
-      User.findById(recipient)
-        .select('name email')
-        .then((user) => {
-          if (user) {
-            sendEmailNotification(notification, user);
-          }
-        })
-        .catch(() => {});
+    // Send email to student
+    try {
+      if (recipientUser?.email) {
+        await sendEmailNotification(notification, recipientUser, officer);
+      } else {
+        const user = await User.findById(recipient).select('name email');
+        if (user?.email) {
+          await sendEmailNotification(notification, user, officer);
+        }
+      }
+    } catch (err) {
+      console.error('[Notification Email Dispatch Error]:', err.message);
     }
 
     return notification;
@@ -262,7 +273,8 @@ export const notifyOnApplicationStatusChange = async (
   application,
   previousStatus,
   newStatus,
-  remarks = ''
+  remarks = '',
+  officer = null
 ) => {
   try {
     if (!application || !newStatus) return;
@@ -309,8 +321,7 @@ export const notifyOnApplicationStatusChange = async (
       message += ` Remarks: "${remarks}"`;
     }
 
-    const historyIndex = application.statusHistory?.length || 1;
-    const eventKey = `APP_STATUS_${application._id}_${newStatus}_${historyIndex}`;
+    const eventKey = `APP_STATUS_${application._id}_${newStatus}_${Date.now()}`;
 
     await createNotification({
       recipient: studentId,
@@ -329,8 +340,16 @@ export const notifyOnApplicationStatusChange = async (
         companyName,
         jobRole,
         remarks,
+        officer: officer
+          ? {
+              _id: officer._id,
+              name: officer.name,
+              email: officer.email,
+            }
+          : undefined,
       },
       recipientUser: studentUser,
+      officer,
     });
   } catch (err) {
     console.error('[Notification Service Error] notifyOnApplicationStatusChange:', err.message);

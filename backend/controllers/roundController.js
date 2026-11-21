@@ -559,32 +559,19 @@ export const evaluateCandidate = async (req, res, next) => {
 
     // 3. Dispatch automated notifications to student
     const studentUser = application.student;
-    const companyName = application.drive?.company?.name || 'Company';
-    const jobRole = application.drive?.jobRole || 'Position';
 
-    if (studentUser && previousAppStatus !== newAppStatus) {
-      notifyOnApplicationStatusChange(
-        application,
-        previousAppStatus,
-        newAppStatus,
-        remarks || `Result for Round ${round.roundNumber} (${round.name}): ${status}`
-      ).catch((err) =>
-        console.error('[Notification Error] Status change dispatch:', err.message)
-      );
-    } else if (studentUser) {
-      // In-app round result notice
-      createNotification({
-        recipient: studentUser._id,
-        recipientRole: 'student',
-        type: 'APPLICATION_STATUS_CHANGED',
-        title: `Round ${round.roundNumber} Result: ${status}`,
-        message: `Your result for ${round.name} at ${companyName} has been marked as "${status}".${remarks ? ` Remarks: "${remarks}"` : ''}`,
-        link: `/student/applications?id=${application._id}`,
-        relatedId: application._id,
-        relatedModel: 'Application',
-        eventKey: `ROUND_EVAL_${round._id}_${application._id}_${status}`,
-        recipientUser: studentUser,
-      }).catch(() => {});
+    if (studentUser) {
+      try {
+        await notifyOnApplicationStatusChange(
+          application,
+          previousAppStatus,
+          newAppStatus,
+          remarks || `Result for Round ${round.roundNumber} (${round.name}): ${status}`,
+          req.user
+        );
+      } catch (err) {
+        console.error('[Notification Error] Round evaluation dispatch:', err.message);
+      }
     }
 
     res.status(200).json({
