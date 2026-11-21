@@ -477,7 +477,7 @@ export const sendEmail = async ({ to, subject, text, html, officer = null }) => 
     throw new Error('Recipient email address is required.');
   }
 
-  const transporter = await getTransporter();
+  let transporter = await getTransporter();
   const { fromHeader, replyTo } = getSenderDetails(officer);
 
   const mailOptions = {
@@ -489,8 +489,15 @@ export const sendEmail = async ({ to, subject, text, html, officer = null }) => 
     html,
   };
 
-  const info = await transporter.sendMail(mailOptions);
-  console.log(`[Email Service] Delivered email "${subject}" to ${to} (MessageID: ${info.messageId || 'OK'})`);
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[Email Service] Delivered email "${subject}" to ${to} (MessageID: ${info.messageId || 'OK'})`);
+    return info;
+  } catch (err) {
+    console.warn(`[Email Service Warning] sendMail failed (${err.message}), clearing cached transporter pool.`);
+    cachedTransporter = null;
+    throw err;
+  }
 
   // If in development using test accounts, log the preview URL for immediate testing
   if (process.env.NODE_ENV !== 'production' && nodemailer.getTestMessageUrl) {
